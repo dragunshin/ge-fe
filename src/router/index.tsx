@@ -7,10 +7,10 @@ import { TermsOfServicePage } from '../pages/auth/terms-of-service/page';
 import { PrivacyPolicyPage } from '../pages/auth/privacy-policy/page';
 import { InterestSelectionPage } from '../pages/auth/interest-selection/page';
 import { TermsAgreementPage } from '../pages/auth/terms-agreement/page';
-import { ProfileWritingListPage } from '../pages/profile/writing-list';
-import { ProfileDetailPage } from '../pages/profile/detail';
-import { ProfileWritePage } from '../pages/profile/write';
-import { ProfileEvaluationPage } from '../pages/profile/evaluation';
+// import { ProfileWritingListPage } from '../pages/profile/writing-list';
+// import { ProfileDetailPage } from '../pages/profile/detail';
+// import { ProfileWritePage } from '../pages/profile/write';
+// import { ProfileEvaluationPage } from '../pages/profile/evaluation';
 
 export const router = createBrowserRouter([
   {
@@ -45,20 +45,20 @@ export const router = createBrowserRouter([
     path: '/auth/terms-agreement',
     element: <TermsAgreementPage />,
   },
-  {
-    path: '/profile/writing-list',
-    element: <ProfileWritingListPage />,
-  },
-  {
-    path: '/profile/detail/:id',
-    element: <ProfileDetailPage />,
-  },
-  {
-    path: '/profile/write/:id',
-    element: <ProfileWritePage />,
-  },
-  {
-    path: '/profile/evaluation/:id',
-    element: <ProfileEvaluationPage />,
-  },
+  // {
+  //   path: '/profile/writing-list',
+  //   element: <ProfileWritingListPage />,
+  // },
+  // {
+  //   path: '/profile/detail/:id',
+  //   element: <ProfileDetailPage />,
+  // },
+  // {
+  //   path: '/profile/write/:id',
+  //   element: <ProfileWritePage />,
+  // },
+  // {
+  //   path: '/profile/evaluation/:id',
+  //   element: <ProfileEvaluationPage />,
+  // },
 ]);
