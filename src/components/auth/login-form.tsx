@@ -1,12 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import backIcon from '../../images/login/back.svg';
 import googleIcon from '../../images/login/google.svg';
 import kakaoIcon from '../../images/login/kakao.svg';
 import separateIcon from '../../images/login/seperate.svg';
 import { authService } from '../../services/auth.service';
-import type { ApiErrorResponse } from '../../lib/api/types';
-import { AxiosError } from 'axios';
+import { getErrorMessage } from '../../lib/api/error-handler';
+import { redirectToKakaoLogin, getKakaoCodeFromUrl, getKakaoErrorFromUrl } from '../../lib/utils/kakao';
 
 type UserType = 'login' | 'expert';
 
@@ -19,6 +19,52 @@ export function LoginForm() {
   });
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // 카카오 로그인 콜백 처리
+  useEffect(() => {
+    const handleKakaoCallback = async () => {
+      // URL에서 에러 확인
+      const kakaoError = getKakaoErrorFromUrl();
+      if (kakaoError) {
+        setError(`카카오 로그인 실패: ${kakaoError.error_description}`);
+        return;
+      }
+
+      // URL에서 인가 코드 추출
+      const code = getKakaoCodeFromUrl();
+      if (!code) return;
+
+      setIsLoading(true);
+      try {
+        // 백엔드에 인가 코드 전송
+        const response = await authService.socialLogin({
+          code,
+          provider: 'KAKAO',
+        });
+
+        if (response.statusCode === 0) {
+          const { userType, nickname } = response.data;
+
+          // TMP_USER인 경우 추가 정보 입력 페이지로 이동
+          if (userType === 'TMP_USER') {
+            navigate('/auth/social-signup', { state: { nickname } });
+          } else {
+            // 정상 사용자는 홈으로 이동
+            navigate('/');
+          }
+        }
+      } catch (err) {
+        const errorMessage = getErrorMessage(err);
+        setError(errorMessage);
+      } finally {
+        setIsLoading(false);
+        // URL에서 code 파라미터 제거
+        window.history.replaceState({}, '', '/auth/login');
+      }
+    };
+
+    handleKakaoCallback();
+  }, [navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -45,25 +91,9 @@ export function LoginForm() {
         navigate('/');
       }
     } catch (err) {
-      // 에러 처리
-      const axiosError = err as AxiosError<ApiErrorResponse>;
-      if (axiosError.response) {
-        const { statusCode, message } = axiosError.response.data;
-
-        // API 명세서 에러 코드 처리
-        switch (statusCode) {
-          case 1101:
-            setError('이메일이 일치하지 않습니다.');
-            break;
-          case 1102:
-            setError('비밀번호가 일치하지 않습니다.');
-            break;
-          default:
-            setError(message || '로그인에 실패했습니다. 다시 시도해주세요.');
-        }
-      } else {
-        setError('네트워크 오류가 발생했습니다. 다시 시도해주세요.');
-      }
+      // 중앙화된 에러 처리 사용
+      const errorMessage = getErrorMessage(err);
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -174,18 +204,23 @@ export function LoginForm() {
           <div className="flex flex-col gap-3 pb-8">
             <button
               type="button"
-              className="w-full h-14 flex items-center justify-center gap-3 border border-gray-200 bg-white hover:bg-gray-50 transition-colors rounded"
+              disabled={isLoading}
+              className="w-full h-14 flex items-center justify-center gap-3 border border-gray-200 bg-white hover:bg-gray-50 transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <img src={googleIcon} alt="Google" className="w-5 h-5" />
               <span className="text-base font-medium text-gray-900">Google 로그인</span>
             </button>
             <button
               type="button"
-              className="w-full h-14 flex items-center justify-center gap-3 hover:opacity-90 transition-opacity rounded"
+              onClick={redirectToKakaoLogin}
+              disabled={isLoading}
+              className="w-full h-14 flex items-center justify-center gap-3 hover:opacity-90 transition-opacity rounded disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ backgroundColor: '#FEE500' }}
             >
               <img src={kakaoIcon} alt="Kakao" className="w-5 h-5" />
-              <span className="text-base font-semibold" style={{ color: '#3C1E1E' }}>카카오톡 로그인</span>
+              <span className="text-base font-semibold" style={{ color: '#3C1E1E' }}>
+                {isLoading ? '로그인 중...' : '카카오톡 로그인'}
+              </span>
             </button>
           </div>
         </form>
