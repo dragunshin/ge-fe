@@ -1,24 +1,24 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { authService } from '../../services/auth.service';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { authService } from "../../services/auth.service";
 
 const HomePage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogout = async () => {
-    if (!confirm('로그아웃 하시겠습니까?')) {
+    if (!confirm("로그아웃 하시겠습니까?")) {
       return;
     }
 
     setIsLoading(true);
     try {
       await authService.logout();
-      alert('로그아웃 되었습니다.');
-      navigate('/auth/login');
+      alert("로그아웃 되었습니다.");
+      navigate("/auth/login");
     } catch (error) {
-      console.error('로그아웃 실패:', error);
-      alert('로그아웃에 실패했습니다.');
+      console.error("로그아웃 실패:", error);
+      alert("로그아웃에 실패했습니다.");
     } finally {
       setIsLoading(false);
     }
@@ -36,7 +36,7 @@ const HomePage = () => {
             disabled={isLoading}
             className="px-6 py-3 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
           >
-            {isLoading ? '로그아웃 중...' : '로그아웃'}
+            {isLoading ? "로그아웃 중..." : "로그아웃"}
           </button>
         </div>
 
@@ -44,31 +44,31 @@ const HomePage = () => {
           <h2 className="text-xl font-semibold mb-4">인증 페이지</h2>
           <div className="flex flex-wrap gap-3">
             <button
-              onClick={() => navigate('/auth/login')}
+              onClick={() => navigate("/auth/login")}
               className="px-6 py-3 bg-black text-white rounded hover:bg-gray-800"
             >
               로그인 페이지
             </button>
             <button
-              onClick={() => navigate('/auth/signup')}
+              onClick={() => navigate("/auth/signup")}
               className="px-6 py-3 bg-gray-800 text-white rounded hover:bg-gray-700"
             >
               회원가입 페이지
             </button>
             <button
-              onClick={() => navigate('/auth/social-signup')}
+              onClick={() => navigate("/auth/social-signup")}
               className="px-6 py-3 bg-gray-600 text-white rounded hover:bg-gray-500"
             >
               소셜 회원가입 페이지
             </button>
             <button
-              onClick={() => navigate('/auth/interest-selection')}
+              onClick={() => navigate("/auth/interest-selection")}
               className="px-6 py-3 bg-gray-400 text-white rounded hover:bg-gray-300"
             >
               관심 분야 선택 페이지
             </button>
             <button
-              onClick={() => navigate('/auth/terms-agreement')}
+              onClick={() => navigate("/auth/terms-agreement")}
               className="px-6 py-3 bg-gray-300 text-black rounded hover:bg-gray-200"
             >
               약관 동의 페이지
@@ -80,25 +80,25 @@ const HomePage = () => {
           <h2 className="text-xl font-semibold mb-4">프로필/후기 페이지</h2>
           <div className="flex flex-wrap gap-3">
             <button
-              onClick={() => navigate('/profile/writing-list')}
+              onClick={() => navigate("/profile/writing-list")}
               className="px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700"
             >
               나의 후기 목록
             </button>
             <button
-              onClick={() => navigate('/profile/detail/1')}
+              onClick={() => navigate("/profile/detail/1")}
               className="px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
               후기 상세
             </button>
             <button
-              onClick={() => navigate('/profile/write/1')}
+              onClick={() => navigate("/profile/write/1")}
               className="px-6 py-3 bg-blue-400 text-white rounded hover:bg-blue-500"
             >
               후기 작성
             </button>
             <button
-              onClick={() => navigate('/profile/evaluation/1')}
+              onClick={() => navigate("/profile/evaluation/1")}
               className="px-6 py-3 bg-blue-300 text-white rounded hover:bg-blue-400"
             >
               평가 페이지
