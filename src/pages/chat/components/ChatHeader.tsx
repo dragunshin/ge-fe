@@ -1,18 +1,10 @@
-import { useLocation, useNavigate } from "react-router-dom";
-import { BatteryFull, ChevronLeft, MoreVertical, SignalHigh, Wifi } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import BackIcon from "@/images/login/back.svg?react";
 import More from "@/images/chat/more.svg?react";
-import { Button } from "@/components/ui/button";
 import { ChatExpertHeader } from "./ChatExpertHeader";
-
-type ChatHeaderState = {
-  title?: string;
-  subtitle?: string;
-};
 
 export default function ChatHeader() {
   const navigate = useNavigate();
-  const location = useLocation();
 
   return (
     <div className="flex flex-col">

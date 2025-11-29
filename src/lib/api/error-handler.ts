@@ -94,13 +94,18 @@ function isAxiosError(error: unknown): error is AxiosError {
 
 // 에러 핸들러 훅에서 사용할 수 있는 유틸리티
 export class ApiError extends Error {
+  statusCode: number;
+  originalError?: unknown;
+
   constructor(
-    public statusCode: number,
+    statusCode: number,
     message: string,
-    public originalError?: unknown
+    originalError?: unknown
   ) {
     super(message);
     this.name = 'ApiError';
+    this.statusCode = statusCode;
+    this.originalError = originalError;
   }
 }
 
@@ -109,7 +114,8 @@ export function handleApiError(error: unknown): ApiError {
   const message = getErrorMessage(error);
 
   if (isAxiosError(error)) {
-    const statusCode = error.response?.data?.statusCode || error.response?.status || 0;
+    const axiosError = error as AxiosError<ApiErrorResponse>;
+    const statusCode = axiosError.response?.data?.statusCode || axiosError.response?.status || 0;
     return new ApiError(statusCode, message, error);
   }
 

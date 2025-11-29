@@ -4,7 +4,6 @@ import * as React from "react";
 import { ChevronLeft, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 type Option = { id: string; label: string };
 
@@ -18,7 +17,6 @@ const OPTIONS: Option[] = [
 export default function FaceStep() {
   const navigate = useNavigate();
   const [selected, setSelected] = React.useState<Set<string>>(new Set());
-  const [etc, setEtc] = React.useState("");
 
   const toggle = (id: string) => {
     setSelected((prev) => {
@@ -28,7 +26,7 @@ export default function FaceStep() {
     });
   };
 
-  const canContinue = selected.size > 0 || etc.trim().length > 0;
+  const canContinue = selected.size > 0;
 
   return (
     <div className="h-screen flex flex-col bg-white text-gray-900 overflow-hidden">
