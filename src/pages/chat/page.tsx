@@ -189,18 +189,20 @@ const MOCK_MESSAGES: ChatMessage[] = [
 
 export function Chat() {
   return (
-    <div className="flex h-full flex-col w-full bg-white">
-      <ChatHeader />
+    <div className="h-screen flex flex-col bg-white overflow-hidden">
+      <div className="shrink-0">
+        <ChatHeader />
+      </div>
 
       {/* 메시지 리스트 영역 */}
-      <main className="flex-1 space-y-5 px-4 py-6 overflow-y-auto">
+      <main className="flex-1 space-y-5 px-4 py-6 overflow-y-auto scrollbar-hide">
         {MOCK_MESSAGES.map((message) => (
           <ChatBubble key={message.id} message={message} />
         ))}
       </main>
 
       {/* 하단 입력 영역 */}
-      <footer className="flex items-center gap-3 border-t border-slate-200 bg-white px-4 py-3">
+      <footer className="shrink-0 flex items-center gap-3 border-t border-slate-200 bg-white px-4 py-3">
         {/* + 버튼 */}
         <Button
           //variant="ghost"

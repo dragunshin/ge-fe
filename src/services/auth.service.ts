@@ -20,7 +20,7 @@ export const authService = {
 
   // 회원가입
   async signup(data: SignupRequest): Promise<ApiResponse<SignupResponse>> {
-    return await api.post<ApiResponse<SignupResponse>>('/auth/signup', data);
+    return await api.post<ApiResponse<SignupResponse>>('/user/signup', data);
   },
 
   // 소셜 로그인 (카카오)

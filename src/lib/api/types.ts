@@ -13,7 +13,7 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   nickname: string;
-  userType: 'GROOMER' | 'EXPERT';
+  userType: 'MENUAL' | 'EXPERT';
 }
 
 // 회원가입 API
@@ -44,7 +44,7 @@ export interface SocialLoginRequest {
 
 export interface SocialLoginResponse {
   nickname: string;
-  userType: 'TMP_USER' | 'GROOMER' | 'EXPERT';
+  userType: 'TMP_USER' | 'MENUAL' | 'EXPERT';
 }
 
 // 소셜 회원 추가정보 입력 API
@@ -59,7 +59,7 @@ export interface SocialSignupRequest {
 
 export interface SocialSignupResponse {
   nickname: string;
-  userType: 'GROOMER' | 'EXPERT';
+  userType: 'MENUAL' | 'EXPERT';
 }
 
 // 에러 타입

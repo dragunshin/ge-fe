@@ -13,9 +13,9 @@ export const ERROR_MESSAGES: Record<number, string> = {
   1007: '필수 약관 및 개인정보 처리에 동의해야 합니다.',
   1008: '비밀번호가 일치하지 않습니다.',
 
-  // 로그인 에러 (1101-1102)
-  1101: '이메일이 일치하지 않습니다.',
-  1102: '비밀번호가 일치하지 않습니다.',
+  // 로그인 에러 (1101-1102) - 보안상 통합된 메시지 사용
+  1101: '이메일 또는 비밀번호가 일치하지 않습니다.',
+  1102: '이메일 또는 비밀번호가 일치하지 않습니다.',
 
   // 소셜 로그인 에러 (1103)
   1103: '인가 코드가 유효하지 않습니다.',
@@ -70,6 +70,16 @@ export function getErrorMessage(error: unknown): string {
     // 500 Internal Server Error
     if (axiosError.response?.status === 500) {
       return '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+    }
+
+    // 502 Bad Gateway
+    if (axiosError.response?.status === 502) {
+      return '서버와 통신 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.';
+    }
+
+    // 503 Service Unavailable
+    if (axiosError.response?.status === 503) {
+      return '서비스를 일시적으로 사용할 수 없습니다. 잠시 후 다시 시도해주세요.';
     }
   }
 

@@ -43,7 +43,7 @@ export default function EditorPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
+    <main className="h-screen flex items-center justify-center bg-slate-50 px-4 py-10 overflow-y-auto scrollbar-hide">
       <Card className="w-full max-w-3xl border-slate-200 shadow-sm">
         <CardHeader className="space-y-1">
           <CardTitle className="text-lg font-semibold text-slate-900">

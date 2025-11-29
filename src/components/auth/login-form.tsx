@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import backIcon from '../../images/login/back.svg';
 import googleIcon from '../../images/login/google.svg';
@@ -6,103 +6,97 @@ import kakaoIcon from '../../images/login/kakao.svg';
 import separateIcon from '../../images/login/seperate.svg';
 import { authService } from '../../services/auth.service';
 import { getErrorMessage } from '../../lib/api/error-handler';
-import { redirectToKakaoLogin, getKakaoCodeFromUrl, getKakaoErrorFromUrl } from '../../lib/utils/kakao';
+import { redirectToKakaoLogin } from '../../lib/utils/kakao';
+import { loginSchema } from '../../lib/schemas/auth.schema';
+import { useAuthStore } from '../../stores/useAuthStore';
 
 type UserType = 'login' | 'expert';
 
 export function LoginForm() {
   const navigate = useNavigate();
+  const login = useAuthStore((state) => state.login);
   const [userType, setUserType] = useState<UserType>('login');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
-  const [error, setError] = useState<string>('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
-
-  // 카카오 로그인 콜백 처리
-  useEffect(() => {
-    const handleKakaoCallback = async () => {
-      // URL에서 에러 확인
-      const kakaoError = getKakaoErrorFromUrl();
-      if (kakaoError) {
-        setError(`카카오 로그인 실패: ${kakaoError.error_description}`);
-        return;
-      }
-
-      // URL에서 인가 코드 추출
-      const code = getKakaoCodeFromUrl();
-      if (!code) return;
-
-      setIsLoading(true);
-      try {
-        // 백엔드에 인가 코드 전송
-        const response = await authService.socialLogin({
-          code,
-          provider: 'KAKAO',
-        });
-
-        if (response.statusCode === 0) {
-          const { userType, nickname } = response.data;
-
-          // TMP_USER인 경우 추가 정보 입력 페이지로 이동
-          if (userType === 'TMP_USER') {
-            navigate('/auth/social-signup', { state: { nickname } });
-          } else {
-            // 정상 사용자는 홈으로 이동
-            navigate('/');
-          }
-        }
-      } catch (err) {
-        const errorMessage = getErrorMessage(err);
-        setError(errorMessage);
-      } finally {
-        setIsLoading(false);
-        // URL에서 code 파라미터 제거
-        window.history.replaceState({}, '', '/auth/login');
-      }
-    };
-
-    handleKakaoCallback();
-  }, [navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // 입력 시 에러 메시지 초기화
-    if (error) setError('');
+    // 입력 시 해당 필드의 에러 메시지 초기화
+    if (errors[name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+    // 일반 에러도 초기화
+    if (errors.general) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.general;
+        return newErrors;
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setErrors({});
     setIsLoading(true);
 
     try {
-      const response = await authService.login({
+      // 1차 검증: Zod 스키마로 클라이언트 측 검증
+      const validatedData = loginSchema.parse({
         email: formData.email,
         password: formData.password,
       });
 
+      // 검증 통과 후 API 호출
+      const response = await authService.login(validatedData);
+
       // 로그인 성공
       if (response.statusCode === 0) {
-        console.log('로그인 성공:', response.data);
+        const { nickname, userType } = response.data;
+
+        // 로그인 정보 저장
+        login({ nickname, userType });
+
         // 홈 페이지로 이동
         navigate('/');
       }
     } catch (err) {
-      // 중앙화된 에러 처리 사용
-      const errorMessage = getErrorMessage(err);
-      setError(errorMessage);
+      // Zod 검증 에러 처리
+      if (err && typeof err === 'object' && 'issues' in err) {
+        const zodError = err as { issues: Array<{ path: string[]; message: string }> };
+        const fieldErrors: Record<string, string> = {};
+
+        zodError.issues.forEach((issue) => {
+          const fieldName = issue.path[0] as string;
+          if (!fieldErrors[fieldName]) {
+            fieldErrors[fieldName] = issue.message;
+          }
+        });
+
+        setErrors(fieldErrors);
+      } else {
+        // API 에러 처리: 백엔드에서 전송한 에러 메시지 (보안상 통합 메시지)
+        const errorMessage = getErrorMessage(err);
+        setErrors({ general: errorMessage });
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="h-screen bg-white flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="flex items-center px-6 py-4">
+      <header className="shrink-0 flex items-center px-6 py-4">
         <button onClick={() => navigate(-1)} className="mr-3">
           <img src={backIcon} alt="back" className="w-2.5 h-[18px]" />
         </button>
@@ -110,7 +104,7 @@ export function LoginForm() {
       </header>
 
       {/* Tabs */}
-      <div className="flex">
+      <div className="shrink-0 flex">
         <button
           onClick={() => setUserType('login')}
           className={`flex-1 py-4 text-base font-medium transition-all relative ${
@@ -136,36 +130,48 @@ export function LoginForm() {
       </div>
 
       {/* Form */}
-      <div className="flex-1 overflow-y-auto">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-6 pt-10">
+      <div className="flex-1 overflow-y-auto scrollbar-hide">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-6 pt-10 pb-8">
           {/* Email Input */}
-          <input
-            name="email"
-            type="email"
-            placeholder="이메일 입력"
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full h-12 px-5 border border-gray-200 rounded focus:outline-none focus:border-gray-300 placeholder:text-gray-400 text-[13px] bg-white transition-colors"
-            required
-            disabled={isLoading}
-          />
+          <div>
+            <input
+              name="email"
+              type="text"
+              placeholder="이메일 입력"
+              value={formData.email}
+              onChange={handleChange}
+              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[13px] bg-white transition-colors ${
+                errors.email ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gray-300'
+              }`}
+              disabled={isLoading}
+            />
+            {errors.email && (
+              <p className="text-red-500 text-xs mt-1 px-1">{errors.email}</p>
+            )}
+          </div>
 
           {/* Password Input */}
-          <input
-            name="password"
-            type="password"
-            placeholder="패스워드 입력"
-            value={formData.password}
-            onChange={handleChange}
-            className="w-full h-12 px-5 border border-gray-200 rounded focus:outline-none focus:border-gray-300 placeholder:text-gray-400 text-[13px] bg-white transition-colors"
-            required
-            disabled={isLoading}
-          />
+          <div>
+            <input
+              name="password"
+              type="password"
+              placeholder="패스워드 입력"
+              value={formData.password}
+              onChange={handleChange}
+              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[13px] bg-white transition-colors ${
+                errors.password ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gray-300'
+              }`}
+              disabled={isLoading}
+            />
+            {errors.password && (
+              <p className="text-red-500 text-xs mt-1 px-1">{errors.password}</p>
+            )}
+          </div>
 
-          {/* Error Message */}
-          {error && (
+          {/* 일반 에러 메시지 (로그인 실패 등) */}
+          {errors.general && (
             <div className="text-red-500 text-sm px-1">
-              {error}
+              {errors.general}
             </div>
           )}
 
