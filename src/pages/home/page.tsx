@@ -162,17 +162,14 @@ const HomePage = () => {
             </div>
           </div>
 
-          {/* 전문가 카드 가로 스크롤 */}
-          <div className="px-4">
+          {/* <div className="px-4">
             <div className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2">
               {[1, 2, 3].map((item) => (
                 <div
                   key={item}
                   className="min-w-[160px] shrink-0 snap-start"
                 >
-                  {/* 전문가 이미지 */}
                   <div className="w-[160px] h-[200px] bg-gray-200 rounded-lg mb-2" />
-                  {/* 전문가 정보 */}
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-1">
                       <span className="text-xs font-semibold truncate">고객 닉네임</span>
@@ -190,7 +187,7 @@ const HomePage = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </div> */}
         </section>
       </main>
 
