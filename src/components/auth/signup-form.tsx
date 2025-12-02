@@ -202,7 +202,7 @@ export function SignUpForm() {
             <input
               name="password"
               type="password"
-              placeholder="영문+숫자+특수문자 조합 8자리 이상 입력해주세요."
+              placeholder="8-14자 영문+숫자 조합"
               value={formData.password}
               onChange={handleChange}
               className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[12px] bg-white transition-colors ${
