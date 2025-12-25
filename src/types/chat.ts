@@ -20,20 +20,41 @@ export interface Chatroom {
   createdAt: string;
 }
 
-export type MessageType = "TEXT" | "SOLUTION" | "QUESTION" | "SYSTEM";
+// export type MessageType = "TEXT" | "SOLUTION" | "QUESTION" | "SYSTEM";
 
-export interface ChatMessage {
-  id: string;
-  chatroomId: number;
-  senderId: string;
-  content: string;
-  messageType: MessageType;
-  relatedId?: number | null;
-  createdAt: string; // ISO
-}
+// export type ChatMessage = {
+//   messageId: number;
+//   chatroomId: number;
+//   senderId: number;
+//   senderRole: "MEMBER" | "EXPERT" | "MENUAL";
+//   messageType: "TEXT" | "IMAGE" | "QUESTION" | "SOLUTION" | "SYSTEM";
+//   content: string;
+//   relatedId: number | null;
+//   createdAt: string;
+// };
 
 export interface ApiResponse<T> {
   statusCode: number;
   message: string;
   data: T;
 }
+
+export type MessageType = "TEXT" | "IMAGE" | "QUESTION" | "SOLUTION" | "SYSTEM";
+export type SenderRole = "MEMBER" | "MENUAL" | "EXPERT";
+
+export type ChatMessage = {
+  messageId: number;
+  chatroomId: number;
+  senderId: number;
+  senderRole: SenderRole;
+  messageType: MessageType;
+  content: string;
+  relatedId: number | null;
+  createdAt: string;
+};
+
+export type SocketResponse<T> = {
+  eventType: string;
+  chatroomId: number;
+  payload: T;
+};

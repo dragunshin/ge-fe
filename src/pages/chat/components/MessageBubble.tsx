@@ -120,18 +120,18 @@
 //   );
 // }
 
-// src/features/chat/components/MessageBubble.tsx
+"use client";
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import type { ChatMessage } from "@/types/chat";
 
-const MY_ID = "me"; // TODO: 실제 로그인한 유저 ID로 교체
-
-interface Props {
+type Props = {
   message: ChatMessage;
-}
+  myUserId?: number;
+};
 
-export function MessageBubble({ message }: Props) {
-  const isMine = message.senderId === MY_ID;
+export function MessageBubble({ message, myUserId }: Props) {
+  const isMine = myUserId != null && message.senderId === myUserId;
 
   const isCard = message.messageType === "QUESTION" || message.messageType === "SOLUTION";
 
@@ -165,14 +165,10 @@ export function MessageBubble({ message }: Props) {
   return (
     <div className="flex items-start gap-2">
       <Avatar className="mt-1 h-8 w-8 bg-[#D9D9D9] text-slate-600">
-        <AvatarFallback className="text-xs">박</AvatarFallback>
+        <AvatarFallback className="text-xs">?</AvatarFallback>
       </Avatar>
       <div
-        className={`${baseBubble} ${
-          isCard
-            ? "bg-[#F8F8FC] text-slate-900 border border-slate-200"
-            : "bg-white text-slate-900 shadow-sm"
-        }`}
+        className={`${baseBubble} ${isCard ? "bg-[#F8F8FC] text-slate-900 border border-slate-200" : "bg-white text-slate-900 shadow-sm"}`}
       >
         <p className="whitespace-pre-line">{message.content}</p>
         {isCard && actionLabel && (

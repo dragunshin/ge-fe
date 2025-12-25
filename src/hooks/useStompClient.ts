@@ -1,229 +1,167 @@
-// import { useCallback, useEffect, useRef } from "react";
-// import { Client } from "@stomp/stompjs";
-// import { useChatStore } from "@/stores/useChatStore";
-
-// const WS_URL = import.meta.env.VITE_WS_URL ?? "ws://localhost:8080/ws-stomp";
-
-// // 모든 컴포넌트에서 공유되는 클라이언트
-// let sharedClient: Client | null = null;
-
-// interface SendChatPayload {
-//   chatroomId: number;
-//   content: string;
-//   messageType?: "TEXT" | "SOLUTION" | "QUESTION" | "SYSTEM";
-//   relatedId?: number | null;
-// }
-
-// export const useStompClient = () => {
-//   // ✅ hook으로는 "읽기만"
-//   const currentRoomId = useChatStore((s) => s.currentRoomId);
-//   const isConnected = useChatStore((s) => s.isConnected);
-
-//   const clientRef = useRef<Client | null>(sharedClient);
-
-//   // 1) 클라이언트 생성 (한 번만, store에 set 안 함)
-//   useEffect(() => {
-//     if (clientRef.current) return;
-
-//     const client = new Client({
-//       brokerURL: WS_URL,
-//       reconnectDelay: 5000,
-//       heartbeatIncoming: 10000,
-//       heartbeatOutgoing: 10000,
-//       debug: () => {
-//         // 필요하면 로그
-//       },
-//       onConnect: () => {
-//         console.log("[STOMP] connected");
-//         // ✅ 정적 setState 사용 (hook 아님)
-//         useChatStore.setState({ isConnected: true });
-//       },
-//       onStompError: (frame) => {
-//         console.error("[STOMP] error", frame.body);
-//       },
-//       onWebSocketClose: () => {
-//         console.log("[STOMP] websocket closed");
-//         useChatStore.setState({ isConnected: false });
-//       },
-//     });
-
-//     clientRef.current = client;
-//     sharedClient = client;
-//     client.activate();
-
-//     return () => {
-//       console.log("[STOMP] deactivate");
-//       client.deactivate();
-//       // cleanup에서는 굳이 setState 안 해도 됨 (해도 한 번이라 상관없지만 안전하게)
-//       sharedClient = null;
-//       clientRef.current = null;
-//     };
-//   }, []); // ✅ deps 비움: 한 번만 실행
-
-//   // 2) 현재 방 구독
-//   useEffect(() => {
-//     const client = clientRef.current;
-//     if (!client || !client.connected) return;
-//     if (currentRoomId == null) return;
-
-//     const destination = `/sub/chatroom/${currentRoomId}`;
-//     console.log("[STOMP] subscribe:", destination);
-
-//     const subscription = client.subscribe(destination, (frame) => {
-//       try {
-//         const body = JSON.parse(frame.body);
-
-//         const msg = {
-//           id: body.id ?? crypto.randomUUID(),
-//           chatroomId: body.chatroomId,
-//           senderId: body.senderId ?? "unknown",
-//           content: body.content,
-//           messageType: body.messageType ?? "TEXT",
-//           relatedId: body.relatedId ?? null,
-//           createdAt: body.createdAt ?? new Date().toISOString(),
-//         };
-
-//         // ✅ hook 대신 정적 API로 메시지 추가
-//         const { addMessage } = useChatStore.getState();
-//         addMessage(msg);
-//       } catch (e) {
-//         console.error("[STOMP] parse error", e);
-//       }
-//     });
-
-//     return () => {
-//       console.log("[STOMP] unsubscribe:", destination);
-//       subscription.unsubscribe();
-//     };
-//   }, [currentRoomId]);
-
-//   // 3) 메시지 전송
-//   const sendChatMessage = useCallback(
-//     ({ chatroomId, content, messageType = "TEXT", relatedId = null }: SendChatPayload) => {
-//       const client = clientRef.current;
-//       if (!client || !client.connected) {
-//         console.warn("[STOMP] not connected, skip send");
-//         return;
-//       }
-
-//       client.publish({
-//         destination: "/pub/chat.message",
-//         body: JSON.stringify({
-//           chatroomId,
-//           messageType,
-//           content,
-//           relatedId,
-//         }),
-//       });
-//     },
-//     [],
-//   );
-
-//   return {
-//     isConnected,
-//     sendChatMessage,
-//   };
-// };
-
-//상태관리 자꾸 무한루프로 빠짐 일단 나중에
-
-// src/hooks/useStompClient.ts
-import { useEffect, useRef, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Client, type IMessage, type StompSubscription } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
-const WS_URL = import.meta.env.VITE_WS_URL ?? "ws://localhost:8080/ws-stomp";
-
-// 모듈 전역 싱글톤
-let sharedClient: Client | null = null;
+const WS_URL = import.meta.env.VITE_WS_URL ?? "https://api.menual.site/ws/chat";
 
 type MessageHandler = (msg: IMessage) => void;
 
-interface UseStompClientResult {
+export interface UseStompClientResult {
   isReady: boolean;
   subscribe: (destination: string, handler: MessageHandler) => () => void;
   send: (destination: string, body: unknown) => void;
 }
 
+type SubRecord = {
+  destination: string;
+  handler: MessageHandler;
+  sub?: StompSubscription;
+  active: boolean;
+};
+
+// module singleton 중복 연결 방지
+let shared: Client | null = null;
+let sharedReady = false;
+let mounts = 0;
+
+const readyListeners = new Set<(ready: boolean) => void>();
+const subs = new Set<SubRecord>();
+
+function emitReady(next: boolean) {
+  sharedReady = next;
+  for (const fn of readyListeners) fn(next);
+}
+
+function buildClient(): Client {
+  const isSockJsUrl = WS_URL.startsWith("http://") || WS_URL.startsWith("https://");
+
+  const client = new Client({
+    // SockJS 서버면 brokerURL 대신 webSocketFactory 사용
+    brokerURL: isSockJsUrl ? undefined : WS_URL,
+    webSocketFactory: isSockJsUrl
+      ? () =>
+          new SockJS(WS_URL, undefined, {
+            withCredentials: true,
+            transports: ["websocket", "xhr-streaming", "xhr-polling"],
+          } as any)
+      : undefined,
+
+    reconnectDelay: 3000,
+    heartbeatIncoming: 10000,
+    heartbeatOutgoing: 10000,
+
+    debug: (str) => {
+      if (import.meta.env.DEV) console.log("[STOMP]", str);
+    },
+
+    onConnect: () => {
+      emitReady(true);
+
+      // 연결되면 밀린 구독 flush
+      for (const r of subs) {
+        if (!r.active) continue;
+        if (!r.sub) r.sub = client.subscribe(r.destination, r.handler);
+      }
+    },
+
+    onWebSocketClose: () => {
+      // 재연결 시 재구독 되도록 핸들 제거
+      for (const r of subs) r.sub = undefined;
+      emitReady(false);
+    },
+
+    onStompError: (frame) => {
+      console.error("[STOMP] stomp error:", frame.headers, frame.body);
+    },
+
+    onWebSocketError: (evt) => {
+      console.error("[STOMP] websocket error", evt);
+    },
+  });
+
+  return client;
+}
+
+function ensureClient() {
+  if (shared) return shared;
+
+  shared = buildClient();
+  shared.activate();
+  return shared;
+}
+
+function teardownIfUnused() {
+  if (mounts > 0) return;
+
+  const client = shared;
+  shared = null;
+
+  for (const r of subs) {
+    try {
+      r.sub?.unsubscribe();
+    } catch {}
+  }
+  subs.clear();
+
+  try {
+    client?.deactivate();
+  } catch {}
+
+  emitReady(false);
+}
+
 export function useStompClient(): UseStompClientResult {
-  const clientRef = useRef<Client | null>(sharedClient);
-  const isReadyRef = useRef(false);
+  const [isReady, setIsReady] = useState(sharedReady);
 
-  // 1) 한 번만 클라이언트 생성/연결
   useEffect(() => {
-    if (clientRef.current) {
-      return;
-    }
+    mounts += 1;
+    ensureClient();
 
-    const client = new Client({
-      brokerURL: WS_URL,
-      reconnectDelay: 5000,
-      heartbeatIncoming: 10000,
-      heartbeatOutgoing: 10000,
-      debug: () => {
-        // console.log("[STOMP]", str);
-      },
-      onConnect: () => {
-        console.log("[STOMP] connected");
-        isReadyRef.current = true;
-      },
-      onStompError: (frame) => {
-        console.error("[STOMP] error", frame.body);
-      },
-      onWebSocketClose: () => {
-        console.log("[STOMP] websocket closed");
-        isReadyRef.current = false;
-      },
-    });
-
-    clientRef.current = client;
-    sharedClient = client;
-    client.activate();
+    const listener = (ready: boolean) => setIsReady(ready);
+    readyListeners.add(listener);
+    setIsReady(sharedReady);
 
     return () => {
-      console.log("[STOMP] deactivate");
-      client.deactivate();
-      sharedClient = null;
-      clientRef.current = null;
-      isReadyRef.current = false;
+      readyListeners.delete(listener);
+      mounts -= 1;
+      teardownIfUnused();
     };
   }, []);
 
-  // 2) 구독 함수
   const subscribe = useCallback((destination: string, handler: MessageHandler) => {
-    const client = clientRef.current;
-    if (!client) {
-      console.warn("[STOMP] subscribe: client not ready");
-      return () => {};
-    }
+    const client = ensureClient();
 
-    // 아직 연결 전이라면, onConnect에서 다시 구독하는 로직을 넣을 수도 있음
-    if (!client.connected) {
-      console.warn("[STOMP] subscribe: not connected yet");
-      return () => {};
-    }
+    const rec: SubRecord = { destination, handler, active: true };
+    subs.add(rec);
 
-    const sub: StompSubscription = client.subscribe(destination, handler);
+    // 이미 연결돼 있으면 바로 SUBSCRIBE
+    if (client.connected) {
+      rec.sub = client.subscribe(destination, handler);
+    }
+    // 아니면 onConnect에서 자동 구독
+
     return () => {
-      sub.unsubscribe();
+      rec.active = false;
+      try {
+        rec.sub?.unsubscribe();
+      } catch {}
+      subs.delete(rec);
     };
   }, []);
 
-  // 3) 전송 함수
   const send = useCallback((destination: string, body: unknown) => {
-    const client = clientRef.current;
-    if (!client || !client.connected) {
-      console.warn("[STOMP] send: not connected");
+    const client = ensureClient();
+
+    if (!client.connected) {
+      console.warn("[STOMP] send blocked: not connected");
       return;
     }
+
     client.publish({
       destination,
       body: JSON.stringify(body),
     });
   }, []);
 
-  return {
-    isReady: isReadyRef.current,
-    subscribe,
-    send,
-  };
+  return useMemo(() => ({ isReady, subscribe, send }), [isReady, subscribe, send]);
 }

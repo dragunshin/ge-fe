@@ -13,6 +13,8 @@ import { Chat } from "@/pages/chat/page";
 import { ChatList } from "@/pages/chat/components/ChatList";
 import { ChatRoom } from "@/pages/chat/components/ChatRoom";
 import EditorPage from "@/pages/solution/writeSolution";
+import MyPage from "@/pages/myPage/page";
+import ReservationHistoryView from "@/pages/myPage/reservation/page";
 // import { ProfileWritingListPage } from '../pages/profile/writing-list';
 // import { ProfileDetailPage } from '../pages/profile/detail';
 // import { ProfileWritePage } from '../pages/profile/write';
@@ -75,6 +77,14 @@ export const router = createBrowserRouter([
   {
     path: "/write",
     element: <EditorPage />,
+  },
+  {
+    path: "/mypage",
+    element: <MyPage />,
+  },
+  {
+    path: "/reservationhistory",
+    element: <ReservationHistoryView />,
   },
   // {
   //   path: '/profile/writing-list',

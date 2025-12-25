@@ -1,16 +1,16 @@
-import axios from 'axios';
-import type { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { useAuthStore } from '../../stores/useAuthStore';
+import axios from "axios";
+import type { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import { useAuthStore } from "../../stores/useAuthStore";
 
 // API Base URL - 환경 변수로 관리
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
 
 // Axios 인스턴스 생성
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
   withCredentials: true, // HttpOnly 쿠키를 위해 필수
 });
@@ -28,10 +28,10 @@ apiClient.interceptors.response.use(
       logout();
 
       // 로그인 페이지로 리다이렉트
-      window.location.href = '/auth/login';
+      window.location.href = "/auth/login";
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 // API 요청 래퍼 함수들
