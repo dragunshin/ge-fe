@@ -21,6 +21,7 @@ export function MessageInput({ onSend, disabled }: MessageInputProps) {
     const text = value.trim();
     onSend(text);
     setValue("");
+    console.log(disabled);
   }, [canSend, onSend, value]);
 
   return (

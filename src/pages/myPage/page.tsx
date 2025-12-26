@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import HeadPhone from "@/images/mypage/headPhone.svg?react";
+//import HeadPhone from "@/images/mypage/headPhone.svg?react";
 import Point from "@/images/mypage/point.svg?react";
 import ReservationList from "@/images/mypage/reservationList.svg?react";
 import Write from "@/images/mypage/wirte.svg?react";
@@ -268,41 +268,6 @@ function IconBase({ children, className }: { children: React.ReactNode; classNam
     >
       {children}
     </svg>
-  );
-}
-
-function TicketIcon() {
-  return (
-    <IconBase>
-      <path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8z" />
-      <path d="M9 9h.01M9 12h.01M9 15h.01" />
-    </IconBase>
-  );
-}
-
-function HeartIcon() {
-  return (
-    <IconBase>
-      <path d="M12 21s-7-4.6-9.5-8.7C.9 9.4 2.3 6.7 5 6.1c1.7-.4 3.3.2 4.3 1.5 1-1.3 2.6-1.9 4.3-1.5 2.7.6 4.1 3.3 2.5 6.2C19 16.4 12 21 12 21z" />
-    </IconBase>
-  );
-}
-
-function CoinPillIcon({ letter }: { letter: string }) {
-  return (
-    <IconBase>
-      <rect x="6" y="6" width="12" height="12" rx="6" />
-      <path d="M11 9h2a2 2 0 0 1 0 4h-2v2h3" />
-    </IconBase>
-  );
-}
-
-function PencilIcon() {
-  return (
-    <IconBase>
-      <path d="M12 20h9" />
-      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5z" />
-    </IconBase>
   );
 }
 
