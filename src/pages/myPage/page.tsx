@@ -208,7 +208,7 @@ export default function MyPage() {
               <button
                 type="button"
                 onClick={() => console.log("후기 작성")}
-                className="rounded-lg bg-white px-4 py-2 text-[13px] font-semibold text-neutral-800 shadow-sm ring-1 ring-neutral-200 hover:bg-neutral-50 active:bg-neutral-100"
+                className="rounded-lg bg-white px-4 py-2 text-[13px] pre_title_semi_20 text-neutral-800 shadow-sm ring-1 ring-neutral-200 hover:bg-neutral-50 active:bg-neutral-100"
               >
                 후기 작성
               </button>
@@ -227,26 +227,33 @@ export default function MyPage() {
   );
 }
 
-function MenuSection({ title, items }: { title: string; items: MenuItem[] }) {
+function MenuSection({
+  title,
+  items,
+  isLast,
+}: {
+  title: string;
+  items: MenuItem[];
+  isLast?: boolean;
+}) {
   return (
-    <section>
-      <p className="mb-2 text-[12px] font-semibold text-neutral-400">{title}</p>
+    <section className={cn(!isLast && "border-b border-neutral-200")}>
+      <p className="pt-6 text-[14px] font-semibold text-neutral-400">{title}</p>
 
-      <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
-        {items.map((item, idx) => (
-          <React.Fragment key={item.key}>
-            <button
-              type="button"
-              onClick={item.onClick}
-              className="flex w-full items-center gap-3 px-4 py-4 text-left hover:bg-neutral-50 active:bg-neutral-100"
-            >
-              <span className="text-neutral-700">{item.icon}</span>
-              <span className="flex-1 text-[14px] font-medium text-neutral-900">{item.label}</span>
-              <ChevronRightIcon />
-            </button>
+      <div className="mt-4 divide-y divide-neutral-200">
+        {items.map((item) => (
+          <button
+            key={item.key}
+            type="button"
+            onClick={item.onClick}
+            className="flex w-full items-center gap-4 py-5 text-left"
+          >
+            <span className="text-neutral-900">{item.icon}</span>
+            <span className="text-[18px] font-semibold text-neutral-900">{item.label}</span>
 
-            {idx !== items.length - 1 && <div className="h-px bg-neutral-200" />}
-          </React.Fragment>
+            {/* 사진엔 우측 화살표가 없어서 제거 (원하면 다시 추가 가능) */}
+            {/* <ChevronRightIcon /> */}
+          </button>
         ))}
       </div>
     </section>

@@ -15,7 +15,10 @@ body {
   justify-content: center;
   align-items: center;
   background-color: #1a1a1a;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -39,7 +42,12 @@ body {
   display: none;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   line-height: 1.5;
 }
 
@@ -63,6 +71,9 @@ input {
 }
 
 @theme inline {
+  --font-sans:
+    "Pretendard Variable", Pretendard, ui-sans-serif, system-ui, -apple-system,
+    "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -171,9 +182,64 @@ input {
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply font-sans border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  /* Title */
+  .pre_title_semi_20 {
+    @apply text-[20px] leading-[140%] font-semibold;
+  }
+  .pre_title_semi_18 {
+    @apply text-[18px] leading-[140%] font-semibold;
+  }
+
+  /* Subtitle */
+  .pre_subtitle_semi_18 {
+    @apply text-[18px] leading-[140%] font-semibold;
+  }
+  .pre_subtitle_semi_16 {
+    @apply text-[16px] leading-[140%] font-semibold;
+  }
+
+  /* Body */
+  .pre_body_bold_16 {
+    @apply text-[16px] leading-[140%] font-bold;
+  }
+  .pre_body_med_16 {
+    @apply text-[16px] leading-[140%] font-medium;
+  }
+  .pre_body_semi_14 {
+    @apply text-[14px] leading-[140%] font-semibold;
+  }
+  .pre_body_med_14 {
+    @apply text-[14px] leading-[140%] font-medium;
+  }
+  .pre_body_reg_14 {
+    @apply text-[14px] leading-[140%] font-normal;
+  }
+
+  /* 'line'은 보통 underline 토큰으로 쓰는 경우가 많아서 이렇게 두는 걸 추천 */
+  .pre_body_semi_line_12 {
+    @apply text-[12px] leading-[140%] font-semibold underline underline-offset-2;
+  }
+
+  .pre_body_semi_12 {
+    @apply text-[12px] leading-[140%] font-semibold;
+  }
+  .pre_body_reg_12 {
+    @apply text-[12px] leading-[140%] font-normal;
+  }
+
+  /* Caption */
+  .pre_cap_semi_12 {
+    @apply text-[12px] leading-[140%] font-semibold;
+  }
+  .pre_cap_reg_12 {
+    @apply text-[12px] leading-[140%] font-normal;
   }
 }
