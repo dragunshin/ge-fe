@@ -15,6 +15,10 @@ import { ChatRoom } from "@/pages/chat/components/ChatRoom";
 import EditorPage from "@/pages/solution/writeSolution";
 import MyPage from "@/pages/myPage/page";
 import ReservationHistoryView from "@/pages/myPage/reservation/page";
+import CategoryLandingPage from "@/pages/category/page";
+import CategoryBestReviewsPage from "@/pages/category/reviews/page";
+import ExpertInfoPage from "@/pages/category/expert/page";
+import PortfolioLandingPage from "@/pages/category/portfolio/page";
 // import { ProfileWritingListPage } from '../pages/profile/writing-list';
 // import { ProfileDetailPage } from '../pages/profile/detail';
 // import { ProfileWritePage } from '../pages/profile/write';
@@ -85,6 +89,22 @@ export const router = createBrowserRouter([
   {
     path: "/reservationhistory",
     element: <ReservationHistoryView />,
+  },
+  {
+    path: "/category/:category",
+    element: <CategoryLandingPage />,
+  },
+  {
+    path: "/category/:category/reviews",
+    element: <CategoryBestReviewsPage />,
+  },
+  {
+    path: "/experts/:expertId",
+    element: <ExpertInfoPage />,
+  },
+  {
+    path: "/experts/:expertId/portfolio",
+    element: <PortfolioLandingPage />,
   },
   // {
   //   path: '/profile/writing-list',
