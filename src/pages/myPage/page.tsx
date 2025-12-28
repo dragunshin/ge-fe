@@ -336,10 +336,10 @@ function HelpIcon() {
   );
 }
 
-function ChevronRightIcon() {
-  return (
-    <IconBase className="text-neutral-300">
-      <path d="M10 6l6 6-6 6" />
-    </IconBase>
-  );
-}
+// function ChevronRightIcon() {
+//   return (
+//     <IconBase className="text-neutral-300">
+//       <path d="M10 6l6 6-6 6" />
+//     </IconBase>
+//   );
+// }
