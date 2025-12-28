@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronDown, ChevronRight } from 'lucide-react';
-import searchIcon from '../../images/home/search.svg';
+import { ChevronDown, ChevronRight, Search } from 'lucide-react';
 import heartIcon from '../../images/mypage/heart.svg';
 import homeIcon from '../../images/home/home.svg';
 import exploreIcon from '../../images/home/search.svg';
@@ -92,7 +91,7 @@ const CategoryLandingPage = () => {
         </button>
         <div className="flex items-center gap-[14px]">
           <button className="flex h-6 w-6 items-center justify-center">
-            <img src={searchIcon} alt="검색" className="h-6 w-6" />
+            <Search className="h-6 w-6 text-[#0f0f10]" />
           </button>
           <button className="flex h-6 w-6 items-center justify-center">
             <img src={heartIcon} alt="찜" className="h-6 w-6" />
