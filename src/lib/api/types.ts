@@ -25,7 +25,7 @@ export interface SignupRequest {
   email: string;
   password: string;
   passwordConfirm: string;
-  userType: 'MEMBER' | 'EXPERT';
+  userType: string;
   agreeTerms: boolean;
   agreePrivacy: boolean;
 }
@@ -46,7 +46,7 @@ export interface SocialLoginRequest {
 
 export interface SocialLoginResponse {
   nickname: string;
-  userType: ApiUserType;
+  role: ApiUserType;
 }
 
 // 소셜 회원 추가정보 입력 API
@@ -54,7 +54,7 @@ export interface SocialSignupRequest {
   nickname: string;
   birth: string; // YYYY-MM-DD
   email: string;
-  userType: 'MEMBER' | 'EXPERT';
+  userType: string;
   agreeTerms: boolean;
   agreePrivacy: boolean;
 }

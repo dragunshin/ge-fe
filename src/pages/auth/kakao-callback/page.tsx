@@ -35,14 +35,14 @@ export default function KakaoCallbackPage() {
         });
 
         if (response.statusCode === 0) {
-          const { userType, nickname } = response.data;
+          const { role, nickname } = response.data;
 
           // TMP_USER인 경우 추가 정보 입력 페이지로 이동
-          if (userType === 'TMP_USER') {
+          if (role === 'TMP_USER') {
             navigate('/auth/social-signup', { state: { nickname } });
           } else {
             // 정상 사용자는 로그인 정보 저장 후 홈으로 이동
-            login({ nickname, userType });
+            login({ nickname, userType: role });
             navigate('/');
           }
         }
