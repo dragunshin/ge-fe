@@ -77,11 +77,12 @@ export function SocialSignUpForm() {
 
     try {
       // 1차 검증: Zod 스키마로 클라이언트 측 검증
+      const apiUserType = userType === 'customer' ? 'MEMBER' : 'EXPERT';
       const validatedData = socialSignupSchema.parse({
         nickname: formData.nickname,
         birth: formData.birthDate, // YYYYMMDD 형식 그대로 전송
         email: formData.email,
-        userType: userType === 'customer' ? 'MEMBER' : 'EXPERT',
+        userType: apiUserType,
         agreeTerms: agreed,
         agreePrivacy: agreed,
       });
