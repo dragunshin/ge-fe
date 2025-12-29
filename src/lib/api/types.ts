@@ -5,6 +5,8 @@ export interface ApiResponse<T> {
   data: T;
 }
 
+export type ApiUserType = 'MEMBER' | 'TMP_USER' | 'EXPERT';
+
 // 로그인 API
 export interface LoginRequest {
   email: string;
@@ -13,7 +15,7 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   nickname: string;
-  userType: 'MENUAL' | 'EXPERT';
+  userType: ApiUserType;
 }
 
 // 회원가입 API
@@ -23,7 +25,7 @@ export interface SignupRequest {
   email: string;
   password: string;
   passwordConfirm: string;
-  userType: string;
+  userType: 'MEMBER' | 'EXPERT';
   agreeTerms: boolean;
   agreePrivacy: boolean;
 }
@@ -33,7 +35,7 @@ export interface SignupResponse {
   email: string;
   nickname: string;
   createdAt: string;
-  userType: string;
+  userType: ApiUserType;
 }
 
 // 소셜 로그인 API
@@ -44,7 +46,7 @@ export interface SocialLoginRequest {
 
 export interface SocialLoginResponse {
   nickname: string;
-  userType: 'TMP_USER' | 'MENUAL' | 'EXPERT';
+  userType: ApiUserType;
 }
 
 // 소셜 회원 추가정보 입력 API
@@ -52,14 +54,14 @@ export interface SocialSignupRequest {
   nickname: string;
   birth: string; // YYYY-MM-DD
   email: string;
-  userType: string;
+  userType: 'MEMBER' | 'EXPERT';
   agreeTerms: boolean;
   agreePrivacy: boolean;
 }
 
 export interface SocialSignupResponse {
   nickname: string;
-  userType: 'MENUAL' | 'EXPERT';
+  userType: ApiUserType;
 }
 
 // 에러 타입

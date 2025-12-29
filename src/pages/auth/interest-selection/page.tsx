@@ -24,9 +24,13 @@ export function InterestSelectionPage() {
     );
   };
 
+  const handleSkip = () => {
+    navigate('/');
+  };
+
   const handleSubmit = () => {
     console.log('선택된 관심 분야:', selectedInterests);
-    // TODO: 다음 페이지로 이동
+    navigate('/');
   };
 
   return (
@@ -37,7 +41,7 @@ export function InterestSelectionPage() {
           <img src={backIcon} alt="back" className="w-2.5 h-[18px]" />
         </button>
         <button
-          onClick={handleSubmit}
+          onClick={handleSkip}
           className="text-base text-gray-400 hover:text-black"
         >
           건너뛰기

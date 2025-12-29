@@ -380,7 +380,10 @@ const HomePage = () => {
           <img src={chatIcon} alt="채팅" className="h-6 w-6" />
           <span className="text-[12px]">채팅</span>
         </button>
-        <button className="flex flex-1 flex-col items-center gap-1 text-[#aeb0b6]">
+        <button
+          onClick={() => navigate('/payment/order')}
+          className="flex flex-1 flex-col items-center gap-1 text-[#aeb0b6]"
+        >
           <img src={communityIcon} alt="커뮤니티" className="h-6 w-6" />
           <span className="text-[12px]">커뮤니티</span>
         </button>

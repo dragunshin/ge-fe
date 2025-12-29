@@ -19,6 +19,8 @@ import CategoryLandingPage from "@/pages/category/page";
 import CategoryBestReviewsPage from "@/pages/category/reviews/page";
 import ExpertInfoPage from "@/pages/category/expert/page";
 import PortfolioLandingPage from "@/pages/category/portfolio/page";
+import { PaymentOrderPage } from "@/pages/payment/order/page";
+import { PaymentCompletePage } from "@/pages/payment/complete/page";
 // import { ProfileWritingListPage } from '../pages/profile/writing-list';
 // import { ProfileDetailPage } from '../pages/profile/detail';
 // import { ProfileWritePage } from '../pages/profile/write';
@@ -105,6 +107,14 @@ export const router = createBrowserRouter([
   {
     path: "/experts/:expertId/portfolio",
     element: <PortfolioLandingPage />,
+  },
+  {
+    path: "/payment/order",
+    element: <PaymentOrderPage />,
+  },
+  {
+    path: "/payment/complete",
+    element: <PaymentCompletePage />,
   },
   // {
   //   path: '/profile/writing-list',
