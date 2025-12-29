@@ -1,9 +1,10 @@
 import { create } from 'zustand';
+import type { ApiUserType } from '../lib/api/types';
 
 // 사용자 정보 타입
 export interface User {
   nickname: string;
-  userType: 'MENUAL' | 'EXPERT';
+  userType: ApiUserType;
 }
 
 // Auth Store 상태 타입

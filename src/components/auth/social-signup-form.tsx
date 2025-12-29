@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import backIcon from '../../images/login/back.svg';
 import { authService } from '../../services/auth.service';
@@ -9,17 +9,53 @@ import { useAuthStore } from '../../stores/useAuthStore';
 type UserType = 'customer' | 'expert';
 
 export function SocialSignUpForm() {
+  const STORAGE_KEY = 'social_signup_form_state_v1';
+  const defaultState = {
+    userType: 'customer' as UserType,
+    formData: {
+      nickname: '',
+      birthDate: '',
+      email: '',
+    },
+    agreed: false,
+  };
+  const initialState = (() => {
+    if (typeof window === 'undefined') {
+      return defaultState;
+    }
+    const stored = sessionStorage.getItem(STORAGE_KEY);
+    if (!stored) {
+      return defaultState;
+    }
+    try {
+      const parsed = JSON.parse(stored) as Partial<typeof defaultState>;
+      return {
+        ...defaultState,
+        ...parsed,
+        formData: {
+          ...defaultState.formData,
+          ...parsed.formData,
+        },
+      };
+    } catch {
+      sessionStorage.removeItem(STORAGE_KEY);
+      return defaultState;
+    }
+  })();
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
-  const [userType, setUserType] = useState<UserType>('customer');
-  const [formData, setFormData] = useState({
-    nickname: '',
-    birthDate: '',
-    email: '',
-  });
-  const [agreed, setAgreed] = useState(false);
+  const [userType, setUserType] = useState<UserType>(initialState.userType);
+  const [formData, setFormData] = useState(initialState.formData);
+  const [agreed, setAgreed] = useState(initialState.agreed);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    sessionStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ userType, formData, agreed }),
+    );
+  }, [userType, formData, agreed]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -45,7 +81,7 @@ export function SocialSignUpForm() {
         nickname: formData.nickname,
         birth: formData.birthDate, // YYYYMMDD 형식 그대로 전송
         email: formData.email,
-        userType: userType === 'customer' ? 'MENUAL' : 'EXPERT',
+        userType: userType === 'customer' ? 'MEMBER' : 'EXPERT',
         agreeTerms: agreed,
         agreePrivacy: agreed,
       });
@@ -59,6 +95,8 @@ export function SocialSignUpForm() {
 
         // 로그인 정보 저장
         login({ nickname, userType });
+
+        sessionStorage.removeItem(STORAGE_KEY);
 
         // 관심 분야 선택 페이지로 이동
         navigate('/auth/interest-selection');
