@@ -49,7 +49,9 @@ export const signupSchema = z
     email: emailSchema,
     password: passwordSchema,
     passwordConfirm: z.string().min(1, '비밀번호 확인을 입력해주세요.'),
-    userType: z.string().min(1, '사용자 유형을 선택해주세요.'),
+    userType: z.enum(['MEMBER', 'EXPERT'], {
+      errorMap: () => ({ message: '사용자 유형을 선택해주세요.' }),
+    }),
     agreeTerms: z.boolean().refine((val) => val === true, {
       message: '서비스 이용약관에 동의해야 합니다.',
     }),
@@ -93,7 +95,9 @@ export const socialSignupSchema = z.object({
       message: '올바른 날짜를 입력해주세요.',
     }),
   email: emailSchema,
-  userType: z.string().min(1, '사용자 유형을 선택해주세요.'),
+  userType: z.enum(['MEMBER', 'EXPERT'], {
+    errorMap: () => ({ message: '사용자 유형을 선택해주세요.' }),
+  }),
   agreeTerms: z.boolean().refine((val) => val === true, {
     message: '서비스 이용약관에 동의해야 합니다.',
   }),
