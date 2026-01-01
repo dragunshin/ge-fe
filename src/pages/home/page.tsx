@@ -1,38 +1,38 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Search } from 'lucide-react';
 import { useAuthStore } from '../../stores/useAuthStore';
-import hairIcon from '../../images/home/Hair.svg';
-import fashionIcon from '../../images/home/Fashion.svg';
-import makeupIcon from '../../images/home/MakeUp.svg';
-import skinIcon from '../../images/home/Skin.svg';
 import heartIcon from '../../images/mypage/heart.svg';
 import homeIcon from '../../images/home/home.svg';
 import exploreIcon from '../../images/home/search.svg';
 import chatIcon from '../../images/home/chat.svg';
 import communityIcon from '../../images/home/community.svg';
 import mypageIcon from '../../images/home/mypage.svg';
+import starIcon from '../../images/reviews/star.svg';
 
 type Banner = {
   id: number;
+  eyebrow?: string;
   title: string;
-  subtitle: string;
+  subtitle?: string;
+  author?: string;
+  role?: string;
   image?: string;
 };
 
-type Category = {
+type TabItem = {
   id: string;
   label: string;
-  icon?: string;
-  route: string;
+  route?: string;
+  underlineLeft: number;
 };
 
 type TopExpert = {
   id: number;
   name: string;
-  category: string;
   summary: string;
-  avatar?: string;
+  tags: string[];
+  thumbnail?: string;
 };
 
 type ReviewCard = {
@@ -47,25 +47,53 @@ type ReviewCard = {
   images: string[];
 };
 
+type ExpertListCard = {
+  id: number;
+  name: string;
+  rating: number;
+  reviewCount: string;
+  summary: string;
+  avatar?: string;
+  tags: string[];
+  reviewTags: string[];
+  images: string[];
+};
+
 const HomePage = () => {
   const navigate = useNavigate();
   const { isAuthenticated, initializeAuth } = useAuthStore();
   const [selectedTopTab, setSelectedTopTab] = useState('전체');
+  const [selectedConsultingTab, setSelectedConsultingTab] = useState('전체');
+  const [selectedHomeTab, setSelectedHomeTab] = useState('전체');
 
   useEffect(() => {
     initializeAuth();
   }, [initializeAuth]);
 
+  const homeTabs: TabItem[] = useMemo(
+    () => [
+      { id: 'all', label: '전체', route: '/', underlineLeft: 16 },
+      { id: 'hair', label: '헤어', route: '/category/hair', underlineLeft: 85 },
+      { id: 'makeup', label: '메이크업', route: '/category/makeup', underlineLeft: 153 },
+      { id: 'fashion', label: '패션', route: '/category/fashion', underlineLeft: 249 },
+      { id: 'skin', label: '스킨', route: '/category/skin', underlineLeft: 317 },
+    ],
+    [],
+  );
+
   const banners: Banner[] = [
     {
       id: 1,
-      title: '박철옹이 알려주는',
-      subtitle: '진짜 남자의 메이크업',
+      title: '3분 투자로 완성하는',
+      subtitle: '관리하는 남자의 인상',
     },
     {
       id: 2,
-      title: '박철옹이 알려주는',
-      subtitle: '진짜 남자의 메이크업',
+      eyebrow: '이제 슬슬 준비해야지',
+      title: '소개팅 필수 헤어스타일',
+      subtitle: '‘스핀 스왈로브펌’',
+      author: '박서령',
+      role: '헤어디자이너',
     },
     {
       id: 3,
@@ -74,18 +102,10 @@ const HomePage = () => {
     },
   ];
 
-  const categories: Category[] = [
-    { id: 'hair', label: 'Hair', route: '/category/hair', icon: hairIcon },
-    { id: 'fashion', label: 'Fashion', route: '/category/fashion', icon: fashionIcon },
-    { id: 'makeup', label: 'Makeup', route: '/category/makeup', icon: makeupIcon },
-    { id: 'skin', label: 'Skin', route: '/category/skin', icon: skinIcon },
-  ];
-
   const topTabs = [
     { label: '전체', minWidth: 47 },
     { label: '헤어', minWidth: 47 },
-    { label: '시스루 댄디', minWidth: 84 },
-    { label: '다운펌', minWidth: 58 },
+    { label: '메이크업', minWidth: 69 },
     { label: '스킨', minWidth: 47 },
   ];
 
@@ -93,34 +113,31 @@ const HomePage = () => {
     {
       id: 1,
       name: '강현우',
-      category: '메이크업',
-      summary:
-        '김바보님을 위한 솔루션지가 도착했어요. 24시간 내에 질문이 가능하며 시간이 지나면 질문이 불가능해요.',
+      summary: '전문가가 작성한 자신만의 강점 1줄을 이렇게 적어두기!!',
+      tags: ['헤어라인', '두상분석'],
     },
     {
       id: 2,
-      name: '최영인',
-      category: '헤어',
-      summary:
-        '이지지원님을 위한 솔루션지가 도착했어요. 24시간 내에 질문이 가능하며 시간이 지나면 질문이 불가능해요.',
+      name: '강현우',
+      summary: '전문가가 작성한 자신만의 강점 1줄을 이렇게 적어두기!!',
+      tags: ['헤어라인', '두상분석'],
     },
     {
       id: 3,
-      name: '김준영',
-      category: '패션',
-      summary:
-        '윤나영님을 위한 솔루션지가 도착했어요. 24시간 내에 질문이 가능하며 시간이 지나면 질문이 불가능해요.',
+      name: '강현우',
+      summary: '전문가가 작성한 자신만의 강점 1줄을 이렇게 적어두기!!',
+      tags: ['헤어라인', '두상분석'],
     },
   ];
 
   const reviews: ReviewCard[] = [
     {
       id: 1,
-      name: '옹민호 전문가',
+      name: '성정수 전문가',
       rating: 4.7,
       date: '2025.10.08',
       content:
-        '머리가 악성곱슬이어서 너무 고민이었는데 옹민호 전문가님 만나고 광명 찾았어요~!!! 원래는 2주만 지나도 바로 곱슬곱슬해지는데 지금 한 달이 지나도 직모에요.',
+        '머리가 악성곱슬이어서 너무 고민이었는데 성정수 전문가님 만나고 광명 찾았어요~!!! 원래는 2주만 지나도 바로 곱슬곱슬해지는데 지금 한 달이 지나도 직모에요.',
       category: '헤어',
       concern: '탈모',
       images: ['', ''],
@@ -138,6 +155,46 @@ const HomePage = () => {
     },
   ];
 
+  const consultingTabs = [
+    { label: '전체', minWidth: 47 },
+    { label: '헤어', minWidth: 47 },
+    { label: '메이크업', minWidth: 69 },
+    { label: '패션', minWidth: 47 },
+  ];
+
+  const expertCards: ExpertListCard[] = [
+    {
+      id: 1,
+      name: '김푸힝',
+      rating: 4.7,
+      reviewCount: '(1,130)',
+      summary: '탈모 삭제 마법사 | 탈모인만의 컨설팅',
+      tags: ['헤어', '탈모', '투블럭컷', '펌', '+3'],
+      reviewTags: ['탈모', '투블럭컷', '투블럭컷'],
+      images: ['', '', ''],
+    },
+    {
+      id: 2,
+      name: '김푸힝',
+      rating: 4.7,
+      reviewCount: '(1,130)',
+      summary: '탈모 삭제 마법사 | 탈모인만의 컨설팅',
+      tags: ['헤어', '탈모', '투블럭컷', '펌', '+3'],
+      reviewTags: ['탈모', '투블럭컷', '투블럭컷'],
+      images: ['', '', ''],
+    },
+    {
+      id: 3,
+      name: '김푸힝',
+      rating: 4.7,
+      reviewCount: '(1,130)',
+      summary: '탈모 삭제 마법사 | 탈모인만의 컨설팅',
+      tags: ['헤어', '탈모', '투블럭컷', '펌', '+3'],
+      reviewTags: ['탈모', '투블럭컷', '투블럭컷'],
+      images: ['', '', ''],
+    },
+  ];
+
   const handleMyPageClick = () => {
     if (isAuthenticated) {
       navigate('/profile');
@@ -148,8 +205,8 @@ const HomePage = () => {
 
   return (
     <div className="flex h-full flex-col bg-white">
-      <header className="flex items-center justify-between px-4 pt-[14px]">
-        <div className="flex items-center gap-1 text-[18px] font-semibold tracking-tight">
+      <header className="flex h-[56px] items-center justify-between px-4 pt-[14px]">
+        <div className="flex items-center gap-1 text-[18px] font-semibold tracking-tight text-[#0f0f10]">
           <span>MENUAL</span>
           <span>.</span>
         </div>
@@ -164,8 +221,37 @@ const HomePage = () => {
       </header>
 
       <main className="flex-1 overflow-y-auto pb-6 scrollbar-hide">
-        <section className="px-4 pt-4">
-          <div className="flex gap-[6px] overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
+        <section className="pt-[4px]">
+          <div className="flex items-center justify-between px-4 text-[16px] font-semibold">
+            {homeTabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setSelectedHomeTab(tab.label);
+                  if (tab.route && tab.route !== '/') {
+                    navigate(tab.route);
+                  }
+                }}
+                className={
+                  tab.label === selectedHomeTab
+                    ? 'text-[#0f0f10]'
+                    : 'text-[#989ba2]'
+                }
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+          <div className="relative mt-[12px] h-px bg-[#e1e2e4]">
+            <span
+              className="absolute top-0 h-px w-[41px] bg-[#0f0f10]"
+              style={{ left: homeTabs.find((tab) => tab.label === selectedHomeTab)?.underlineLeft }}
+            />
+          </div>
+        </section>
+
+        <section className="px-4 pt-5">
+          <div className="flex gap-[4px] overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
             {banners.map((banner) => (
               <article
                 key={banner.id}
@@ -175,7 +261,7 @@ const HomePage = () => {
                   <img
                     src={banner.image}
                     alt=""
-                    className="absolute inset-0 h-full w-full rounded-[11.333px] object-cover"
+                    className="absolute inset-0 h-full w-full object-cover"
                   />
                 )}
                 <div
@@ -185,99 +271,81 @@ const HomePage = () => {
                       'linear-gradient(180deg, rgba(111,111,111,0) 52.404%, rgba(89,89,89,0.9) 100%)',
                   }}
                 />
-                <div className="absolute left-6 top-[244px] w-[292px] text-[#f4f4f5]">
+                <div className="absolute left-6 top-[220px] w-[292px] text-white">
+                  {banner.eyebrow && (
+                    <p className="text-[12px] leading-[1.4]">{banner.eyebrow}</p>
+                  )}
                   <p className="text-[25.5px] font-semibold leading-[1.5]">
                     {banner.title}
                   </p>
-                  <p className="text-[25.5px] font-semibold leading-[1.5]">
-                    {banner.subtitle}
-                  </p>
+                  {banner.subtitle && (
+                    <p className="text-[25.5px] font-semibold leading-[1.5]">
+                      {banner.subtitle}
+                    </p>
+                  )}
+                  {banner.author && banner.role && (
+                    <div className="mt-3 inline-flex h-[22px] items-center gap-[6px] rounded-[2px] bg-[#008bff] px-[8px] text-[12px] font-semibold">
+                      <span>{banner.author}</span>
+                      <span className="h-[7px] w-px bg-white/80" />
+                      <span className="text-[10px] font-medium">{banner.role}</span>
+                    </div>
+                  )}
                 </div>
               </article>
             ))}
           </div>
         </section>
 
-        <section className="px-4 pt-[33px]">
-          <div className="flex items-start gap-[5px]">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => navigate(category.route)}
-                className={`flex flex-col items-center gap-[1px] ${
-                  category.id === 'hair'
-                    ? 'w-[80px]'
-                    : category.id === 'skin'
-                      ? 'w-[80px]'
-                      : 'w-[84px]'
-                }`}
-              >
-                {category.icon ? (
-                  <img
-                    src={category.icon}
-                    alt=""
-                    width={80}
-                    height={80}
-                    className="block h-[80px] w-[80px]"
-                  />
-                ) : (
-                  <div className="flex h-[80px] w-[80px] items-center justify-center rounded-full bg-[#f4f4f5]" />
-                )}
-                <span className="text-[12px] leading-[1.4] text-[#989ba2]">
-                  {category.label}
-                </span>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <section className="px-4 pt-7">
-          <div className="flex items-center justify-between">
+        <section className="pt-[41px]">
+          <div className="px-4">
             <h2 className="text-[18px] font-semibold text-[#0f0f10]">
               지금 가장 인기있는 전문가 TOP3
             </h2>
+            <div className="mt-[16px] flex gap-[8px] overflow-x-auto pb-2 scrollbar-hide">
+              {topTabs.map((tab) => (
+                <button
+                  key={tab.label}
+                  onClick={() => setSelectedTopTab(tab.label)}
+                  className={`flex h-[30px] items-center justify-center whitespace-nowrap rounded-[4px] px-[12px] text-[13px] ${
+                    selectedTopTab === tab.label
+                      ? 'bg-[#46474c] text-white font-semibold'
+                      : 'border border-[#dbdcdf] text-[#46474c] font-normal'
+                  }`}
+                  style={{ minWidth: tab.minWidth }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="mt-[16px] flex gap-[8px] overflow-x-auto pb-2 scrollbar-hide">
-            {topTabs.map((tab) => (
-              <button
-                key={tab.label}
-                onClick={() => setSelectedTopTab(tab.label)}
-                className={`flex h-[30px] items-center justify-center whitespace-nowrap rounded-[4px] px-[12px] text-[13px] ${
-                  selectedTopTab === tab.label
-                    ? 'bg-[#46474c] text-white font-semibold'
-                    : 'border border-[#dbdcdf] text-[#46474c] font-normal'
-                }`}
-                style={{ minWidth: tab.minWidth }}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-          <div className="mt-4 space-y-4">
+          <div className="mt-4 space-y-4 px-4">
             {topExperts.map((expert, index) => (
-              <div key={expert.id} className="flex h-[67px] w-[342px] items-center justify-between">
-                <div className="flex items-center gap-[9px]">
-                  <span className="w-[12px] text-center text-[18px] font-semibold leading-[1.1] text-[#656870]">
-                    {index + 1}
-                  </span>
-                  <div className="flex items-center gap-[15px]">
-                    <div className="h-[60px] w-[60px] shrink-0 overflow-hidden rounded-full bg-[#e1e2e4]">
-                      {expert.avatar && (
-                        <img src={expert.avatar} alt="" className="h-full w-full object-cover" />
-                      )}
+              <div key={expert.id} className="flex h-[72px] w-[342px] items-start justify-between">
+                <div className="flex items-end gap-[12px]">
+                  <div className="relative h-[72px] w-[72px] shrink-0 overflow-hidden rounded-[4px] bg-[#e1e2e4]">
+                    {expert.thumbnail && (
+                      <img src={expert.thumbnail} alt="" className="h-full w-full object-cover" />
+                    )}
+                    <div className="absolute left-[4px] top-[4px] flex h-[15px] w-[15px] items-center justify-center bg-[#008bff]">
+                      <span className="text-[12px] font-medium leading-[1.4] text-white">
+                        {index + 1}
+                      </span>
                     </div>
-                    <div className="flex flex-col items-start">
-                      <div className="flex items-center gap-[8px]">
-                        <span className="rounded-[2px] bg-[#e5f4ff] px-[8px] py-[4px] text-[12px] text-[#008bff]">
-                          {expert.category}
+                  </div>
+                  <div className="flex w-[218px] flex-col items-start gap-[10px]">
+                    <p className="h-[40px] w-[218px] text-[14px] font-semibold leading-[1.4] text-[#292a2d]">
+                      {expert.name} |{' '}
+                      <span className="font-normal">{expert.summary}</span>
+                    </p>
+                    <div className="flex items-center gap-[4px]">
+                      {expert.tags.map((tag) => (
+                        <span
+                          key={`${expert.id}-${tag}`}
+                          className="flex h-[21px] items-center justify-center rounded-[2px] bg-[#f4f4f5] px-[6px] py-[4px] text-[12px] text-[#46474c]"
+                        >
+                          {tag}
                         </span>
-                        <span className="text-[14px] font-semibold text-[#292a2d]">
-                          {expert.name}
-                        </span>
-                      </div>
-                      <p className="mt-[6px] line-clamp-2 w-[184px] text-[13px] text-[#878a93]">
-                        {expert.summary}
-                      </p>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -289,40 +357,45 @@ const HomePage = () => {
           </div>
         </section>
 
-        <section className="pt-10">
-          <div className="flex items-center justify-between px-4">
-            <h2 className="text-[18px] font-semibold text-[#0f0f10]">실시간 후기 확인하기</h2>
-            <button className="flex items-center gap-[2px] text-[14px] text-[#70737c]">
-              전체보기
-              <ChevronRight className="h-4 w-4" />
-            </button>
+        <section className="mt-[41px] bg-[#f4f8fb]">
+          <div className="px-4 pt-[22px]">
+            <div className="flex items-center justify-between">
+              <h2 className="text-[18px] font-semibold text-[#0f0f10]">전체 후기</h2>
+              <button className="flex items-center gap-[2px] text-[14px] text-[#70737c]">
+                전체보기
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
           </div>
           <div className="mt-4 flex gap-2 overflow-x-auto px-4 pb-2 scrollbar-hide snap-x snap-mandatory">
             {reviews.map((review) => (
               <article
                 key={review.id}
-                className="flex h-[410px] w-[300px] shrink-0 flex-col rounded-[8px] border border-[#e1e2e4] bg-white snap-start"
+                className="flex h-[393px] w-[300px] shrink-0 flex-col rounded-[8px] border border-[#e1e2e4] bg-white snap-start"
               >
-                <div className="flex items-center gap-[10px] border-b border-[#f4f4f5] px-4 py-[14px]">
-                  <div className="h-[36px] w-[36px] shrink-0 overflow-hidden rounded-full bg-[#e1e2e4]">
-                    {review.avatar && (
-                      <img src={review.avatar} alt="" className="h-full w-full object-cover" />
-                    )}
-                  </div>
-                  <div className="flex flex-1 flex-col gap-[4px]">
-                    <div className="flex items-center gap-[2px]">
-                      <span className="text-[14px] font-semibold text-[#0f0f10]">
-                        {review.name}
-                      </span>
-                      <ChevronRight className="h-4 w-4 text-[#0f0f10]" />
+                <div className="flex items-center justify-between px-4 pt-[14px]">
+                  <div className="flex items-center gap-[10px]">
+                    <div className="h-[36px] w-[36px] shrink-0 overflow-hidden rounded-full bg-[#e1e2e4]">
+                      {review.avatar && (
+                        <img src={review.avatar} alt="" className="h-full w-full object-cover" />
+                      )}
                     </div>
-                    <div className="flex items-center gap-[8px] text-[13px] text-[#989ba2]">
-                      <div className="flex items-center gap-1 text-[#ffb800]">★★★★★</div>
-                      <span>{review.rating}</span>
+                    <div className="flex flex-col gap-[4px]">
+                      <div className="flex items-center gap-[2px]">
+                        <span className="text-[14px] font-semibold text-[#0f0f10]">
+                          {review.name}
+                        </span>
+                        <ChevronRight className="h-4 w-4 text-[#0f0f10]" />
+                      </div>
+                      <div className="flex items-center gap-[8px] text-[13px] text-[#989ba2]">
+                        <div className="flex items-center gap-1 text-[#ffb800]">★★★★★</div>
+                        <span>{review.rating}</span>
+                      </div>
                     </div>
                   </div>
+                  <button className="text-[14px] text-[#70737c]">프로필 보기</button>
                 </div>
-                <div className="px-4 pt-4">
+                <div className="px-4 pt-[14px]">
                   <div className="flex gap-[8px]">
                     {review.images.map((image, index) => (
                       <div
@@ -345,7 +418,7 @@ const HomePage = () => {
                     {review.content}
                   </p>
                 </div>
-                <div className="flex gap-[6px] px-4 pb-4 pt-2">
+                <div className="mt-auto flex gap-[6px] px-4 pb-4 pt-2">
                   <span className="rounded-[2px] bg-[#e5f4ff] px-[8px] py-[4px] text-[12px] text-[#008bff]">
                     {review.category}
                   </span>
@@ -356,11 +429,102 @@ const HomePage = () => {
               </article>
             ))}
           </div>
-          <div className="mt-4 flex items-center justify-center">
+          <div className="mt-4 flex items-center justify-center pb-[12px]">
             <div className="h-[3px] w-[55px] rounded-full bg-[#e1e2e4]">
               <div className="h-[3px] w-[20px] rounded-full bg-[#429ff0]" />
             </div>
           </div>
+        </section>
+
+        <section className="px-4 pt-[32px]">
+          <h2 className="text-[18px] font-semibold text-[#0f0f10]">필승 소개팅 컨설팅</h2>
+          <div className="mt-[12px] flex gap-[8px] overflow-x-auto pb-2 scrollbar-hide">
+            {consultingTabs.map((tab) => (
+              <button
+                key={tab.label}
+                onClick={() => setSelectedConsultingTab(tab.label)}
+                className={`flex h-[30px] items-center justify-center whitespace-nowrap rounded-[4px] px-[12px] text-[13px] ${
+                  selectedConsultingTab === tab.label
+                    ? 'bg-[#46474c] text-white font-semibold'
+                    : 'border border-[#dbdcdf] text-[#46474c] font-normal'
+                }`}
+                style={{ minWidth: tab.minWidth }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+          <div className="mt-[20px] space-y-[16px] pb-[16px]">
+            {expertCards.map((expert) => (
+              <article
+                key={expert.id}
+                className="relative h-[253px] w-[343px] rounded-[8px] bg-white shadow-[0px_2px_12px_0px_rgba(0,0,0,0.13)]"
+              >
+                <div className="absolute left-[13px] top-[23px] flex items-center gap-[10px]">
+                  <div className="h-[42px] w-[42px] shrink-0 rounded-full bg-[#e1e2e4]">
+                    {expert.avatar && (
+                      <img src={expert.avatar} alt="" className="h-full w-full object-cover" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-[16px] font-semibold leading-[1.1] text-[#292a2d]">
+                      {expert.name}
+                    </p>
+                    <p className="mt-[6px] text-[13px] text-[#878a93]">{expert.summary}</p>
+                  </div>
+                </div>
+                <div className="absolute right-[13px] top-[23px] flex items-center gap-[6px] text-[13px] text-[#878a93]">
+                  <div className="flex items-center gap-[2px]">
+                    <img src={starIcon} alt="" className="h-[18px] w-[18px]" />
+                    <span className="font-semibold text-[#505158]">{expert.rating}</span>
+                  </div>
+                  <span>{expert.reviewCount}</span>
+                </div>
+                <div className="absolute left-[12px] top-[79px] flex gap-[2px]">
+                  {expert.images.map((image, index) => (
+                    <div
+                      key={`${expert.id}-review-${index}`}
+                      className="relative h-[105px] w-[105px] overflow-hidden rounded-[4px] bg-[#e1e2e4]"
+                    >
+                      {image && (
+                        <img src={image} alt="" className="h-full w-full object-cover" />
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60" />
+                      <span className="absolute bottom-[10px] left-[10px] text-[12px] text-white">
+                        {expert.reviewTags[index]}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <button className="absolute right-[12px] top-[198px] h-[36px] w-[95px] rounded-[4px] bg-[#171719] text-[14px] font-medium text-white">
+                  상담 예약
+                </button>
+                <div className="absolute left-[13px] top-[204px] flex gap-[6px]">
+                  {expert.tags.map((tag, index) => (
+                    <span
+                      key={`${expert.id}-tag-${tag}-${index}`}
+                      className={
+                        tag === '헤어'
+                          ? 'rounded-[2px] bg-[#f5f9fd] px-[6px] py-[4px] text-[12px] text-[#429ff0]'
+                          : 'rounded-[2px] bg-[#f4f4f5] px-[8px] py-[4px] text-[12px] text-[#46474c]'
+                      }
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="px-4 pb-[24px] pt-[8px]">
+          <button
+            onClick={() => navigate('/reservation/fashion')}
+            className="flex h-[52px] w-full items-center justify-center rounded-[12px] bg-[#171719] text-[16px] font-semibold text-white"
+          >
+            예약
+          </button>
         </section>
       </main>
 
@@ -381,7 +545,7 @@ const HomePage = () => {
           <span className="text-[12px]">채팅</span>
         </button>
         <button
-          onClick={() => navigate('/payment/order')}
+          onClick={() => navigate('/reservation/fashion?step=9')}
           className="flex flex-1 flex-col items-center gap-1 text-[#aeb0b6]"
         >
           <img src={communityIcon} alt="커뮤니티" className="h-6 w-6" />

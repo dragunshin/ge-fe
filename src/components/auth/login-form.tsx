@@ -192,7 +192,7 @@ export function LoginForm() {
             <img src={separateIcon} alt="separator" className="w-px h-3" />
             <button
               type="button"
-              onClick={() => navigate('/auth/signup')}
+              onClick={() => navigate('/auth/terms-agreement')}
               className="hover:text-black transition-colors"
             >
               이메일로 회원가입

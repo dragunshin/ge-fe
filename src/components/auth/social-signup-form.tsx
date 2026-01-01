@@ -135,42 +135,36 @@ export function SocialSignUpForm() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
-      <header className="flex items-center px-6 py-4">
+      <header className="flex items-center px-4 py-4">
         <button onClick={() => navigate(-1)} className="mr-3">
           <img src={backIcon} alt="back" className="w-2.5 h-[18px]" />
         </button>
-        <h1 className="text-xl font-semibold">회원가입</h1>
+        <h1 className="text-[20px] font-semibold">회원가입</h1>
       </header>
 
       {/* Tabs */}
       <div className="flex">
         <button
           onClick={() => setUserType('customer')}
-          className={`flex-1 py-4 text-base font-medium transition-all relative ${
-            userType === 'customer' ? 'text-black' : 'text-gray-400'
+          className={`flex-1 py-4 text-base font-medium transition-all border-b ${
+            userType === 'customer' ? 'text-black border-black border-b-2' : 'text-gray-400 border-[#f4f4f5]'
           }`}
         >
           그루머
-          {userType === 'customer' && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />
-          )}
         </button>
         <button
           onClick={() => setUserType('expert')}
-          className={`flex-1 py-4 text-base font-medium transition-all relative ${
-            userType === 'expert' ? 'text-black' : 'text-gray-400'
+          className={`flex-1 py-4 text-base font-medium transition-all border-b ${
+            userType === 'expert' ? 'text-black border-black border-b-2' : 'text-gray-400 border-[#f4f4f5]'
           }`}
         >
           전문가
-          {userType === 'expert' && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />
-          )}
         </button>
       </div>
 
       {/* Form - 스크롤 가능 영역 */}
       <div className="flex-1 overflow-y-auto">
-        <form onSubmit={handleSubmit} className="px-6 pt-7 flex flex-col gap-6">
+        <form onSubmit={handleSubmit} className="px-4 pt-6 flex flex-col gap-6">
           {/* 닉네임 */}
           <div>
             <label className="block text-base font-medium text-black mb-3">닉네임</label>
@@ -179,7 +173,7 @@ export function SocialSignUpForm() {
               placeholder="이름을 입력해주세요."
               value={formData.nickname}
               onChange={handleChange}
-              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[12px] bg-white transition-colors ${
+              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[13px] bg-white transition-colors ${
                 errors.nickname ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gray-300'
               }`}
               disabled={isLoading}
@@ -197,7 +191,7 @@ export function SocialSignUpForm() {
               placeholder="ex) 19980101"
               value={formData.birthDate}
               onChange={handleChange}
-              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[12px] bg-white transition-colors ${
+              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[13px] bg-white transition-colors ${
                 errors.birth ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gray-300'
               }`}
               disabled={isLoading}
@@ -216,7 +210,7 @@ export function SocialSignUpForm() {
               placeholder="example@gmail.com"
               value={formData.email}
               onChange={handleChange}
-              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[12px] bg-white transition-colors ${
+              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[13px] bg-white transition-colors ${
                 errors.email ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gray-300'
               }`}
               disabled={isLoading}
@@ -243,19 +237,19 @@ export function SocialSignUpForm() {
       </div>
 
       {/* 약관 동의 - 하단 고정 */}
-      <div className="px-6 py-6">
+      <div className="px-4 py-6">
         <label className="flex items-center gap-3 cursor-pointer">
           <input
             type="checkbox"
             checked={agreed}
             onChange={(e) => setAgreed(e.target.checked)}
-            className="w-5 h-5 rounded border-gray-300"
+            className="h-[14px] w-[14px] rounded border-[#c2c4c8]"
           />
-          <span className="text-[12px] text-gray-600">
+          <span className="text-[12px] leading-[1.4] text-[#70737c]">
             <button
               type="button"
               onClick={() => navigate('/auth/terms-of-service')}
-              className="underline text-black hover:font-bold"
+              className="underline text-black"
             >
               이용약관
             </button>
@@ -263,9 +257,9 @@ export function SocialSignUpForm() {
             <button
               type="button"
               onClick={() => navigate('/auth/privacy-policy')}
-              className="underline text-black hover:font-bold"
+              className="underline text-black"
             >
-              개인정보 취급방침
+              개인정보취급 방침
             </button>
             에 동의합니다. (필수)
           </span>
@@ -278,7 +272,9 @@ export function SocialSignUpForm() {
           type="submit"
           onClick={handleSubmit}
           disabled={isLoading || !isFormValid}
-          className="w-full h-14 font-medium transition-colors bg-black text-white disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`w-full h-[90px] text-[16px] font-semibold text-white transition-colors ${
+            isFormValid ? 'bg-[#0f0f10]' : 'bg-[#aeb0b6]'
+          }`}
         >
           {isLoading ? '처리 중...' : '다음'}
         </button>

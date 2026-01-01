@@ -9,6 +9,7 @@ import { useAuthStore } from '../../stores/useAuthStore';
 type UserType = 'customer' | 'expert';
 
 export function SignUpForm() {
+  const AGREEMENTS_STORAGE_KEY = 'signup_terms_agreements_v1';
   const STORAGE_KEY = 'signup_form_state_v1';
   const defaultState = {
     userType: 'customer' as UserType,
@@ -19,7 +20,12 @@ export function SignUpForm() {
       password: '',
       passwordConfirm: '',
     },
-    agreed: false,
+  };
+  const defaultAgreements = {
+    age: false,
+    service: false,
+    privacy: false,
+    marketing: false,
   };
   const initialState = (() => {
     if (typeof window === 'undefined') {
@@ -44,20 +50,50 @@ export function SignUpForm() {
       return defaultState;
     }
   })();
+  const initialAgreements = (() => {
+    if (typeof window === 'undefined') {
+      return defaultAgreements;
+    }
+    const stored = sessionStorage.getItem(AGREEMENTS_STORAGE_KEY);
+    if (!stored) {
+      return defaultAgreements;
+    }
+    try {
+      const parsed = JSON.parse(stored) as Partial<typeof defaultAgreements>;
+      return {
+        ...defaultAgreements,
+        ...parsed,
+      };
+    } catch {
+      sessionStorage.removeItem(AGREEMENTS_STORAGE_KEY);
+      return defaultAgreements;
+    }
+  })();
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
   const [userType, setUserType] = useState<UserType>(initialState.userType);
   const [formData, setFormData] = useState(initialState.formData);
-  const [agreed, setAgreed] = useState(initialState.agreed);
+  const [agreements] = useState(initialAgreements);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     sessionStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ userType, formData, agreed }),
+      JSON.stringify({ userType, formData }),
     );
-  }, [userType, formData, agreed]);
+  }, [userType, formData]);
+
+  const isAgreementsValid =
+    agreements.age &&
+    agreements.service &&
+    agreements.privacy;
+
+  useEffect(() => {
+    if (!isAgreementsValid) {
+      navigate('/auth/terms-agreement');
+    }
+  }, [isAgreementsValid, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -74,6 +110,10 @@ export function SignUpForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAgreementsValid) {
+      navigate('/auth/terms-agreement');
+      return;
+    }
     setErrors({});
     setIsLoading(true);
 
@@ -87,8 +127,8 @@ export function SignUpForm() {
         password: formData.password,
         passwordConfirm: formData.passwordConfirm,
         userType: apiUserType,
-        agreeTerms: agreed,
-        agreePrivacy: agreed,
+        agreeTerms: agreements.service,
+        agreePrivacy: agreements.privacy,
       });
 
       // 검증 통과 후 API 호출
@@ -105,6 +145,7 @@ export function SignUpForm() {
         });
 
         sessionStorage.removeItem(STORAGE_KEY);
+        sessionStorage.removeItem(AGREEMENTS_STORAGE_KEY);
 
         // 관심 분야 선택 페이지로 이동
         navigate('/auth/interest-selection');
@@ -138,48 +179,41 @@ export function SignUpForm() {
     formData.birthDate &&
     formData.email &&
     formData.password &&
-    formData.passwordConfirm &&
-    agreed;
+    formData.passwordConfirm;
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
-      <header className="flex items-center px-6 py-4">
+      <header className="flex items-center px-4 py-4">
         <button onClick={() => navigate(-1)} className="mr-3">
           <img src={backIcon} alt="back" className="w-2.5 h-[18px]" />
         </button>
-        <h1 className="text-xl font-semibold">회원가입</h1>
+        <h1 className="text-[20px] font-semibold">회원가입</h1>
       </header>
 
       {/* Tabs */}
       <div className="flex">
         <button
           onClick={() => setUserType('customer')}
-          className={`flex-1 py-4 text-base font-medium transition-all relative ${
-            userType === 'customer' ? 'text-black' : 'text-gray-400'
+          className={`flex-1 py-4 text-base font-medium transition-all border-b ${
+            userType === 'customer' ? 'text-black border-black border-b-2' : 'text-gray-400 border-[#f4f4f5]'
           }`}
         >
           그루머
-          {userType === 'customer' && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />
-          )}
         </button>
         <button
           onClick={() => setUserType('expert')}
-          className={`flex-1 py-4 text-base font-medium transition-all relative ${
-            userType === 'expert' ? 'text-black' : 'text-gray-400'
+          className={`flex-1 py-4 text-base font-medium transition-all border-b ${
+            userType === 'expert' ? 'text-black border-black border-b-2' : 'text-gray-400 border-[#f4f4f5]'
           }`}
         >
           전문가
-          {userType === 'expert' && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />
-          )}
         </button>
       </div>
 
       {/* Form - 스크롤 가능 영역 */}
       <div className="flex-1 overflow-y-auto">
-        <form onSubmit={handleSubmit} className="px-6 pt-7 flex flex-col gap-6">
+        <form onSubmit={handleSubmit} className="px-4 pt-6 flex flex-col gap-6">
           {/* 닉네임 */}
           <div>
             <label className="block text-base font-medium text-black mb-3">닉네임</label>
@@ -188,7 +222,7 @@ export function SignUpForm() {
               placeholder="이름을 입력해주세요."
               value={formData.nickname}
               onChange={handleChange}
-              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[12px] bg-white transition-colors ${
+              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[13px] bg-white transition-colors ${
                 errors.nickname ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gray-300'
               }`}
               disabled={isLoading}
@@ -206,7 +240,7 @@ export function SignUpForm() {
               placeholder="ex) 19980101"
               value={formData.birthDate}
               onChange={handleChange}
-              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[12px] bg-white transition-colors ${
+              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[13px] bg-white transition-colors ${
                 errors.birth ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gray-300'
               }`}
               disabled={isLoading}
@@ -225,7 +259,7 @@ export function SignUpForm() {
               placeholder="example@gmail.com"
               value={formData.email}
               onChange={handleChange}
-              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[12px] bg-white transition-colors ${
+              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[13px] bg-white transition-colors ${
                 errors.email ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gray-300'
               }`}
               disabled={isLoading}
@@ -241,10 +275,10 @@ export function SignUpForm() {
             <input
               name="password"
               type="password"
-              placeholder="8-14자 영문+숫자 조합"
+              placeholder="영문+숫자 조합 8자리 이상 입력해주세요."
               value={formData.password}
               onChange={handleChange}
-              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[12px] bg-white transition-colors ${
+              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[13px] bg-white transition-colors ${
                 errors.password ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gray-300'
               }`}
               disabled={isLoading}
@@ -263,7 +297,7 @@ export function SignUpForm() {
               placeholder="비밀번호를 한 번 더 입력해주세요."
               value={formData.passwordConfirm}
               onChange={handleChange}
-              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[12px] bg-white transition-colors ${
+              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[13px] bg-white transition-colors ${
                 errors.passwordConfirm ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gray-300'
               }`}
               disabled={isLoading}
@@ -272,13 +306,6 @@ export function SignUpForm() {
               <p className="text-red-500 text-xs mt-1 px-1">{errors.passwordConfirm}</p>
             )}
           </div>
-
-          {/* 약관 동의 에러 */}
-          {(errors.agreeTerms || errors.agreePrivacy) && (
-            <div className="text-red-500 text-xs px-1">
-              {errors.agreeTerms || errors.agreePrivacy}
-            </div>
-          )}
 
           {/* 일반 에러 메시지 */}
           {errors.general && (
@@ -289,42 +316,15 @@ export function SignUpForm() {
         </form>
       </div>
 
-      {/* 약관 동의 - 하단 고정 */}
-      <div className="px-6 py-6">
-        <label className="flex items-center gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={agreed}
-            onChange={(e) => setAgreed(e.target.checked)}
-            className="w-5 h-5 rounded border-gray-300"
-          />
-          <span className="text-[12px] text-gray-600">
-            <button
-              type="button"
-              onClick={() => navigate('/auth/terms-of-service')}
-              className="underline text-black hover:font-bold"
-            >
-              이용약관
-            </button>
-            {' '}및{' '}
-            <button
-              type="button"
-              onClick={() => navigate('/auth/privacy-policy')}
-              className="underline text-black hover:font-bold"
-            >
-              개인정보 취급방침
-            </button>
-            에 동의합니다. (필수)
-          </span>
-        </label>
-      </div>
       {/* Submit Button - 하단 고정 */}
       <div className="mt-auto">
         <button
           type="submit"
           onClick={handleSubmit}
           disabled={isLoading || !isFormValid}
-          className="w-full h-14 font-medium transition-colors bg-black text-white disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`w-full h-[90px] text-[16px] font-semibold text-white transition-colors ${
+            isFormValid ? 'bg-[#0f0f10]' : 'bg-[#aeb0b6]'
+          }`}
         >
           {isLoading ? '처리 중...' : '다음'}
         </button>

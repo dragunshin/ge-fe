@@ -1,94 +1,204 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronDown, ChevronRight, Search } from 'lucide-react';
+import { ChevronRight, Search } from 'lucide-react';
 import heartIcon from '../../images/mypage/heart.svg';
 import homeIcon from '../../images/home/home.svg';
 import exploreIcon from '../../images/home/search.svg';
 import chatIcon from '../../images/home/chat.svg';
 import communityIcon from '../../images/home/community.svg';
 import mypageIcon from '../../images/home/mypage.svg';
+import starIcon from '../../images/reviews/star.svg';
 
-type TopExpert = {
-  id: number;
-  name: string;
-  category: string;
-  summary: string;
-  avatar?: string;
+type TabItem = {
+  id: string;
+  label: string;
+  route?: string;
+  underlineLeft: number;
 };
 
-type ExpertCard = {
+type ReviewCard = {
   id: number;
   name: string;
+  rating: number;
+  date: string;
+  content: string;
   category: string;
+  concern: string;
+  avatar?: string;
+  images: string[];
+};
+
+type ExpertListCard = {
+  id: number;
+  name: string;
+  rating: number;
+  reviewCount: string;
   summary: string;
   avatar?: string;
-  available: boolean;
+  tags: string[];
+  reviewTags: string[];
+  images: string[];
+};
+
+type StyleCard = {
+  id: number;
+  title: string;
+  description: string;
+  badge: string;
+  image?: string;
+};
+
+type ImmediateCard = {
+  id: number;
+  title: string;
+  subtitle: string;
+  expert: string;
+  rating: number;
+  reviewCount: string;
+  times: string[];
+  image?: string;
+  avatar?: string;
 };
 
 const CategoryLandingPage = () => {
   const navigate = useNavigate();
   const params = useParams();
   const categoryKey = params.category ?? 'hair';
+  const [selectedStyleFilter, setSelectedStyleFilter] = useState('전체');
 
   const categoryLabel = useMemo(() => {
     const map: Record<string, string> = {
-      hair: 'HAIR',
-      fashion: 'FASHION',
-      makeup: 'MAKEUP',
-      skin: 'SKIN',
+      hair: '헤어',
+      fashion: '패션',
+      makeup: '메이크업',
+      skin: '스킨',
     };
-    return map[categoryKey] ?? 'HAIR';
+    return map[categoryKey] ?? '헤어';
   }, [categoryKey]);
 
-  const topExperts: TopExpert[] = [
+  const categoryTabs: TabItem[] = useMemo(
+    () => [
+      { id: 'all', label: '전체', route: '/', underlineLeft: 16 },
+      { id: 'hair', label: '헤어', route: '/category/hair', underlineLeft: 85 },
+      { id: 'makeup', label: '메이크업', route: '/category/makeup', underlineLeft: 153 },
+      { id: 'fashion', label: '패션', route: '/category/fashion', underlineLeft: 249 },
+      { id: 'skin', label: '스킨', route: '/category/skin', underlineLeft: 317 },
+    ],
+    [],
+  );
+
+  const quickTopics = [
+    { label: '펌으로 이미지 변신' },
+    { label: '탈모 콤플렉스' },
+    { label: '헤어라인 정리' },
+    { label: '데일리 헤어 손질법' },
+  ];
+
+  const styleFilters = ['전체', '컷', '펌', '염색', '클리닉', '스타일링', '탈모'];
+
+  const styleCards: StyleCard[] = [
     {
       id: 1,
-      name: '김이슬 전문가',
-      category: '헤어',
-      summary:
-        '바쁜 아침, 트렌디한 머리와 간편한 손질법을 여러분께 선물합니다.',
+      badge: '인기 1위',
+      title: '스핀 스왈로브 펌',
+      description: '과하지 않고 자연스러운 펌으로 이목구비를 강조하는 가벼운 곡선형 펌',
     },
     {
       id: 2,
-      name: '박규영 전문가',
+      badge: '인기 1위',
+      title: '스핀 스왈로브 펌',
+      description: '과하지 않고 자연스러운 펌으로 이목구비를 강조하는 펌',
+    },
+  ];
+
+  const reviews: ReviewCard[] = [
+    {
+      id: 1,
+      name: '옹민호 전문가',
+      rating: 4.7,
+      date: '2025.10.08',
+      content:
+        '머리가 악성곱슬이어서 너무 고민이었는데 옹민호 전문가님 만나고 광명 찾았어요~!!! 원래는 2주만 지나도 바로 곱슬곱슬해지는데 지금 한 달이 지나도 직모에요.',
       category: '헤어',
-      summary:
-        '짧은 머리부터 긴머리까지 남자머리의 정석, 오래 유지되는 디자인으로 얼굴형에 어울리는 맞춤형으로 디자인 해드리겠습니다.',
+      concern: '탈모',
+      images: ['', ''],
+    },
+    {
+      id: 2,
+      name: '옹민호 전문가',
+      rating: 4.7,
+      date: '2025.10.08',
+      content:
+        '평소에 여드름도 많아서 메이크업 받으면 둥둥 떴는데 성정수 상담가님 덕분에 너무 멋지게 프로필 사진 촬영하고 왔어요! 상세하게 알려주셔서 덕분에 메이크업 잘하고 갔습니다.',
+      category: '메이크업',
+      concern: '?',
+      images: ['', ''],
+    },
+  ];
+
+  const immediateCards: ImmediateCard[] = [
+    {
+      id: 1,
+      title: '소개팅 필승 펌',
+      subtitle: '“여심을 흔들만한 스핀 스왈로브펌”',
+      expert: '성정수 상담사',
+      rating: 4.7,
+      reviewCount: '(1,130)',
+      times: ['오전 11:00', '오후 12:30', '오후 1:00'],
+    },
+    {
+      id: 2,
+      title: '여심 저격 컷',
+      subtitle: '“콧대가 높아보이는 가일컷”',
+      expert: '성정수 상담사',
+      rating: 4.7,
+      reviewCount: '(1,130)',
+      times: ['오전 11:00', '오후 12:30', '오후 1:00'],
+    },
+  ];
+
+  const expertCards: ExpertListCard[] = [
+    {
+      id: 1,
+      name: '김푸힝',
+      rating: 4.7,
+      reviewCount: '(1,130)',
+      summary: '탈모 삭제 마법사 | 탈모인만의 컨설팅',
+      tags: ['헤어', '탈모', '투블럭컷', '펌', '+3'],
+      reviewTags: ['탈모', '투블럭컷', '투블럭컷'],
+      images: ['', '', ''],
+    },
+    {
+      id: 2,
+      name: '김푸힝',
+      rating: 4.7,
+      reviewCount: '(1,130)',
+      summary: '탈모 삭제 마법사 | 탈모인만의 컨설팅',
+      tags: ['헤어', '탈모', '투블럭컷', '펌', '+3'],
+      reviewTags: ['탈모', '투블럭컷', '투블럭컷'],
+      images: ['', '', ''],
     },
     {
       id: 3,
-      name: '이민준 전문가',
-      category: '헤어',
-      summary: '어울리는 머리가 뭔지 몰라서 고민이신 분들! 제가 인생머리 찾아드릴게요',
+      name: '김푸힝',
+      rating: 4.7,
+      reviewCount: '(1,130)',
+      summary: '탈모 삭제 마법사 | 탈모인만의 컨설팅',
+      tags: ['헤어', '탈모', '투블럭컷', '펌', '+3'],
+      reviewTags: ['탈모', '투블럭컷', '투블럭컷'],
+      images: ['', '', ''],
     },
   ];
 
-  const expertList: ExpertCard[] = [
-    {
-      id: 1,
-      name: '이가영',
-      category: '헤어',
-      summary:
-        '고객님의 두상 유형을 정확히 파악하고 얼굴형에 맞게 디자인해서 스타일링해드립니다.',
-      available: true,
-    },
-    {
-      id: 2,
-      name: '이지훈',
-      category: '헤어',
-      summary:
-        '각 모질에 따른 손상도와 얼굴형 두상에 맞춰 1대1로 정성껏 디자인해 드리고 있습니다.',
-      available: true,
-    },
-  ];
+  const underlineLeft = categoryTabs.find((tab) => tab.label === categoryLabel)?.underlineLeft ?? 85;
 
   return (
     <div className="flex h-full flex-col bg-white">
-      <header className="flex h-[60px] items-center justify-between px-4 pt-[14px]">
-        <button className="flex items-center gap-1 text-[18px] font-semibold text-[#0f0f10]">
-          <span>{categoryLabel}</span>
-          <ChevronDown className="h-4 w-4" />
-        </button>
+      <header className="flex h-[56px] items-center justify-between px-4 pt-[14px]">
+        <div className="flex items-center gap-1 text-[18px] font-semibold text-[#0f0f10]">
+          <span>MENUAL</span>
+          <span>.</span>
+        </div>
         <div className="flex items-center gap-[14px]">
           <button className="flex h-6 w-6 items-center justify-center">
             <Search className="h-6 w-6 text-[#0f0f10]" />
@@ -100,8 +210,29 @@ const CategoryLandingPage = () => {
       </header>
 
       <main className="flex-1 overflow-y-auto pb-6 scrollbar-hide">
-        <section className="relative h-[246px] w-[375px] overflow-hidden">
-          <div className="absolute left-[-25px] top-[-8px] h-[262px] w-[400px] bg-[#d2d4d8]" />
+        <section className="pt-[4px]">
+          <div className="flex items-center justify-between px-4 text-[16px] font-semibold">
+            {categoryTabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => tab.route && navigate(tab.route)}
+                className={
+                  tab.label === categoryLabel
+                    ? 'text-[#0f0f10]'
+                    : 'text-[#989ba2]'
+                }
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+          <div className="relative mt-[12px] h-px bg-[#e1e2e4]">
+            <span className="absolute top-0 h-px w-[41px] bg-[#0f0f10]" style={{ left: underlineLeft }} />
+          </div>
+        </section>
+
+        <section className="relative mt-[20px] h-[246px] w-full overflow-hidden">
+          <div className="absolute left-[-25px] top-[-8px] h-[262px] w-[400px] rounded-[12px] bg-[#d2d4d8]" />
           <div className="absolute bottom-0 left-[-20px] h-[144.5px] w-[416px] bg-gradient-to-b from-transparent to-black/50" />
           <div className="absolute left-[19.5px] top-[125px] w-[165px] text-white">
             <p className="text-[12px] leading-[1.4]">이제 슬슬 준비해야지</p>
@@ -109,7 +240,7 @@ const CategoryLandingPage = () => {
               소개팅 필수 헤어스타일
               <br />‘스핀 스왈로브펌’
             </p>
-            <div className="mt-3 inline-flex h-[22px] items-center gap-[4px] bg-[#008bff] px-[8px] py-[6px] text-[12px] font-semibold">
+            <div className="mt-3 inline-flex h-[22px] items-center gap-[4px] bg-[#008bff] px-[8px] text-[12px] font-semibold">
               <span>박서령</span>
               <span className="h-[7px] w-px bg-white/80" />
               <span className="text-[10px] font-medium">헤어디자이너</span>
@@ -120,50 +251,76 @@ const CategoryLandingPage = () => {
           </div>
         </section>
 
-        <section className="px-4 pt-[28px]">
-          <h2 className="text-[18px] font-semibold text-[#0f0f10]">
-            지금 가장 인기있는 헤어 전문가 TOP3
-          </h2>
-          <div className="mt-[16px] space-y-[16px]">
-            {topExperts.map((expert, index) => (
-              <div key={expert.id} className="flex h-[67px] w-[342px] items-center justify-between">
-                <div className="flex items-center gap-[9px]">
-                  <span className="w-[12px] text-center text-[18px] font-semibold leading-[1.1] text-[#656870]">
-                    {index + 1}
-                  </span>
-                  <div className="flex items-center gap-[15px]">
-                    <div className="h-[60px] w-[60px] shrink-0 overflow-hidden rounded-full bg-[#e1e2e4]">
-                      {expert.avatar && (
-                        <img src={expert.avatar} alt="" className="h-full w-full object-cover" />
-                      )}
-                    </div>
-                    <div className="flex flex-col items-start">
-                      <div className="flex items-center gap-[8px]">
-                        <span className="rounded-[2px] bg-[#e5f4ff] px-[8px] py-[4px] text-[12px] text-[#008bff]">
-                          {expert.category}
-                        </span>
-                        <span className="text-[14px] font-semibold text-[#292a2d]">
-                          {expert.name}
-                        </span>
-                      </div>
-                      <p className="mt-[6px] line-clamp-2 w-[184px] text-[13px] text-[#878a93]">
-                        {expert.summary}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <button className="flex h-6 w-6 items-center justify-center">
-                  <img src={heartIcon} alt="찜" className="h-6 w-6" />
-                </button>
+        <section className="mt-[16px] px-4">
+          <div className="flex gap-[6px] overflow-x-auto pb-[2px] scrollbar-hide">
+            {quickTopics.map((topic) => (
+              <div
+                key={topic.label}
+                className="flex h-[44px] shrink-0 items-center gap-[10px] rounded-[4px] bg-white p-[10px] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.2)]"
+              >
+                <div className="h-[24px] w-[24px] bg-[#d9d9d9]" />
+                <span className="text-[13px] font-semibold text-[#292a2d]">
+                  {topic.label}
+                </span>
               </div>
             ))}
           </div>
         </section>
 
+        <section className="px-4 pt-[32px]">
+          <div className="flex items-center justify-between">
+            <h2 className="text-[18px] font-semibold text-[#0f0f10]">
+              전문가들이 많이 추천하는 스타일
+            </h2>
+            <button className="flex items-center gap-[2px] text-[14px] text-[#70737c]">
+              전체보기
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="mt-[12px] flex gap-[8px] overflow-x-auto pb-2 scrollbar-hide">
+            {styleFilters.map((filter) => (
+              <button
+                key={filter}
+                onClick={() => setSelectedStyleFilter(filter)}
+                className={`flex h-[30px] shrink-0 items-center justify-center whitespace-nowrap rounded-[4px] px-[12px] py-[6px] text-[13px] leading-[1.4] ${
+                  selectedStyleFilter === filter
+                    ? 'bg-[#46474c] text-white font-semibold'
+                    : 'border border-[#dbdcdf] bg-white text-[#46474c] font-normal'
+                }`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+          <div className="mt-[16px] flex gap-[16px] overflow-x-auto pb-2 scrollbar-hide">
+            {styleCards.map((card) => (
+              <article
+                key={card.id}
+                className="relative h-[240px] w-[267px] shrink-0 overflow-hidden rounded-[8px] bg-white shadow-[0px_2px_12px_0px_rgba(0,0,0,0.13)]"
+              >
+                <div className="h-[142px] w-full overflow-hidden bg-[#d2d4d8]">
+                  {card.image && (
+                    <img src={card.image} alt="" className="h-full w-full object-cover" />
+                  )}
+                </div>
+                <div className="absolute left-[10px] top-[155px] flex items-center gap-[8px]">
+                  <span className="inline-flex items-center rounded-[2px] bg-[#e5f4ff] px-[8px] py-[4px] text-[12px] text-[#008bff]">
+                    {card.badge}
+                  </span>
+                  <p className="text-[14px] font-semibold text-black">{card.title}</p>
+                </div>
+                <p className="absolute left-[15px] top-[187px] w-[201px] text-[12px] font-medium leading-[1.4] text-[#656870]">
+                  {card.description}
+                </p>
+              </article>
+            ))}
+          </div>
+        </section>
+
         <section className="mt-[32px] bg-[#f4f8fb]">
-          <div className="px-4 py-[32px]">
+          <div className="px-4 pt-[22px]">
             <div className="flex items-center justify-between">
-              <h2 className="text-[18px] font-semibold text-[#0f0f10]">베스트 후기</h2>
+              <h2 className="text-[18px] font-semibold text-[#0f0f10]">실시간 후기 확인하기</h2>
               <button
                 onClick={() => navigate(`/category/${categoryKey}/reviews`)}
                 className="flex items-center gap-[2px] text-[14px] text-[#70737c]"
@@ -172,104 +329,199 @@ const CategoryLandingPage = () => {
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>
-            <div className="mt-[16px] h-[270px] w-[342px] rounded-[12px] border border-[#dbdcdf] bg-white">
-              <div className="flex items-center justify-between px-[20px] pt-[19px]">
-                <div className="flex items-center gap-[12px]">
-                  <div className="h-[34px] w-[34px] shrink-0 rounded-full bg-[#e1e2e4]" />
-                  <div className="flex flex-col gap-[2px]">
-                    <p className="text-[12px] font-medium text-[#008bff]">최근 후기 63건</p>
-                    <div className="flex items-center gap-[8px] text-[13px] text-[#989ba2]">
-                      <span className="text-[14px] font-semibold text-[#0f0f10]">
-                        옹민호 상담사
-                      </span>
-                      <span className="text-[#ffb800]">★</span>
-                      <span>4.7</span>
+          </div>
+          <div className="mt-4 flex gap-2 overflow-x-auto px-4 pb-2 scrollbar-hide snap-x snap-mandatory">
+            {reviews.map((review) => (
+              <article
+                key={review.id}
+                className="flex h-[393px] w-[300px] shrink-0 flex-col rounded-[8px] border border-[#e1e2e4] bg-white snap-start"
+              >
+                <div className="flex items-center justify-between px-4 pt-[14px]">
+                  <div className="flex items-center gap-[10px]">
+                    <div className="h-[36px] w-[36px] shrink-0 overflow-hidden rounded-full bg-[#e1e2e4]">
+                      {review.avatar && (
+                        <img src={review.avatar} alt="" className="h-full w-full object-cover" />
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-[4px]">
+                      <div className="flex items-center gap-[2px]">
+                        <span className="text-[14px] font-semibold text-[#0f0f10]">
+                          {review.name}
+                        </span>
+                        <ChevronRight className="h-4 w-4 text-[#0f0f10]" />
+                      </div>
+                      <div className="flex items-center gap-[8px] text-[13px] text-[#989ba2]">
+                        <div className="flex items-center gap-1 text-[#ffb800]">★★★★★</div>
+                        <span>{review.rating}</span>
+                      </div>
                     </div>
                   </div>
+                  <button className="text-[14px] text-[#70737c]">프로필 보기</button>
                 </div>
-                <button
-                  onClick={() => navigate('/experts/1')}
-                  className="rounded-full p-1 text-[#aeb0b6] hover:bg-gray-50"
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </button>
-              </div>
-              <div className="mt-[16px] h-px bg-[#e1e2e4]" />
-              <div className="mt-[20px] flex gap-[4px] px-[20px]">
-                {Array.from({ length: 4 }).map((_, index) => (
-                  <div
-                    key={`best-image-${index}`}
-                    className="relative h-[72px] w-[72px] overflow-hidden rounded-[4px] bg-[#e1e2e4]"
-                  >
-                    {index === 3 && (
-                      <span className="absolute inset-0 flex items-center justify-center bg-black/40 text-[14px] font-medium text-white">
-                        +16
-                      </span>
-                    )}
+                <div className="px-4 pt-[14px]">
+                  <div className="flex gap-[8px]">
+                    {review.images.map((image, index) => (
+                      <div
+                        key={`${review.id}-image-${index}`}
+                        className="h-[130px] w-[130px] overflow-hidden rounded-[4px] bg-[#e1e2e4]"
+                      >
+                        {image && (
+                          <img src={image} alt="" className="h-full w-full object-cover" />
+                        )}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <p className="mt-[20px] px-[19px] text-[14px] leading-[1.5] text-[#505158]">
-                저는 완전 악성곱슬이었는데요. 옹민호 상담사님 만나고 광명 찾았습니다. 어딜 가도 머리 곱슬기가 안
-                빠졌는데 매직 시술 받았더니 2개월 지나도 아직도 직모처럼 뻣...
-              </p>
-            </div>
+                </div>
+                <div className="px-4 pt-3">
+                  <div className="flex items-center gap-[12px] text-[13px] text-[#989ba2]">
+                    <span className="font-semibold text-[#878a93]">박덕호</span>
+                    <span>{review.date}</span>
+                  </div>
+                  <p className="mt-2 text-[13px] leading-[1.4] text-[#505158]">
+                    {review.content}
+                  </p>
+                </div>
+                <div className="mt-auto flex gap-[6px] px-4 pb-4 pt-2">
+                  <span className="rounded-[2px] bg-[#e5f4ff] px-[8px] py-[4px] text-[12px] text-[#008bff]">
+                    {review.category}
+                  </span>
+                  <span className="rounded-[2px] bg-[#f4f4f5] px-[8px] py-[4px] text-[12px] text-[#46474c]">
+                    {review.concern}
+                  </span>
+                </div>
+              </article>
+            ))}
           </div>
-          <div className="flex items-center justify-center pb-[12px]">
+          <div className="mt-4 flex items-center justify-center pb-[12px]">
             <div className="h-[3px] w-[55px] rounded-full bg-[#e1e2e4]">
-              <div className="h-[3px] w-[18px] rounded-full bg-[#429ff0]" />
+              <div className="h-[3px] w-[20px] rounded-full bg-[#429ff0]" />
             </div>
           </div>
         </section>
 
         <section className="px-4 pt-[32px]">
           <div className="flex items-center justify-between">
-            <h2 className="text-[18px] font-semibold text-[#0f0f10]">전문가 리스트</h2>
+            <h2 className="text-[18px] font-semibold text-[#0f0f10]">즉시 상담이 가능한 전문가</h2>
+            <button className="flex items-center gap-[2px] text-[14px] text-[#70737c]">
+              전체보기
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="mt-[16px] flex gap-[12px] overflow-x-auto pb-2 scrollbar-hide">
+            {immediateCards.map((card) => (
+              <article
+                key={card.id}
+                className="relative h-[288px] w-[301px] shrink-0 rounded-[8px] bg-white shadow-[0px_2px_12px_0px_rgba(0,0,0,0.13)]"
+              >
+                <div className="relative h-[170px] w-full overflow-hidden rounded-t-[8px] bg-[#d2d4d8]">
+                  {card.image && (
+                    <img src={card.image} alt="" className="h-full w-full object-cover" />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40" />
+                  <p className="absolute bottom-[30px] left-[13px] text-[12px] text-white">
+                    {card.subtitle}
+                  </p>
+                  <p className="absolute bottom-[50px] left-[13px] text-[14px] font-semibold text-white">
+                    {card.title}
+                  </p>
+                </div>
+                <div className="absolute left-[12px] top-[183px] flex items-center gap-[10px]">
+                  <div className="h-[36px] w-[36px] rounded-full bg-[#e1e2e4]">
+                    {card.avatar && (
+                      <img src={card.avatar} alt="" className="h-full w-full object-cover" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-[14px] font-semibold text-[#0f0f10]">{card.expert}</p>
+                    <div className="mt-[4px] flex items-center gap-[4px] text-[13px] text-[#878a93]">
+                      <img src={starIcon} alt="" className="h-[18px] w-[18px]" />
+                      <span className="font-semibold text-[#505158]">{card.rating}</span>
+                      <span>{card.reviewCount}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute left-[12px] top-[238px] flex gap-[6px]">
+                  {card.times.map((time) => (
+                    <span
+                      key={`${card.id}-${time}`}
+                      className="flex h-[36px] w-[88px] items-center justify-center rounded-[6px] bg-[#008bff] text-[13px] text-white"
+                    >
+                      {time}
+                    </span>
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="px-4 pt-[32px]">
+          <div className="flex items-center justify-between">
+            <h2 className="text-[18px] font-semibold text-[#0f0f10]">헤어 전문가</h2>
             <button className="flex items-center gap-[2px] text-[14px] text-[#70737c]">
               전체보기
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
           <div className="mt-[16px] space-y-[16px]">
-            {expertList.map((expert) => (
+            {expertCards.map((expert) => (
               <article
                 key={expert.id}
-                className="relative h-[184px] w-[342px] rounded-[12px] border border-[#dbdcdf] bg-white"
+                className="relative h-[253px] w-[343px] rounded-[8px] bg-white shadow-[0px_2px_12px_0px_rgba(0,0,0,0.13)]"
               >
-                <div className="absolute left-[15px] top-[15px] flex w-[313px] items-start justify-between">
-                  <div className="flex w-[289px] flex-col gap-[12px]">
-                    <div className="flex items-center gap-[16px]">
-                      <div className="h-[60px] w-[60px] shrink-0 rounded-full bg-[#e1e2e4]" />
-                      <div className="flex w-[116px] flex-col gap-[10px]">
-                        <p className="text-[16px] font-semibold leading-[1.1] text-[#292a2d]">
-                          {expert.name}
-                        </p>
-                        <div className="flex items-center gap-[6px]">
-                          <span className="rounded-[2px] bg-[#e5f4ff] px-[8px] py-[4px] text-[12px] text-[#008bff]">
-                            {expert.category}
-                          </span>
-                          <span className="rounded-[2px] bg-[#f4f4f5] px-[8px] py-[4px] text-[12px] text-[#46474c]">
-                            모류교정
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-[13px] leading-[1.4] text-[#878a93]">
-                      {expert.summary}
-                    </p>
+                <div className="absolute left-[13px] top-[23px] flex items-center gap-[10px]">
+                  <div className="h-[42px] w-[42px] shrink-0 rounded-full bg-[#e1e2e4]">
+                    {expert.avatar && (
+                      <img src={expert.avatar} alt="" className="h-full w-full object-cover" />
+                    )}
                   </div>
-                  <button className="flex h-[24px] w-[24px] items-center justify-center">
-                    <img src={heartIcon} alt="찜" className="h-[24px] w-[24px]" />
-                  </button>
+                  <div>
+                    <p className="text-[16px] font-semibold leading-[1.1] text-[#292a2d]">
+                      {expert.name}
+                    </p>
+                    <p className="mt-[6px] text-[13px] text-[#878a93]">{expert.summary}</p>
+                  </div>
                 </div>
-                {expert.available && (
-                  <span className="absolute left-[15px] top-[151px] text-[13px] font-semibold text-[#008bff]">
-                    바로 상담 가능
-                  </span>
-                )}
-                <button className="absolute left-[240px] top-[135px] h-[32px] w-[84px] rounded-[4px] bg-[#171719] text-[14px] font-medium text-white">
+                <div className="absolute right-[13px] top-[23px] flex items-center gap-[6px] text-[13px] text-[#878a93]">
+                  <div className="flex items-center gap-[2px]">
+                    <img src={starIcon} alt="" className="h-[18px] w-[18px]" />
+                    <span className="font-semibold text-[#505158]">{expert.rating}</span>
+                  </div>
+                  <span>{expert.reviewCount}</span>
+                </div>
+                <div className="absolute left-[12px] top-[79px] flex gap-[2px]">
+                  {expert.images.map((image, index) => (
+                    <div
+                      key={`${expert.id}-review-${index}`}
+                      className="relative h-[105px] w-[105px] overflow-hidden rounded-[4px] bg-[#e1e2e4]"
+                    >
+                      {image && (
+                        <img src={image} alt="" className="h-full w-full object-cover" />
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60" />
+                      <span className="absolute bottom-[10px] left-[10px] text-[12px] text-white">
+                        {expert.reviewTags[index]}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <button className="absolute right-[12px] top-[198px] h-[36px] w-[95px] rounded-[4px] bg-[#171719] text-[14px] font-medium text-white">
                   상담 예약
                 </button>
+                <div className="absolute left-[13px] top-[204px] flex gap-[6px]">
+                  {expert.tags.map((tag, index) => (
+                    <span
+                      key={`${expert.id}-tag-${tag}-${index}`}
+                      className={
+                        tag === '헤어'
+                          ? 'rounded-[2px] bg-[#f5f9fd] px-[6px] py-[4px] text-[12px] text-[#429ff0]'
+                          : 'rounded-[2px] bg-[#f4f4f5] px-[8px] py-[4px] text-[12px] text-[#46474c]'
+                      }
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </article>
             ))}
           </div>
@@ -296,7 +548,7 @@ const CategoryLandingPage = () => {
           <span className="text-[12px]">채팅</span>
         </button>
         <button
-          onClick={() => navigate('/payment/order')}
+          onClick={() => navigate('/reservation/fashion?step=9')}
           className="flex flex-1 flex-col items-center gap-1 text-[#aeb0b6]"
         >
           <img src={communityIcon} alt="커뮤니티" className="h-6 w-6" />

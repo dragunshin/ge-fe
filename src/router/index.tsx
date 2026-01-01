@@ -21,6 +21,7 @@ import ExpertInfoPage from "@/pages/category/expert/page";
 import PortfolioLandingPage from "@/pages/category/portfolio/page";
 import { PaymentOrderPage } from "@/pages/payment/order/page";
 import { PaymentCompletePage } from "@/pages/payment/complete/page";
+import FashionReservationFlowPage from "@/pages/reservation/fashion/page";
 // import { ProfileWritingListPage } from '../pages/profile/writing-list';
 // import { ProfileDetailPage } from '../pages/profile/detail';
 // import { ProfileWritePage } from '../pages/profile/write';
@@ -115,6 +116,10 @@ export const router = createBrowserRouter([
   {
     path: "/payment/complete",
     element: <PaymentCompletePage />,
+  },
+  {
+    path: "/reservation/fashion",
+    element: <FashionReservationFlowPage />,
   },
   // {
   //   path: '/profile/writing-list',

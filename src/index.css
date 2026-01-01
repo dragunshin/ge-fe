@@ -243,3 +243,60 @@ input {
     @apply text-[12px] leading-[140%] font-normal;
   }
 }
+/* Hide scrollbars while keeping scroll behavior. */
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Custom price range slider thumbs to match Figma. */
+.price-range {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: none;
+}
+
+.price-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  border: 1px solid #dbdcdf;
+  background: #ffffff;
+  pointer-events: auto;
+}
+
+.price-range::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  border: 1px solid #dbdcdf;
+  background: #ffffff;
+  pointer-events: auto;
+}
+
+.price-range::-webkit-slider-runnable-track {
+  height: 24px;
+  background: transparent;
+}
+
+.price-range::-moz-range-track {
+  height: 24px;
+  background: transparent;
+}
+
+.price-range-min {
+  z-index: 2;
+}
+
+.price-range-max {
+  z-index: 3;
+}
