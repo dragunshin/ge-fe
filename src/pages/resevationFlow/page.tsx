@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import ConsultationMethodSheet from "./reservationSheet/typeReservation";
 import DateTimeBottomSheet from "./reservationSheet/calendar";
 

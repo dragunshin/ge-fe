@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Heart from "@/images/mypage/heart.svg?react";
 import Back from "@/images/login/back.svg?react";

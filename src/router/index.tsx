@@ -18,7 +18,7 @@ import ReservationHistoryView from "@/pages/myPage/reservation/page";
 
 import LikedListPage from "@/pages/myPage/likedList/page1";
 import PointPage from "@/pages/myPage/point/page";
-import WriteReviewPage from "@/pages/myPage/review/writeReview";
+// import WriteReviewPage from "@/pages/myPage/review/writeReview";
 import ConsultationSheetTestPage from "@/pages/resevationFlow/page";
 import CategoryLandingPage from "@/pages/category/page";
 import CategoryBestReviewsPage from "@/pages/category/reviews/page";
@@ -100,7 +100,6 @@ export const router = createBrowserRouter([
     element: <ReservationHistoryView />,
   },
   {
-
     path: "/LikedList",
     element: <LikedListPage />,
   },
@@ -108,17 +107,12 @@ export const router = createBrowserRouter([
     path: "/PointPage",
     element: <PointPage />,
   },
-  {
-    path: "/WriteReview",
-    element: <WriteReviewPage />,
-  },
+
   {
     path: "/sheetTest",
     element: <ConsultationSheetTestPage />,
-
-    path: "/category/:category",
-    element: <CategoryLandingPage />,
   },
+  { path: "/category/:category", element: <CategoryLandingPage /> },
   {
     path: "/category/:category/reviews",
     element: <CategoryBestReviewsPage />,
@@ -142,7 +136,6 @@ export const router = createBrowserRouter([
   {
     path: "/reservation/fashion",
     element: <FashionReservationFlowPage />,
-
   },
   // {
   //   path: '/profile/writing-list',

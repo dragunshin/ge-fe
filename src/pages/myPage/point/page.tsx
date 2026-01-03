@@ -1,13 +1,8 @@
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, X } from "lucide-react";
+import { X } from "lucide-react";
 import Back from "@/images/login/back.svg?react";
 import Point from "@/images/mypage/point.svg?react";
-
-/** utils */
-function cn(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(" ");
-}
 
 /** types */
 type PointHistoryItem = {
