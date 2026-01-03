@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DayPicker } from "react-day-picker";
 import { ko } from "date-fns/locale";
 import "react-day-picker/dist/style.css";
