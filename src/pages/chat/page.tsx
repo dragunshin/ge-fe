@@ -160,7 +160,7 @@ import { MessageInput } from "./components/MessageInput";
 import { createChatroom } from "@/api/chat";
 
 export function Chat() {
-  const consultationId = 2;
+  const consultationId = 4;
 
   const [chatroomId, setChatroomId] = useState<number | null>(null);
   const [creating, setCreating] = useState(true);

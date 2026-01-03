@@ -205,6 +205,9 @@ input {
   .pre_subtitle_semi_16 {
     @apply text-[16px] leading-[140%] font-semibold;
   }
+  .pre_subtitle_semi_14 {
+    @apply text-[14px] leading-[140%] font-semibold;
+  }
 
   /* Body */
   .pre_body_bold_16 {
@@ -219,6 +222,9 @@ input {
   .pre_body_med_14 {
     @apply text-[14px] leading-[140%] font-medium;
   }
+  .pre_body_med_12 {
+    @apply text-[12px] leading-[140%] font-medium;
+  }
   .pre_body_reg_14 {
     @apply text-[14px] leading-[140%] font-normal;
   }
@@ -228,19 +234,34 @@ input {
     @apply text-[12px] leading-[140%] font-semibold underline underline-offset-2;
   }
 
+  .pre_body_semi_13 {
+    @apply text-[13px] leading-[140%] font-semibold;
+  }
   .pre_body_semi_12 {
     @apply text-[12px] leading-[140%] font-semibold;
   }
   .pre_body_reg_12 {
     @apply text-[12px] leading-[140%] font-normal;
   }
+  .pre_body_reg_13 {
+    @apply text-[13px] leading-[140%] font-normal;
+  }
 
   /* Caption */
   .pre_cap_semi_12 {
     @apply text-[12px] leading-[140%] font-semibold;
   }
+  .pre_cap_semi_13 {
+    @apply text-[13px] leading-[140%] font-semibold;
+  }
   .pre_cap_reg_12 {
     @apply text-[12px] leading-[140%] font-normal;
+  }
+  .pre_cap_reg_14 {
+    @apply text-[14px] leading-[140%] font-normal;
+  }
+  .pre_cap_reg_13 {
+    @apply text-[13px] leading-[140%] font-normal;
   }
 }
 /* Hide scrollbars while keeping scroll behavior. */

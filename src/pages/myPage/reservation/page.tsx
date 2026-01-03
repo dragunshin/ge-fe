@@ -1,4 +1,11 @@
 import React, { useMemo, useState } from "react";
+import Back from "@/images/login/back.svg?react";
+import Heart from "@/images/mypage/heart.svg?react";
+import Payment from "@/images/mypage/payment.svg?react";
+import Write from "@/images/mypage/wirte.svg?react";
+import Message from "@/images/mypage/message.svg?react";
+import SandClock from "@/images/mypage/sandClock.svg?react";
+import { useNavigate } from "react-router-dom";
 
 /** utils */
 function cn(...classes: Array<string | false | null | undefined>) {
@@ -33,87 +40,16 @@ type PastConsultation = {
   reviewPriceWon: number;
 };
 
-/** icons */
-const IconBack = (p: React.SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 24 24" fill="none" {...p}>
-    <path
-      d="M15 18l-6-6 6-6"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const IconMessage = (p: React.SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 24 24" fill="none" {...p}>
-    <path
-      d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v8A2.5 2.5 0 0 1 17.5 17H10l-4.5 3V17A2.5 2.5 0 0 1 4 14.5v-8Z"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinejoin="round"
-    />
-    <path d="M7 8h10M7 11h7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-  </svg>
-);
-
-const IconHourglass = (p: React.SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 24 24" fill="none" {...p}>
-    <path d="M7 3h10M7 21h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    <path
-      d="M8 3v4c0 1.1.6 2.1 1.6 2.6L12 11l2.4-1.4A3 3 0 0 0 16 7V3"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M16 21v-4c0-1.1-.6-2.1-1.6-2.6L12 13l-2.4 1.4A3 3 0 0 0 8 17v4"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const IconHeart = (p: React.SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 24 24" fill="none" {...p}>
-    <path
-      d="M12 20s-7-4.4-9.2-8.5C1 8.3 2.9 6 5.6 6c1.5 0 2.9.7 3.7 1.9C10.1 6.7 11.5 6 13 6c2.7 0 4.6 2.3 2.8 5.5C19 15.6 12 20 12 20Z"
-      fill="currentColor"
-    />
-  </svg>
-);
-
-const IconCard = (p: React.SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 24 24" fill="none" {...p}>
-    <path
-      d="M3.5 7.5A2.5 2.5 0 0 1 6 5h12a2.5 2.5 0 0 1 2.5 2.5v9A2.5 2.5 0 0 1 18 19H6a2.5 2.5 0 0 1-2.5-2.5v-9Z"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    />
-    <path d="M3.5 9h17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-  </svg>
-);
-
-const IconPen = (p: React.SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 24 24" fill="none" {...p}>
-    <path
-      d="M4 20h4l10.5-10.5a2 2 0 0 0 0-2.8l-.2-.2a2 2 0 0 0-2.8 0L5 16v4Z"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinejoin="round"
-    />
-    <path d="M13.5 6.5l4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-  </svg>
-);
-
 /** ui */
 function Badge({ kind }: { kind: ConsultKind }) {
   const isMessage = kind === "MESSAGE";
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-[#EAF3FF] px-3 py-1 text-[12px] font-semibold text-[#2B6DEB]">
-      {isMessage ? <IconMessage className="h-4 w-4" /> : <IconHourglass className="h-4 w-4" />}
+    <span className="inline-flex items-center gap-1 ml-2 rounded-full bg-[#EAF3FF] px-3 py-1 pre_cap_reg_12 text-[#333438]">
+      {isMessage ? (
+        <Message className="h-[12px] w-[12px] mr-1" />
+      ) : (
+        <SandClock className="h-[20px] w-[20px]" />
+      )}
       {isMessage ? "메시지 상담" : "시간제한형 상담"}
     </span>
   );
@@ -121,18 +57,15 @@ function Badge({ kind }: { kind: ConsultKind }) {
 
 function TagChip({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center rounded bg-[#EAF3FF] px-2 py-[2px] text-[12px] font-semibold text-[#2B6DEB]">
+    <span className="inline-flex items-center rounded bg-[#EAF3FF] px-2 py-[2px] pre_cap_reg_12 text-[#008bff]">
       {children}
     </span>
   );
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <p className="text-[13px] font-medium text-[#8E8E93]">{children}</p>;
-}
-
 function Divider() {
-  return <div className="h-[10px] w-full bg-[#F2F2F7]" />;
+  // return <div className="h-[8px] w-full bg-[#e1e2e4]" />;
+  return <div className="mt-6 divide-y divide-[#e1e2e4]" />;
 }
 
 function ReservationCard({
@@ -146,26 +79,27 @@ function ReservationCard({
     <div className="bg-white">
       <div className="flex items-center justify-between py-2">
         <div className="flex items-baseline gap-2">
-          <span className="text-[18px] font-semibold text-black">{item.dateLabel}</span>
-          <span className="text-[13px] font-medium text-[#8E8E93]">{item.dayLabel}</span>
+          <span className="pre_subtitle_semi_16 text-black">{item.dateLabel}</span>
+          <span className="pre_cap_reg_14 text-[#70737C]">{item.dayLabel}</span>
+          <Badge kind={item.kind} />
         </div>
-        <Badge kind={item.kind} />
       </div>
-
+      {/* <div className="mt-6 divide-y divide-[#e1e2e4]" /> */}
+      <hr className="mt-[4px] mb-4 border-[#e1e2e4]" />
       <div className="mt-2 flex gap-3">
-        <div className="h-14 w-14 shrink-0 rounded-full bg-[#D1D1D6]" />
+        <div className="h-[60px] w-[60px] shrink-0 rounded-full bg-[#Dbdcdf]" />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <p className="text-[15px] font-semibold text-black">{item.expertName}</p>
             <TagChip>{item.tag}</TagChip>
           </div>
-          <p className="mt-1 line-clamp-2 text-[12px] leading-[140%] text-[#8E8E93]">{item.desc}</p>
+          <p className="mt-1 line-clamp-2 pre_cap_reg_13 text-[#878a93]">{item.desc}</p>
 
           <div className="mt-3 flex gap-2">
             {variant === "waiting" && item.canChange && (
               <button
                 type="button"
-                className="h-9 flex-1 rounded-md border border-[#D1D1D6] bg-white text-[13px] font-semibold text-black active:scale-[0.99]"
+                className="h-9 w-[81px] border border-[#Dbdcdf] bg-white pre_body_med_14 text-black active:scale-[0.99]"
               >
                 예약변경
               </button>
@@ -174,8 +108,9 @@ function ReservationCard({
               <button
                 type="button"
                 className={cn(
-                  "h-9 rounded-md border border-[#D1D1D6] bg-white text-[13px] font-semibold text-black active:scale-[0.99]",
-                  variant === "upcoming" ? "flex-1" : "flex-1",
+                  "h-9 w-[81px] border border-[#D1D1D6] bg-white pre_body_med_14 text-black active:scale-[0.99]",
+                  // variant === "upcoming" ? "flex-1" : "flex-1",
+                  //variant === "upcoming" ? "w-[120px]" : "w-[81px]",
                 )}
               >
                 예약취소
@@ -184,8 +119,9 @@ function ReservationCard({
           </div>
         </div>
       </div>
+      <hr className="mt-[24px] mb-[30px] border-[#e1e2e4] border-t-4" />
 
-      <div className="mt-4 h-px w-full bg-[#E5E5EA]" />
+      {/* <div className="mt-4 h-px w-full bg-[#E5E5EA]" /> */}
     </div>
   );
 }
@@ -204,9 +140,9 @@ function FilterChip({
       type="button"
       onClick={onClick}
       className={cn(
-        "h-9 whitespace-nowrap rounded-md border px-4 text-[13px] font-semibold active:scale-[0.99]",
+        "h-9 whitespace-nowrap rounded-md border px-4 pre_cap_semi_13 active:scale-[0.99]",
         active
-          ? "border-[#1C1C1E] bg-[#1C1C1E] text-white"
+          ? "border-[#1C1C1E] bg-[#46474c] text-white"
           : "border-[#D1D1D6] bg-white text-black",
       )}
     >
@@ -220,11 +156,12 @@ function PastItem({ item }: { item: PastConsultation }) {
     <div className="bg-white pb-4">
       <div className="flex items-center justify-between py-2">
         <div className="flex items-baseline gap-2">
-          <span className="text-[18px] font-semibold text-black">{item.dateLabel}</span>
-          <span className="text-[13px] font-medium text-[#8E8E93]">{item.dayLabel}</span>
+          <span className="pre_subtitle_semi_16 text-black">{item.dateLabel}</span>
+          <span className="pre_cap_reg_14 text-[#70737C]">{item.dayLabel}</span>
+          <Badge kind={item.kind} />
         </div>
-        <Badge kind={item.kind} />
       </div>
+      <hr className="flex-1 mt-[4px] mb-4 border-[#e1e2e4]" />
 
       <div className="mt-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -232,39 +169,41 @@ function PastItem({ item }: { item: PastConsultation }) {
           <TagChip>{item.tag}</TagChip>
         </div>
 
-        <div className="flex items-center gap-1 text-[#FF3B30]">
-          <IconHeart className="h-5 w-5" />
-          <span className="text-[12px] font-semibold">{item.likeCount}</span>
+        <div className="flex items-center gap-1">
+          <Heart className="h-5 w-5 fill-[#FF3434]" stroke="#FF3434" />
+          <span className="pre_cap_reg_13 text-[#878a93]">{item.likeCount}</span>
         </div>
       </div>
 
       <div className="mt-2 flex items-center gap-2 text-[#3A3A3C]">
-        <IconCard className="h-4 w-4" />
-        <span className="text-[13px] font-semibold">{item.priceWon.toLocaleString("ko-KR")}원</span>
+        <Payment className="h-4 w-4" />
+        <span className="pre_body_med_14">{item.priceWon.toLocaleString("ko-KR")}원</span>
       </div>
 
       <div className="mt-2 flex items-center gap-2">
-        <IconPen className="h-4 w-4 text-[#3A3A3C]" />
-        <span className="text-[13px] font-semibold text-[#3A3A3C]">
+        <Write className="h-4 w-4 text-[#3A3A3C]" />
+        <span className="pre_body_med_14 text-[#3A3A3C]">
           후기 작성 시{" "}
-          <span className="text-[#2B6DEB]">{item.reviewPriceWon.toLocaleString("ko-KR")}원</span>
+          <span className="pre_body_med_14 text-[#008bff]">
+            {item.reviewPriceWon.toLocaleString("ko-KR")}원
+          </span>
         </span>
       </div>
 
-      <div className="mt-3 rounded-md bg-[#EAF3FF] px-4 py-3 text-[12px] font-semibold text-[#2B6DEB]">
+      <div className="mt-3 rounded-[8px] bg-[#e5f4ff] px-4 py-3 pre_body_semi_14 text-[#292a2d]">
         후기를 남겨주시면 1000원을 환급해드려요.
       </div>
 
-      <div className="mt-4 flex gap-2">
+      <div className="mt-4 flex gap-2 mx-3">
         <button
           type="button"
-          className="h-11 flex-1 rounded-md bg-[#1C1C1E] text-[14px] font-semibold text-white active:scale-[0.99]"
+          className="h-11 flex-1 rounded-[4px] bg-[#1C1C1E] text-[14px] font-semibold text-white active:scale-[0.99]"
         >
           다시 상담받기
         </button>
         <button
           type="button"
-          className="h-11 flex-1 rounded-md border border-[#D1D1D6] bg-white text-[14px] font-semibold text-black active:scale-[0.99]"
+          className="h-11 flex-1 rounded-[4px] border border-[#D1D1D6] bg-white text-[14px] font-semibold text-black active:scale-[0.99]"
         >
           후기 쓰기
         </button>
@@ -320,6 +259,7 @@ export default function ReservationHistoryView() {
 
   const filters: Category[] = ["전체", "헤어", "스킨케어", "패션", "메이크업"];
   const [selected, setSelected] = useState<Category>("스킨케어");
+  const navigate = useNavigate();
 
   const filteredPast = useMemo(() => {
     if (selected === "전체") return past;
@@ -329,23 +269,17 @@ export default function ReservationHistoryView() {
   return (
     <div className="min-h-screen bg-white">
       {/* header */}
-      <div className="px-5 pt-4">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            aria-label="뒤로가기"
-            className="grid h-9 w-9 place-items-center rounded-full active:bg-[#F2F2F7]"
-          >
-            <IconBack className="h-6 w-6 text-black" />
-          </button>
-          <h1 className="text-[18px] font-semibold text-black">예약 내역</h1>
-        </div>
-      </div>
+      <header className="flex items-center px-4 py-4 bg-white">
+        <button onClick={() => navigate(-1)} className="mr-3">
+          <Back className="w-[18px] h-[18px]" />
+        </button>
+        <h1 className="pre_title_semi_20">예약 내역</h1>
+      </header>
 
       {/* content */}
       <div className="px-5 pb-10 pt-4">
         {/* waiting */}
-        <SectionTitle>확정 대기 중인 예약 일정이에요</SectionTitle>
+        <span className="pre_body_med_14 text-[#878a93]">확정 대기 중인 예약 일정이에요</span>
         <div className="mt-2">
           {waiting.map((it) => (
             <ReservationCard key={it.id} item={it} variant="waiting" />
@@ -355,7 +289,7 @@ export default function ReservationHistoryView() {
         <Divider />
 
         {/* upcoming */}
-        <SectionTitle>곧 다가오는 예약 일정이에요</SectionTitle>
+        <span className="pre_body_med_14 text-[#878a93]">곧 다가오는 예약 일정이에요</span>
         <div className="mt-2">
           {upcoming.map((it) => (
             <ReservationCard key={it.id} item={it} variant="upcoming" />
@@ -365,7 +299,7 @@ export default function ReservationHistoryView() {
         <Divider />
 
         {/* past */}
-        <h2 className="text-[16px] font-semibold text-black">지난 상담 내역</h2>
+        <h2 className="pre_subtitle_semi_16 text-black mb-5">지난 상담 내역</h2>
 
         <div className="mt-3 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {filters.map((f) => (
