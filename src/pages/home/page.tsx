@@ -9,6 +9,12 @@ import chatIcon from '../../images/home/chat.svg';
 import communityIcon from '../../images/home/community.svg';
 import mypageIcon from '../../images/home/mypage.svg';
 import starIcon from '../../images/reviews/star.svg';
+import { expertService } from '../../services/expert.service';
+import { reviewService } from '../../services/review.service';
+import {
+  getApiCategoryFromLabel,
+  getLabelFromApiCategory,
+} from '../../lib/utils/category';
 
 type Banner = {
   id: number;
@@ -65,6 +71,8 @@ const HomePage = () => {
   const [selectedTopTab, setSelectedTopTab] = useState('전체');
   const [selectedConsultingTab, setSelectedConsultingTab] = useState('전체');
   const [selectedHomeTab, setSelectedHomeTab] = useState('전체');
+  const [topExperts, setTopExperts] = useState<TopExpert[]>([]);
+  const [reviews, setReviews] = useState<ReviewCard[]>([]);
 
   useEffect(() => {
     initializeAuth();
@@ -109,51 +117,43 @@ const HomePage = () => {
     { label: '스킨', minWidth: 47 },
   ];
 
-  const topExperts: TopExpert[] = [
-    {
-      id: 1,
-      name: '강현우',
-      summary: '전문가가 작성한 자신만의 강점 1줄을 이렇게 적어두기!!',
-      tags: ['헤어라인', '두상분석'],
-    },
-    {
-      id: 2,
-      name: '강현우',
-      summary: '전문가가 작성한 자신만의 강점 1줄을 이렇게 적어두기!!',
-      tags: ['헤어라인', '두상분석'],
-    },
-    {
-      id: 3,
-      name: '강현우',
-      summary: '전문가가 작성한 자신만의 강점 1줄을 이렇게 적어두기!!',
-      tags: ['헤어라인', '두상분석'],
-    },
-  ];
+  const formatDate = (value?: string) => {
+    if (!value) {
+      return '';
+    }
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}.${month}.${day}`;
+  };
 
-  const reviews: ReviewCard[] = [
-    {
-      id: 1,
-      name: '성정수 전문가',
-      rating: 4.7,
-      date: '2025.10.08',
-      content:
-        '머리가 악성곱슬이어서 너무 고민이었는데 성정수 전문가님 만나고 광명 찾았어요~!!! 원래는 2주만 지나도 바로 곱슬곱슬해지는데 지금 한 달이 지나도 직모에요.',
-      category: '헤어',
-      concern: '탈모',
-      images: ['', ''],
-    },
-    {
-      id: 2,
-      name: '옹민호 전문가',
-      rating: 4.7,
-      date: '2025.10.08',
-      content:
-        '평소에 여드름도 많아서 메이크업 받으면 둥둥 떴는데 성정수 상담가님 덕분에 너무 멋지게 프로필 사진 촬영하고 왔어요! 상세하게 알려주셔서 덕분에 메이크업 잘하고 갔습니다.',
-      category: '메이크업',
-      concern: '?',
-      images: ['', ''],
-    },
-  ];
+  const parseMediaUrls = (value?: string) => {
+    if (!value) {
+      return [];
+    }
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return [];
+    }
+    if (trimmed.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          return parsed.filter(Boolean);
+        }
+      } catch {
+        return [];
+      }
+    }
+    return trimmed
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean);
+  };
 
   const consultingTabs = [
     { label: '전체', minWidth: 47 },
@@ -202,6 +202,81 @@ const HomePage = () => {
       navigate('/auth/login');
     }
   };
+
+  const handleReservationSchedule = () => {
+    navigate('/sheetTest');
+  };
+
+  const handleExpertProfile = (expertId: number) => {
+    navigate(`/experts/${expertId}`);
+  };
+
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchTopExperts = async () => {
+      try {
+        const category = getApiCategoryFromLabel(selectedTopTab);
+        const response = await expertService.getTopExperts(category);
+        if (!isActive) {
+          return;
+        }
+        const mapped = response.data.top3.map((expert, index) => ({
+          id: index + 1,
+          name: expert.name,
+          summary: expert.introduction,
+          tags: expert.category ? [getLabelFromApiCategory(expert.category)] : [],
+          thumbnail: expert.profileImage,
+        }));
+        setTopExperts(mapped);
+      } catch (error) {
+        console.error('Failed to fetch top experts:', error);
+      }
+    };
+
+    fetchTopExperts();
+
+    return () => {
+      isActive = false;
+    };
+  }, [selectedTopTab]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchReviews = async () => {
+      try {
+        const category = getApiCategoryFromLabel(selectedHomeTab);
+        const response = await reviewService.getRecentReviews({
+          category,
+          page: 0,
+          size: 5,
+        });
+        if (!isActive) {
+          return;
+        }
+        const mapped = response.data.map((review) => ({
+          id: review.reviewId,
+          name: '익명',
+          rating: review.rating,
+          date: formatDate(review.createdAt),
+          content: review.content,
+          category: getLabelFromApiCategory(review.category),
+          concern: '후기',
+          images: parseMediaUrls(review.mediaUrls).slice(0, 2),
+        }));
+        setReviews(mapped);
+      } catch (error) {
+        console.error('Failed to fetch reviews:', error);
+      }
+    };
+
+    fetchReviews();
+
+    return () => {
+      isActive = false;
+    };
+  }, [selectedHomeTab]);
 
   return (
     <div className="flex h-full flex-col bg-white">
@@ -332,8 +407,12 @@ const HomePage = () => {
                       </span>
                     </div>
                   </div>
-                  <div className="flex w-[218px] flex-col items-start gap-[10px]">
-                    <p className="h-[40px] w-[218px] text-[14px] font-semibold leading-[1.4] text-[#292a2d]">
+                  <button
+                    type="button"
+                    onClick={() => handleExpertProfile(expert.id)}
+                    className="flex w-[218px] flex-col items-start gap-[10px] text-left"
+                  >
+                    <p className="h-[40px] w-[218px] text-[14px] font-semibold leading-[1.4] text-[#292a2d] line-clamp-2">
                       {expert.name} |{' '}
                       <span className="font-normal">{expert.summary}</span>
                     </p>
@@ -347,7 +426,7 @@ const HomePage = () => {
                         </span>
                       ))}
                     </div>
-                  </div>
+                  </button>
                 </div>
                 <button className="flex h-6 w-6 items-center justify-center">
                   <img src={heartIcon} alt="찜" className="h-6 w-6" />
@@ -460,7 +539,11 @@ const HomePage = () => {
                 key={expert.id}
                 className="relative h-[253px] w-[343px] rounded-[8px] bg-white shadow-[0px_2px_12px_0px_rgba(0,0,0,0.13)]"
               >
-                <div className="absolute left-[13px] top-[23px] flex items-center gap-[10px]">
+                <button
+                  type="button"
+                  onClick={() => handleExpertProfile(expert.id)}
+                  className="absolute left-[13px] top-[23px] flex items-center gap-[10px] text-left"
+                >
                   <div className="h-[42px] w-[42px] shrink-0 rounded-full bg-[#e1e2e4]">
                     {expert.avatar && (
                       <img src={expert.avatar} alt="" className="h-full w-full object-cover" />
@@ -472,7 +555,7 @@ const HomePage = () => {
                     </p>
                     <p className="mt-[6px] text-[13px] text-[#878a93]">{expert.summary}</p>
                   </div>
-                </div>
+                </button>
                 <div className="absolute right-[13px] top-[23px] flex items-center gap-[6px] text-[13px] text-[#878a93]">
                   <div className="flex items-center gap-[2px]">
                     <img src={starIcon} alt="" className="h-[18px] w-[18px]" />
@@ -496,7 +579,10 @@ const HomePage = () => {
                     </div>
                   ))}
                 </div>
-                <button className="absolute right-[12px] top-[198px] h-[36px] w-[95px] rounded-[4px] bg-[#171719] text-[14px] font-medium text-white">
+                <button
+                  className="absolute right-[12px] top-[198px] h-[36px] w-[95px] rounded-[4px] bg-[#171719] text-[14px] font-medium text-white"
+                  onClick={handleReservationSchedule}
+                >
                   상담 예약
                 </button>
                 <div className="absolute left-[13px] top-[204px] flex gap-[6px]">
@@ -519,10 +605,7 @@ const HomePage = () => {
         </section>
 
         <section className="px-4 pb-[24px] pt-[8px]">
-          <button
-            onClick={() => navigate('/reservation/fashion')}
-            className="flex h-[52px] w-full items-center justify-center rounded-[12px] bg-[#171719] text-[16px] font-semibold text-white"
-          >
+          <button className="flex h-[52px] w-full items-center justify-center rounded-[12px] bg-[#171719] text-[16px] font-semibold text-white">
             예약
           </button>
         </section>
@@ -544,10 +627,7 @@ const HomePage = () => {
           <img src={chatIcon} alt="채팅" className="h-6 w-6" />
           <span className="text-[12px]">채팅</span>
         </button>
-        <button
-          onClick={() => navigate('/reservation/fashion?step=9')}
-          className="flex flex-1 flex-col items-center gap-1 text-[#aeb0b6]"
-        >
+        <button className="flex flex-1 flex-col items-center gap-1 text-[#aeb0b6]">
           <img src={communityIcon} alt="커뮤니티" className="h-6 w-6" />
           <span className="text-[12px]">커뮤니티</span>
         </button>

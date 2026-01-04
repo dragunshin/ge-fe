@@ -69,3 +69,47 @@ export interface ApiErrorResponse {
   statusCode: number;
   message: string;
 }
+
+export interface ExpertRanking {
+  name: string;
+  category: string;
+  profileImage: string;
+  introduction: string;
+}
+
+export interface PopularExpertsResponse {
+  top3: ExpertRanking[];
+}
+
+export interface ExpertInfoResponse {
+  userId: number;
+  nickname: string;
+  profileImage: string;
+  category: string;
+  specialities: string[];
+  introduction: string;
+  profileLink: string;
+  careerInfo: string;
+  likes: number;
+}
+
+export interface ReviewSummaryResponse {
+  reviewId: number;
+  rating: number;
+  content: string;
+  mediaUrls: string;
+  likeCount: number;
+  category: string;
+  createdAt: string;
+}
+
+export interface ExpertSummaryResponse {
+  expertId: number;
+  nickname: string;
+  category: string;
+  profileImage: string;
+  introduction: string;
+  ratingAverage: number;
+  reviewCount: number;
+  representativeReviewImages: string[];
+}

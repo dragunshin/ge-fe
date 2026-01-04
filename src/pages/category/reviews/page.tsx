@@ -1,6 +1,12 @@
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, MoreHorizontal } from 'lucide-react';
 import starIcon from '../../../images/reviews/star.svg';
+import { reviewService } from '../../../services/review.service';
+import {
+  getApiCategoryFromRoute,
+  getLabelFromApiCategory,
+} from '../../../lib/utils/category';
 
 type ReviewItem = {
   id: number;
@@ -14,29 +20,120 @@ type ReviewItem = {
 
 const CategoryBestReviewsPage = () => {
   const navigate = useNavigate();
+  const { category } = useParams();
+  const apiCategory = getApiCategoryFromRoute(category);
+  const [reviews, setReviews] = useState<ReviewItem[]>([]);
+  const [page, setPage] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
-  const reviews: ReviewItem[] = [
-    {
-      id: 1,
-      author: '박덕호',
-      rating: 4.7,
-      date: '2025.10.08',
-      content:
-        '머리가 악성곱슬이어서 너무 고민이었는데 옹민호 전문가님 만나고 광명 찾았어요~!!! 원래는 2주만 지나도 바로 곱슬곱슬해지는데 지금 한 달이 지나도 직모에요. ',
-      tags: ['헤어', '메세지 상담', '탈모'],
-      images: ['', '', ''],
-    },
-    {
-      id: 2,
-      author: '김민준',
-      rating: 5.0,
-      date: '2025.06.12',
-      content:
-        '자꾸 앞머리가 휘어서 고민이 많았는데 가영쌤 덕분에 멋있게 앞머리 내릴 수 있어서 너무 만족스러워요. 다음에도 방문해서 모류교정 받을게요!',
-      tags: ['헤어', '메세지 상담', '모류교정'],
-      images: ['', '', ''],
-    },
-  ];
+  const formatDate = (value?: string) => {
+    if (!value) {
+      return '';
+    }
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}.${month}.${day}`;
+  };
+
+  const parseMediaUrls = (value?: string) => {
+    if (!value) {
+      return [];
+    }
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return [];
+    }
+    if (trimmed.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          return parsed.filter(Boolean);
+        }
+      } catch {
+        return [];
+      }
+    }
+    return trimmed
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean);
+  };
+
+  useEffect(() => {
+    setReviews([]);
+    setPage(0);
+    setHasMore(true);
+  }, [apiCategory]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchReviews = async () => {
+      if (!hasMore || isLoading) {
+        return;
+      }
+      setIsLoading(true);
+      try {
+        const response = await reviewService.getRecentReviews({
+          category: apiCategory,
+          page,
+          size: 5,
+        });
+        if (!isActive) {
+          return;
+        }
+        const mapped = response.data.map((review) => ({
+          id: review.reviewId,
+          author: '익명',
+          rating: review.rating,
+          date: formatDate(review.createdAt),
+          content: review.content,
+          tags: review.category
+            ? [getLabelFromApiCategory(review.category)]
+            : [],
+          images: parseMediaUrls(review.mediaUrls),
+        }));
+        setReviews((prev) => (page === 0 ? mapped : [...prev, ...mapped]));
+        setHasMore(mapped.length === 5);
+      } catch (error) {
+        console.error('Failed to fetch reviews:', error);
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchReviews();
+
+    return () => {
+      isActive = false;
+    };
+  }, [apiCategory, page, hasMore, isLoading]);
+
+  useEffect(() => {
+    if (!sentinelRef.current) {
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const firstEntry = entries[0];
+        if (firstEntry?.isIntersecting && hasMore && !isLoading) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      { rootMargin: '200px' },
+    );
+    observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, isLoading]);
 
   return (
     <div className="flex h-full flex-col bg-white">
@@ -122,6 +219,7 @@ const CategoryBestReviewsPage = () => {
             </div>
           ))}
         </section>
+        <div ref={sentinelRef} className="h-10" />
       </main>
     </div>
   );

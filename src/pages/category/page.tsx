@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronRight, Search } from 'lucide-react';
 import heartIcon from '../../images/mypage/heart.svg';
@@ -8,6 +8,12 @@ import chatIcon from '../../images/home/chat.svg';
 import communityIcon from '../../images/home/community.svg';
 import mypageIcon from '../../images/home/mypage.svg';
 import starIcon from '../../images/reviews/star.svg';
+import { expertService } from '../../services/expert.service';
+import { reviewService } from '../../services/review.service';
+import {
+  getApiCategoryFromRoute,
+  getLabelFromApiCategory,
+} from '../../lib/utils/category';
 
 type TabItem = {
   id: string;
@@ -64,7 +70,10 @@ const CategoryLandingPage = () => {
   const navigate = useNavigate();
   const params = useParams();
   const categoryKey = params.category ?? 'hair';
+  const apiCategory = getApiCategoryFromRoute(categoryKey);
   const [selectedStyleFilter, setSelectedStyleFilter] = useState('전체');
+  const [reviews, setReviews] = useState<ReviewCard[]>([]);
+  const [expertCards, setExpertCards] = useState<ExpertListCard[]>([]);
 
   const categoryLabel = useMemo(() => {
     const map: Record<string, string> = {
@@ -75,6 +84,129 @@ const CategoryLandingPage = () => {
     };
     return map[categoryKey] ?? '헤어';
   }, [categoryKey]);
+
+  const handleExpertProfile = (expertId: number) => {
+    navigate(`/experts/${expertId}`);
+  };
+
+  const handleReservationSchedule = () => {
+    navigate("/sheetTest");
+  };
+
+  const formatDate = (value?: string) => {
+    if (!value) {
+      return '';
+    }
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}.${month}.${day}`;
+  };
+
+  const parseMediaUrls = (value?: string) => {
+    if (!value) {
+      return [];
+    }
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return [];
+    }
+    if (trimmed.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          return parsed.filter(Boolean);
+        }
+      } catch {
+        return [];
+      }
+    }
+    return trimmed
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean);
+  };
+
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchReviews = async () => {
+      try {
+        const response = await reviewService.getRecentReviews({
+          category: apiCategory,
+          page: 0,
+          size: 5,
+        });
+        if (!isActive) {
+          return;
+        }
+        const mapped = response.data.map((review) => ({
+          id: review.reviewId,
+          name: '익명',
+          rating: review.rating,
+          date: formatDate(review.createdAt),
+          content: review.content,
+          category: getLabelFromApiCategory(review.category),
+          concern: '후기',
+          images: parseMediaUrls(review.mediaUrls).slice(0, 2),
+        }));
+        setReviews(mapped);
+      } catch (error) {
+        console.error('Failed to fetch category reviews:', error);
+      }
+    };
+
+    fetchReviews();
+
+    return () => {
+      isActive = false;
+    };
+  }, [apiCategory]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchExperts = async () => {
+      try {
+        const response = await expertService.getExpertList({
+          category: apiCategory,
+          page: 0,
+          size: 3,
+        });
+        if (!isActive) {
+          return;
+        }
+        const mapped = response.data.map((expert) => {
+          const images = expert.representativeReviewImages ?? [];
+          const tags = expert.category ? [getLabelFromApiCategory(expert.category)] : [];
+          return {
+            id: expert.expertId,
+            name: expert.nickname,
+            rating: Number(expert.ratingAverage?.toFixed?.(1) ?? expert.ratingAverage ?? 0),
+            reviewCount: `(${expert.reviewCount?.toLocaleString?.() ?? expert.reviewCount ?? 0})`,
+            summary: expert.introduction,
+            avatar: expert.profileImage,
+            tags,
+            reviewTags: images.map(() => tags[0] ?? '후기'),
+            images,
+          };
+        });
+        setExpertCards(mapped);
+      } catch (error) {
+        console.error('Failed to fetch category experts:', error);
+      }
+    };
+
+    fetchExperts();
+
+    return () => {
+      isActive = false;
+    };
+  }, [apiCategory]);
 
   const categoryTabs: TabItem[] = useMemo(
     () => [
@@ -111,31 +243,6 @@ const CategoryLandingPage = () => {
     },
   ];
 
-  const reviews: ReviewCard[] = [
-    {
-      id: 1,
-      name: '옹민호 전문가',
-      rating: 4.7,
-      date: '2025.10.08',
-      content:
-        '머리가 악성곱슬이어서 너무 고민이었는데 옹민호 전문가님 만나고 광명 찾았어요~!!! 원래는 2주만 지나도 바로 곱슬곱슬해지는데 지금 한 달이 지나도 직모에요.',
-      category: '헤어',
-      concern: '탈모',
-      images: ['', ''],
-    },
-    {
-      id: 2,
-      name: '옹민호 전문가',
-      rating: 4.7,
-      date: '2025.10.08',
-      content:
-        '평소에 여드름도 많아서 메이크업 받으면 둥둥 떴는데 성정수 상담가님 덕분에 너무 멋지게 프로필 사진 촬영하고 왔어요! 상세하게 알려주셔서 덕분에 메이크업 잘하고 갔습니다.',
-      category: '메이크업',
-      concern: '?',
-      images: ['', ''],
-    },
-  ];
-
   const immediateCards: ImmediateCard[] = [
     {
       id: 1,
@@ -154,39 +261,6 @@ const CategoryLandingPage = () => {
       rating: 4.7,
       reviewCount: '(1,130)',
       times: ['오전 11:00', '오후 12:30', '오후 1:00'],
-    },
-  ];
-
-  const expertCards: ExpertListCard[] = [
-    {
-      id: 1,
-      name: '김푸힝',
-      rating: 4.7,
-      reviewCount: '(1,130)',
-      summary: '탈모 삭제 마법사 | 탈모인만의 컨설팅',
-      tags: ['헤어', '탈모', '투블럭컷', '펌', '+3'],
-      reviewTags: ['탈모', '투블럭컷', '투블럭컷'],
-      images: ['', '', ''],
-    },
-    {
-      id: 2,
-      name: '김푸힝',
-      rating: 4.7,
-      reviewCount: '(1,130)',
-      summary: '탈모 삭제 마법사 | 탈모인만의 컨설팅',
-      tags: ['헤어', '탈모', '투블럭컷', '펌', '+3'],
-      reviewTags: ['탈모', '투블럭컷', '투블럭컷'],
-      images: ['', '', ''],
-    },
-    {
-      id: 3,
-      name: '김푸힝',
-      rating: 4.7,
-      reviewCount: '(1,130)',
-      summary: '탈모 삭제 마법사 | 탈모인만의 컨설팅',
-      tags: ['헤어', '탈모', '투블럭컷', '펌', '+3'],
-      reviewTags: ['탈모', '투블럭컷', '투블럭컷'],
-      images: ['', '', ''],
     },
   ];
 
@@ -469,7 +543,11 @@ const CategoryLandingPage = () => {
                 key={expert.id}
                 className="relative h-[253px] w-[343px] rounded-[8px] bg-white shadow-[0px_2px_12px_0px_rgba(0,0,0,0.13)]"
               >
-                <div className="absolute left-[13px] top-[23px] flex items-center gap-[10px]">
+                <button
+                  type="button"
+                  onClick={() => handleExpertProfile(expert.id)}
+                  className="absolute left-[13px] top-[23px] flex items-center gap-[10px] text-left"
+                >
                   <div className="h-[42px] w-[42px] shrink-0 rounded-full bg-[#e1e2e4]">
                     {expert.avatar && (
                       <img src={expert.avatar} alt="" className="h-full w-full object-cover" />
@@ -481,7 +559,7 @@ const CategoryLandingPage = () => {
                     </p>
                     <p className="mt-[6px] text-[13px] text-[#878a93]">{expert.summary}</p>
                   </div>
-                </div>
+                </button>
                 <div className="absolute right-[13px] top-[23px] flex items-center gap-[6px] text-[13px] text-[#878a93]">
                   <div className="flex items-center gap-[2px]">
                     <img src={starIcon} alt="" className="h-[18px] w-[18px]" />
@@ -505,7 +583,10 @@ const CategoryLandingPage = () => {
                     </div>
                   ))}
                 </div>
-                <button className="absolute right-[12px] top-[198px] h-[36px] w-[95px] rounded-[4px] bg-[#171719] text-[14px] font-medium text-white">
+                <button
+                  className="absolute right-[12px] top-[198px] h-[36px] w-[95px] rounded-[4px] bg-[#171719] text-[14px] font-medium text-white"
+                  onClick={handleReservationSchedule}
+                >
                   상담 예약
                 </button>
                 <div className="absolute left-[13px] top-[204px] flex gap-[6px]">

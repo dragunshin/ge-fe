@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   CheckCircle2,
@@ -11,11 +11,20 @@ import {
 } from 'lucide-react';
 import heartIcon from '../../../images/mypage/heart.svg';
 import { portfolioItems } from './portfolio-data';
+import { expertService } from '../../../services/expert.service';
+import { reviewService } from '../../../services/review.service';
+import type { ExpertInfoResponse } from '../../../lib/api/types';
+import {
+  getLabelFromApiCategory,
+  getRouteCategoryFromApi,
+  type ApiCategory,
+} from '../../../lib/utils/category';
 
 type ReviewCard = {
   id: number;
   title: string;
   content: string;
+  rating: number;
 };
 
 type RelatedExpert = {
@@ -27,10 +36,16 @@ type RelatedExpert = {
 const ExpertInfoPage = () => {
   const navigate = useNavigate();
   const { expertId } = useParams();
+  const expertIdNumber = useMemo(() => (expertId ? Number(expertId) : undefined), [expertId]);
   const portfolioPath = `/experts/${expertId ?? '1'}/portfolio`;
   const [expandedPortfolio, setExpandedPortfolio] = useState<
     Record<number, { concern: boolean; solution: boolean }>
   >({});
+  const [expertInfo, setExpertInfo] = useState<ExpertInfoResponse | null>(null);
+  const [likesCount, setLikesCount] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [reviewCards, setReviewCards] = useState<ReviewCard[]>([]);
+  const [reviewAverage, setReviewAverage] = useState(0);
 
   const handleTogglePortfolio = (id: number, field: 'concern' | 'solution') => {
     setExpandedPortfolio((prev) => ({
@@ -42,19 +57,6 @@ const ExpertInfoPage = () => {
       },
     }));
   };
-
-  const reviewCards: ReviewCard[] = [
-    {
-      id: 1,
-      title: '스핀 스왈로브펌',
-      content: '아 너무 좋아요. 소개팅 나갔는데 머리 예쁘다고 어제부터 사귀기로 했어요.',
-    },
-    {
-      id: 2,
-      title: '앞머리 다운펌',
-      content: '곱슬머리 너무 심했는데 전문가님이 잘 잡아주셔서 덕분에 잘 ',
-    },
-  ];
 
   const portfolioCards = portfolioItems;
 
@@ -78,6 +80,97 @@ const ExpertInfoPage = () => {
     },
   ];
 
+  useEffect(() => {
+    if (!expertIdNumber) {
+      return;
+    }
+
+    let isActive = true;
+
+    const fetchExpertInfo = async () => {
+      try {
+        const response = await expertService.getExpertInfo(expertIdNumber);
+        if (!isActive) {
+          return;
+        }
+        setExpertInfo(response.data);
+        setLikesCount(response.data.likes ?? 0);
+      } catch (error) {
+        console.error('Failed to fetch expert info:', error);
+      }
+    };
+
+    fetchExpertInfo();
+
+    return () => {
+      isActive = false;
+    };
+  }, [expertIdNumber]);
+
+  useEffect(() => {
+    if (!expertInfo?.category) {
+      return;
+    }
+
+    let isActive = true;
+
+    const fetchReviews = async () => {
+      try {
+        const response = await reviewService.getRecentReviews({
+          category: expertInfo.category as ApiCategory,
+          page: 0,
+          size: 5,
+        });
+        if (!isActive) {
+          return;
+        }
+        const nextCards = response.data.map((review, index) => ({
+          id: review.reviewId,
+          title: `후기 ${index + 1}`,
+          content: review.content,
+          rating: review.rating,
+        }));
+        setReviewCards(nextCards);
+        const average =
+          response.data.length === 0
+            ? 0
+            : response.data.reduce((sum, review) => sum + review.rating, 0) /
+              response.data.length;
+        setReviewAverage(Number(average.toFixed(1)));
+      } catch (error) {
+        console.error('Failed to fetch reviews:', error);
+      }
+    };
+
+    fetchReviews();
+
+    return () => {
+      isActive = false;
+    };
+  }, [expertInfo?.category]);
+
+  const handleToggleLike = async () => {
+    if (!expertIdNumber) {
+      return;
+    }
+    try {
+      if (isLiked) {
+        await expertService.unlikeExpert(expertIdNumber);
+        setLikesCount((prev) => Math.max(0, prev - 1));
+        setIsLiked(false);
+        return;
+      }
+      await expertService.likeExpert(expertIdNumber);
+      setLikesCount((prev) => prev + 1);
+      setIsLiked(true);
+    } catch (error) {
+      console.error('Failed to toggle like:', error);
+    }
+  };
+
+  const categoryLabel = getLabelFromApiCategory(expertInfo?.category);
+  const reviewCategoryRoute = getRouteCategoryFromApi(expertInfo?.category) ?? 'hair';
+
   return (
     <div className="flex h-full flex-col bg-white">
       <main className="relative flex-1 overflow-x-hidden overflow-y-auto pb-[120px] scrollbar-hide">
@@ -97,20 +190,32 @@ const ExpertInfoPage = () => {
           <div className="absolute left-0 top-[311px] h-[460px] w-[375px]">
             <div className="absolute left-[16px] top-[40px] flex w-[342px] items-end justify-between">
               <div className="flex items-end gap-[12px]">
-                <div className="h-[52px] w-[52px] rounded-full bg-[#e1e2e4]" />
+                <div className="h-[52px] w-[52px] overflow-hidden rounded-full bg-[#e1e2e4]">
+                  {expertInfo?.profileImage && (
+                    <img
+                      src={expertInfo.profileImage}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  )}
+                </div>
                 <div className="flex flex-col gap-[4px]">
                   <span className="inline-flex rounded-[2px] bg-[#f5f9fd] px-[6px] py-[4px] text-[12px] text-[#429ff0]">
-                    헤어
+                    {categoryLabel || '카테고리'}
                   </span>
                   <span className="text-[18px] font-semibold text-[#292a2d]">
-                    옹민호 전문가
+                    {expertInfo?.nickname ?? '전문가'}
                   </span>
                 </div>
               </div>
-              <div className="flex flex-col items-center gap-[2px]">
+              <button
+                type="button"
+                onClick={handleToggleLike}
+                className="flex flex-col items-center gap-[2px]"
+              >
                 <img src={heartIcon} alt="찜" className="h-[24px] w-[24px]" />
-                <span className="text-[13px] text-[#878a93]">32</span>
-              </div>
+                <span className="text-[13px] text-[#878a93]">{likesCount}</span>
+              </button>
             </div>
 
             <div className="absolute left-[16px] top-[114px] h-px w-[343px] bg-[#f4f4f5]" />
@@ -121,23 +226,35 @@ const ExpertInfoPage = () => {
                 <div className="flex flex-col gap-[6px]">
                   <p className="text-[16px] font-semibold text-[#292a2d]">전문분야</p>
                   <p className="text-[13px] leading-[1.4] text-[#878a93]">
-                    짧은 머리부터 긴머리까지 남자머리의 정석, 오래 유지되는 디자인으로 얼굴형에 어울리는 맞춤형으로 디자인
-                    해드리겠습니다.
+                    {expertInfo?.introduction ?? '전문가 소개가 준비 중입니다.'}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-[8px]">
                 <Instagram className="h-[24px] w-[24px] text-[#292a2d]" />
-                <span className="text-[14px] text-[#429ff0]">instagram link</span>
+                {expertInfo?.profileLink ? (
+                  <a
+                    href={expertInfo.profileLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[14px] text-[#429ff0]"
+                  >
+                    {expertInfo.profileLink}
+                  </a>
+                ) : (
+                  <span className="text-[14px] text-[#429ff0]">링크 준비 중</span>
+                )}
               </div>
               <div className="flex items-start gap-[8px]">
                 <ClipboardList className="h-[24px] w-[24px] text-[#292a2d]" />
                 <div className="flex flex-col gap-[6px]">
                   <p className="text-[16px] font-semibold text-[#292a2d]">경력 정보</p>
                   <div className="text-[14px] leading-[1.4] text-[#878a93]">
-                    <p>탈모 헤어스타일링 전문가</p>
-                    <p>2021~2023 청담동 후고바버샵 근무</p>
-                    <p>전)옹스샵 원장</p>
+                    {(expertInfo?.careerInfo ? expertInfo.careerInfo.split('\n') : ['경력 정보가 준비 중입니다.']).map(
+                      (line, index) => (
+                        <p key={`${line}-${index}`}>{line}</p>
+                      ),
+                    )}
                   </div>
                 </div>
               </div>
@@ -155,16 +272,21 @@ const ExpertInfoPage = () => {
             <div className="absolute left-[17px] top-[30px] flex w-[342px] items-center justify-between">
               <div className="flex items-center gap-[6px] text-[18px] font-semibold">
                 <span className="text-[#0f0f10]">시술 후기</span>
-                <span className="text-[#429ff0]">32</span>
+                <span className="text-[#429ff0]">{reviewCards.length}</span>
               </div>
-              <button className="flex items-center gap-[2px] text-[14px] text-[#70737c]">
+              <button
+                className="flex items-center gap-[2px] text-[14px] text-[#70737c]"
+                onClick={() => navigate(`/category/${reviewCategoryRoute}/reviews`)}
+              >
                 전체보기
                 <ChevronRight className="h-[24px] w-[24px]" />
               </button>
             </div>
             <div className="absolute left-[16px] top-[60px] flex items-center gap-[8px]">
               <Star className="h-[24px] w-[24px] text-[#ffb800]" />
-              <span className="text-[14px] font-semibold text-[#292a2d]">9.8</span>
+              <span className="text-[14px] font-semibold text-[#292a2d]">
+                {reviewAverage || 0}
+              </span>
             </div>
             <div className="absolute left-[16px] top-[100px] flex w-[335px] gap-[12px] overflow-x-auto scrollbar-hide">
               {reviewCards.map((review) => (

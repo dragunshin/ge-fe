@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ConsultationMethodSheet from "./reservationSheet/typeReservation";
 import DateTimeBottomSheet from "./reservationSheet/calendar";
 
@@ -33,6 +34,8 @@ function formatKoDate(date: Date) {
 }
 
 export default function ConsultationSheetTestPage() {
+  const navigate = useNavigate();
+  const STORAGE_KEY = "reservation_sheet_logs_v1";
   // 상담방식 시트
   const [openConsult, setOpenConsult] = useState(false);
   const [defaultConsult, setDefaultConsult] = useState<ConsultType>("MESSAGE");
@@ -41,6 +44,40 @@ export default function ConsultationSheetTestPage() {
   // 날짜/시간 시트
   const [openDateTime, setOpenDateTime] = useState(false);
   const [dateTimeLog, setDateTimeLog] = useState<DateTimeLog[]>([]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const stored = sessionStorage.getItem(STORAGE_KEY);
+    if (!stored) {
+      return;
+    }
+    try {
+      const parsed = JSON.parse(stored) as {
+        consultLog?: ConsultLog[];
+        dateTimeLog?: DateTimeLog[];
+      };
+      if (parsed.consultLog) {
+        setConsultLog(parsed.consultLog);
+      }
+      if (parsed.dateTimeLog) {
+        setDateTimeLog(parsed.dateTimeLog);
+      }
+    } catch {
+      sessionStorage.removeItem(STORAGE_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    sessionStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ consultLog, dateTimeLog }),
+    );
+  }, [consultLog, dateTimeLog]);
 
   const containerMax = useMemo(() => "max-w-[420px]", []);
 
@@ -212,6 +249,7 @@ export default function ConsultationSheetTestPage() {
             ...prev,
           ]);
           setOpenDateTime(false);
+          navigate("/reservation/fashion");
         }}
       />
     </div>
