@@ -3,11 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { authService } from '../../../services/auth.service';
 import { getErrorMessage } from '../../../lib/api/error-handler';
 import { getKakaoCodeFromUrl, getKakaoErrorFromUrl } from '../../../lib/utils/kakao';
-import { useAuthStore } from '../../../stores/useAuthStore';
 
 export default function KakaoCallbackPage() {
   const navigate = useNavigate();
-  const login = useAuthStore((state) => state.login);
 
   useEffect(() => {
     const handleKakaoCallback = async () => {
@@ -34,17 +32,9 @@ export default function KakaoCallbackPage() {
           provider: 'KAKAO',
         });
 
-        if (response.statusCode === 0) {
+        if (response.statusCode === 0 || response.statusCode === 200) {
           const { role, nickname } = response.data;
-
-          // TMP_USER인 경우 추가 정보 입력 페이지로 이동
-          if (role === 'TMP_USER') {
-            navigate('/auth/social-signup', { state: { nickname } });
-          } else {
-            // 정상 사용자는 로그인 정보 저장 후 홈으로 이동
-            login({ nickname, userType: role });
-            navigate('/');
-          }
+          navigate('/auth/social-signup', { state: { nickname, role } });
         }
       } catch (err) {
         const errorMessage = getErrorMessage(err);
@@ -54,7 +44,7 @@ export default function KakaoCallbackPage() {
     };
 
     handleKakaoCallback();
-  }, [navigate, login]);
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">

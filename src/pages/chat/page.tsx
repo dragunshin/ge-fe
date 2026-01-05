@@ -6,6 +6,7 @@ import { useChatRoom } from "@/hooks/useChatRoom";
 import { MessageList } from "./components/MessageList";
 import { MessageInput } from "./components/MessageInput";
 import { createChatroom } from "@/api/chat";
+import BottomNav from "@/components/navigation/bottom-nav";
 
 export function Chat() {
   const consultationId = 4;
@@ -67,6 +68,8 @@ export function Chat() {
 
       <MessageList messages={messages} />
       <MessageInput onSend={sendTextMessage} disabled={!isConnected} />
+
+      <BottomNav />
     </div>
   );
 }

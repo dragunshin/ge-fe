@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import backIcon from '../../images/login/back.svg';
+import { X } from 'lucide-react';
 import googleIcon from '../../images/login/google.svg';
 import kakaoIcon from '../../images/login/kakao.svg';
 import separateIcon from '../../images/login/seperate.svg';
+import menualLogo from '../../images/home/menual.svg';
 import { authService } from '../../services/auth.service';
 import { getErrorMessage } from '../../lib/api/error-handler';
 import { redirectToKakaoLogin } from '../../lib/utils/kakao';
@@ -60,7 +61,7 @@ export function LoginForm() {
       const response = await authService.login(validatedData);
 
       // 로그인 성공
-      if (response.statusCode === 0) {
+      if (response.statusCode === 0 || response.statusCode === 200) {
         const { nickname, userType } = response.data;
 
         // 로그인 정보 저장
@@ -94,143 +95,148 @@ export function LoginForm() {
   };
 
   return (
-    <div className="h-screen bg-white flex flex-col overflow-hidden">
-      {/* Header */}
-      <header className="shrink-0 flex items-center px-6 py-4">
-        <button onClick={() => navigate(-1)} className="mr-3">
-          <img src={backIcon} alt="back" className="w-2.5 h-[18px]" />
+    <div className="min-h-screen bg-white flex flex-col">
+      <header className="flex items-center px-4 pt-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="h-7 w-7 flex items-center justify-center"
+          aria-label="닫기"
+        >
+          <X className="h-6 w-6 text-[#0f0f10]" />
         </button>
-        <h1 className="text-xl font-semibold">회원가입/로그인</h1>
       </header>
 
-      {/* Tabs */}
-      <div className="shrink-0 flex">
-        <button
-          onClick={() => setUserType('login')}
-          className={`flex-1 py-4 text-base font-medium transition-all relative ${
-            userType === 'login' ? 'text-black' : 'text-gray-400'
-          }`}
-        >
-          로그인
-          {userType === 'login' && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />
-          )}
-        </button>
-        <button
-          onClick={() => setUserType('expert')}
-          className={`flex-1 py-4 text-base font-medium transition-all relative ${
-            userType === 'expert' ? 'text-black' : 'text-gray-400'
-          }`}
-        >
-          전문가 로그인
-          {userType === 'expert' && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />
-          )}
-        </button>
+      <div className="flex justify-center pt-4">
+        <img src={menualLogo} alt="MENUAL" className="h-[32px] w-[172px]" />
       </div>
 
-      {/* Form */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-6 pt-10 pb-8">
-          {/* Email Input */}
-          <div>
-            <input
-              name="email"
-              type="text"
-              placeholder="이메일 입력"
-              value={formData.email}
-              onChange={handleChange}
-              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[13px] bg-white transition-colors ${
-                errors.email ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gray-300'
+      <main className="flex-1 overflow-y-auto scrollbar-hide">
+        <div className="mx-auto w-full max-w-[343px] pt-[56px] pb-8">
+          {/* Tabs */}
+          <div className="flex">
+            <button
+              onClick={() => setUserType('login')}
+              className={`flex-1 h-[40px] text-[16px] transition-all ${
+                userType === 'login'
+                  ? 'border-b-2 border-[#0f0f10] font-semibold text-[#0f0f10]'
+                  : 'border-b border-[#f4f4f5] font-normal text-[#0f0f10]'
               }`}
-              disabled={isLoading}
-            />
-            {errors.email && (
-              <p className="text-red-500 text-xs mt-1 px-1">{errors.email}</p>
-            )}
+            >
+              로그인
+            </button>
+            <button
+              onClick={() => setUserType('expert')}
+              className={`flex-1 h-[40px] text-[16px] transition-all ${
+                userType === 'expert'
+                  ? 'border-b-2 border-[#0f0f10] font-semibold text-[#0f0f10]'
+                  : 'border-b border-[#f4f4f5] font-normal text-[#0f0f10]'
+              }`}
+            >
+              전문가 로그인
+            </button>
           </div>
 
-          {/* Password Input */}
-          <div>
-            <input
-              name="password"
-              type="password"
-              placeholder="패스워드 입력"
-              value={formData.password}
-              onChange={handleChange}
-              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[13px] bg-white transition-colors ${
-                errors.password ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gray-300'
-              }`}
-              disabled={isLoading}
-            />
-            {errors.password && (
-              <p className="text-red-500 text-xs mt-1 px-1">{errors.password}</p>
-            )}
-          </div>
-
-          {/* 일반 에러 메시지 (로그인 실패 등) */}
-          {errors.general && (
-            <div className="text-red-500 text-sm px-1">
-              {errors.general}
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4 pt-[28px]">
+            <div>
+              <input
+                name="email"
+                type="text"
+                placeholder="이메일 입력"
+                value={formData.email}
+                onChange={handleChange}
+                className={`w-full h-12 px-5 border rounded-[4px] focus:outline-none placeholder:text-[#989ba2] text-[13px] bg-white transition-colors ${
+                  errors.email
+                    ? 'border-red-500 focus:border-red-500'
+                    : 'border-[#dbdcdf] focus:border-[#c9cbd1]'
+                }`}
+                disabled={isLoading}
+              />
+              {errors.email && (
+                <p className="text-red-500 text-xs mt-1 px-1">{errors.email}</p>
+              )}
             </div>
-          )}
 
-          {/* Login Button */}
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full h-14 flex items-center justify-center mt-2 font-semibold text-base bg-black text-white hover:bg-gray-800 transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoading ? '로그인 중...' : '로그인'}
-          </button>
+            <div>
+              <input
+                name="password"
+                type="password"
+                placeholder="패스워드 입력"
+                value={formData.password}
+                onChange={handleChange}
+                className={`w-full h-12 px-5 border rounded-[4px] focus:outline-none placeholder:text-[#989ba2] text-[13px] bg-white transition-colors ${
+                  errors.password
+                    ? 'border-red-500 focus:border-red-500'
+                    : 'border-[#dbdcdf] focus:border-[#c9cbd1]'
+                }`}
+                disabled={isLoading}
+              />
+              {errors.password && (
+                <p className="text-red-500 text-xs mt-1 px-1">{errors.password}</p>
+              )}
+            </div>
 
-          {/* Password Reset / Sign Up Links */}
-          <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
-            <button type="button" className="hover:text-black transition-colors">
-              비밀번호 찾기
-            </button>
-            <img src={separateIcon} alt="separator" className="w-px h-3" />
+            {errors.general && (
+              <div className="text-red-500 text-sm px-1">
+                {errors.general}
+              </div>
+            )}
+
             <button
-              type="button"
-              onClick={() => navigate('/auth/terms-agreement')}
-              className="hover:text-black transition-colors"
-            >
-              이메일로 회원가입
-            </button>
-          </div>
-
-          {/* Divider */}
-          <div className="flex items-center gap-4 pt-[78px] pb-5">
-            <div className="flex-1 border-t border-gray-200" />
-            <span className="text-sm text-gray-500">SNS 계정으로 간편로그인</span>
-            <div className="flex-1 border-t border-gray-200" />
-          </div>
-
-          {/* Social Login Buttons */}
-          <div className="flex flex-col gap-3 pb-8">
-            <button
-              type="button"
+              type="submit"
               disabled={isLoading}
-              className="w-full h-14 flex items-center justify-center gap-3 border border-gray-200 bg-white hover:bg-gray-50 transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full h-12 flex items-center justify-center mt-[12px] font-semibold text-[16px] bg-[#0f0f10] text-white hover:bg-[#1a1a1a] transition-colors rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <img src={googleIcon} alt="Google" className="w-5 h-5" />
-              <span className="text-base font-medium text-gray-900">Google 로그인</span>
+              {isLoading ? '로그인 중...' : '로그인'}
             </button>
-            <button
-              type="button"
-              onClick={redirectToKakaoLogin}
-              disabled={isLoading}
-              className="w-full h-14 flex items-center justify-center gap-3 hover:opacity-90 transition-opacity rounded disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ backgroundColor: '#FEE500' }}
-            >
-              <img src={kakaoIcon} alt="Kakao" className="w-5 h-5" />
-              <span className="text-base font-semibold" style={{ color: '#3C1E1E' }}>
-                {isLoading ? '로그인 중...' : '카카오톡 로그인'}
+
+            <div className="flex items-center justify-center gap-[10px] text-[12px] text-[#656870]">
+              <button type="button" className="hover:text-black transition-colors">
+                비밀번호 찾기
+              </button>
+              <img src={separateIcon} alt="separator" className="w-px h-3" />
+              <button
+                type="button"
+                onClick={() => navigate('/auth/terms-agreement')}
+                className="hover:text-black transition-colors"
+              >
+                이메일로 회원가입
+              </button>
+            </div>
+
+            <div className="flex items-center gap-[12px] pt-[78px] pb-5">
+              <div className="flex-1 border-t border-[#e1e2e4]" />
+              <span className="text-[14px] font-medium text-[#70737c]">
+                SNS 계정으로 간편로그인
               </span>
-            </button>
-          </div>
-        </form>
-      </div>
+              <div className="flex-1 border-t border-[#e1e2e4]" />
+            </div>
+
+            <div className="flex flex-col gap-3 pb-8">
+              <button
+                type="button"
+                disabled={isLoading}
+                className="w-full h-12 flex items-center justify-center gap-3 border border-[#dbdcdf] bg-white hover:bg-gray-50 transition-colors rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <img src={googleIcon} alt="Google" className="w-5 h-5" />
+                <span className="text-[14px] font-semibold text-[#0f0f10]">Google 로그인</span>
+              </button>
+              <button
+                type="button"
+                onClick={redirectToKakaoLogin}
+                disabled={isLoading}
+                className="w-full h-12 flex items-center justify-center gap-3 hover:opacity-90 transition-opacity rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ backgroundColor: '#FFE809' }}
+              >
+                <img src={kakaoIcon} alt="Kakao" className="w-5 h-5" />
+                <span className="text-[14px] font-semibold text-[#0f0f10]">
+                  {isLoading ? '로그인 중...' : '카카오톡 로그인'}
+                </span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </main>
     </div>
   );
 }

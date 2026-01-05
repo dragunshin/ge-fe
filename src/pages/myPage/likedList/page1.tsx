@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Heart from "@/images/mypage/heart.svg?react";
 import Back from "@/images/login/back.svg?react";
 import Star from "@/images/mypage/star.svg?react";
+import BottomNav from "@/components/navigation/bottom-nav";
 
 type Category = "전체" | "헤어" | "스킨케어" | "패션" | "메이크업";
 
@@ -62,8 +63,9 @@ export default function LikedListPage() {
   }, [activeChip]);
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="mx-auto w-full max-w-md px-4 pb-12">
+    <div className="flex h-full flex-col bg-white">
+      <main className="flex-1 overflow-y-auto">
+        <div className="mx-auto w-full max-w-md px-4 pb-12">
         <div className="pt-6">
           {/* header */}
           <header className="flex items-center px-1 py-2 bg-white">
@@ -155,7 +157,9 @@ export default function LikedListPage() {
             </div>
           )}
         </div>
-      </div>
+        </div>
+      </main>
+      <BottomNav />
     </div>
   );
 }

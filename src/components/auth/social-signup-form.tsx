@@ -91,7 +91,7 @@ export function SocialSignUpForm() {
       const response = await authService.socialSignup(validatedData);
 
       // 소셜 회원가입 성공
-      if (response.statusCode === 0) {
+      if (response.statusCode === 0 || response.statusCode === 200) {
         const { nickname, userType } = response.data;
 
         // 로그인 정보 저장

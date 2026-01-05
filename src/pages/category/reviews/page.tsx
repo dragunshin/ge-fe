@@ -7,6 +7,7 @@ import {
   getApiCategoryFromRoute,
   getLabelFromApiCategory,
 } from '../../../lib/utils/category';
+import BottomNav from '@/components/navigation/bottom-nav';
 
 type ReviewItem = {
   id: number;
@@ -221,6 +222,7 @@ const CategoryBestReviewsPage = () => {
         </section>
         <div ref={sentinelRef} className="h-10" />
       </main>
+      <BottomNav />
     </div>
   );
 };

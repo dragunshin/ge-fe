@@ -11,6 +11,7 @@ import Star from "@/images/mypage/star.svg?react";
 import Question from "@/images/mypage/question.svg?react";
 
 import { X } from "lucide-react";
+import BottomNav from "@/components/navigation/bottom-nav";
 
 type StatItem = {
   key: string;
@@ -138,8 +139,9 @@ export default function MyPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="mx-auto w-full  px-5 pb-10">
+    <div className="flex h-full flex-col bg-white">
+      <main className="flex-1 overflow-y-auto">
+        <div className="mx-auto w-full px-5 pb-10">
         {/* Header */}
         <header className="pt-7">
           <h1 className="pre_title_semi_20 text-neutral-900">마이페이지</h1>
@@ -247,7 +249,9 @@ export default function MyPage() {
             <MenuSection key={section.title} title={section.title} items={section.items} />
           ))}
         </div>
-      </div>
+        </div>
+      </main>
+      <BottomNav />
     </div>
   );
 }

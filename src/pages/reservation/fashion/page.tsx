@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Camera, Check, ChevronLeft, Upload, X } from "lucide-react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 const IMAGE_GUIDE = [
   "밝은 조명 하에서 고화질 사진이 필요해요.",
@@ -87,6 +87,7 @@ const releasePreview = (preview?: OutfitImage | null) => {
 
 export default function FashionReservationFlowPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const [step, setStep] = React.useState(1);
   const [introStage, setIntroStage] = React.useState<1 | 2>(1);
@@ -325,7 +326,9 @@ export default function FashionReservationFlowPage() {
       }
       return;
     }
-    navigate("/payment/order");
+    navigate("/payment/order", {
+      state: { from: `${location.pathname}${location.search}` },
+    });
   };
 
   const handlePreviewNext = () => {
@@ -364,14 +367,16 @@ export default function FashionReservationFlowPage() {
   const maxPercent = (priceMax / PRICE_MAX) * 100;
 
   return (
-    <div className="flex h-screen flex-col bg-white text-[#0f0f10]">
-      <header className="flex h-[44px] items-center px-[16px]">
-        <button onClick={handleBack} aria-label="뒤로가기">
-          <ChevronLeft className="h-[24px] w-[24px]" />
-        </button>
+    <div className="flex min-h-full flex-col bg-white text-[#0f0f10]">
+      <header className="fixed top-0 left-1/2 z-10 w-full max-w-[375px] -translate-x-1/2 bg-white">
+        <div className="flex h-[44px] items-center px-[16px]">
+          <button onClick={handleBack} aria-label="뒤로가기">
+            <ChevronLeft className="h-[24px] w-[24px]" />
+          </button>
+        </div>
       </header>
 
-      <main className="hide-scrollbar flex-1 overflow-y-auto px-[16px] pb-[120px]">
+      <main className="hide-scrollbar flex-1 overflow-y-auto px-[16px] pb-[160px] pt-[44px]">
         {step === 1 && introStage === 1 && (
           <section className="pt-[8px]">
             <p className="text-[16px] font-medium text-[#008bff]">1/9</p>
@@ -1111,7 +1116,7 @@ export default function FashionReservationFlowPage() {
         )}
       </main>
 
-      <div className="shrink-0">
+      <div className="fixed bottom-0 left-1/2 w-full max-w-[375px] -translate-x-1/2 bg-white">
         <div className="px-[16px] pb-[8px] pt-[4px]">
           <div className="flex justify-end">
             <button

@@ -1,9 +1,9 @@
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_1657_7122)">
-<path d="M16.3689 13.791C13.3675 13.791 10.4814 15.7077 9.75831 19.4403C9.66251 19.9341 9.90338 20.4226 10.2981 20.4226H22.4402C22.8348 20.4226 23.0743 19.9341 22.9799 19.4403C22.2569 15.6479 19.3707 13.791 16.3689 13.791Z" stroke="#AEB0B6" stroke-width="1.87895" stroke-miterlimit="10"/>
-<path d="M9.73684 14.3569C8.9343 13.9482 8.05039 13.791 7.11358 13.791C4.80155 13.791 2.574 15.0686 2.016 17.5572C1.94263 17.8864 2.12849 18.2121 2.43261 18.2121H7.42481" stroke="#AEB0B6" stroke-width="1.87895" stroke-miterlimit="10" stroke-linecap="round"/>
-<circle cx="16.3685" cy="7.5443" r="3.31579" stroke="#AEB0B6" stroke-width="1.87895" stroke-miterlimit="10"/>
-<circle cx="6.42146" cy="8.64998" r="2.21053" stroke="#AEB0B6" stroke-width="1.87895" stroke-miterlimit="10"/>
+<path d="M16.3689 13.791C13.3675 13.791 10.4814 15.7077 9.75831 19.4403C9.66251 19.9341 9.90338 20.4226 10.2981 20.4226H22.4402C22.8348 20.4226 23.0743 19.9341 22.9799 19.4403C22.2569 15.6479 19.3707 13.791 16.3689 13.791Z" stroke="currentColor" stroke-width="1.87895" stroke-miterlimit="10"/>
+<path d="M9.73684 14.3569C8.9343 13.9482 8.05039 13.791 7.11358 13.791C4.80155 13.791 2.574 15.0686 2.016 17.5572C1.94263 17.8864 2.12849 18.2121 2.43261 18.2121H7.42481" stroke="currentColor" stroke-width="1.87895" stroke-miterlimit="10" stroke-linecap="round"/>
+<circle cx="16.3685" cy="7.5443" r="3.31579" stroke="currentColor" stroke-width="1.87895" stroke-miterlimit="10"/>
+<circle cx="6.42146" cy="8.64998" r="2.21053" stroke="currentColor" stroke-width="1.87895" stroke-miterlimit="10"/>
 </g>
 <defs>
 <clipPath id="clip0_1657_7122">

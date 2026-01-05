@@ -570,12 +570,15 @@ import { useNavigate } from "react-router-dom";
 import { ChevronRight, Search } from "lucide-react";
 import { useAuthStore } from "../../stores/useAuthStore";
 import heartIcon from "../../images/mypage/heart.svg";
-import homeIcon from "../../images/home/home.svg";
-import exploreIcon from "../../images/home/search.svg";
-import chatIcon from "../../images/home/chat.svg";
-import communityIcon from "../../images/home/community.svg";
-import mypageIcon from "../../images/home/mypage.svg";
+import BottomNav from "@/components/navigation/bottom-nav";
+import Logo from "@/components/ui/logo";
 import starIcon from "../../images/reviews/star.svg";
+import { expertService } from "../../services/expert.service";
+import { reviewService } from "../../services/review.service";
+import {
+  getApiCategoryFromLabel,
+  getLabelFromApiCategory,
+} from "../../lib/utils/category";
 
 // ✅ 아래 2개 import 경로만 프로젝트에 맞게 조정하세요.
 // 예) import ConsultationMethodSheet from './reservationSheet/typeReservation';
@@ -636,19 +639,126 @@ type ExpertListCard = {
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, initializeAuth } = useAuthStore();
-  const [selectedTopTab, setSelectedTopTab] = useState("전체");
+  const { initializeAuth } = useAuthStore();
+  const [selectedTopTab, setSelectedTopTab] = useState("헤어");
   const [selectedConsultingTab, setSelectedConsultingTab] = useState("전체");
   const [selectedHomeTab, setSelectedHomeTab] = useState("전체");
+  const [topExperts, setTopExperts] = useState<TopExpert[]>([]);
+  const [reviews, setReviews] = useState<ReviewCard[]>([]);
 
   // ✅ 추가: bottom sheet 제어 + 선택값 저장(원하면 다음 페이지로 넘길 수 있음)
   const [openTypeSheet, setOpenTypeSheet] = useState(false);
   const [openCalendarSheet, setOpenCalendarSheet] = useState(false);
   const [selectedConsultType, setSelectedConsultType] = useState<ConsultType>("MESSAGE");
 
+  const formatDate = (value?: string) => {
+    if (!value) {
+      return "";
+    }
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return "";
+    }
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}.${month}.${day}`;
+  };
+
+  const parseMediaUrls = (value?: string) => {
+    if (!value) {
+      return [];
+    }
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return [];
+    }
+    if (trimmed.startsWith("[")) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          return parsed.filter(Boolean);
+        }
+      } catch {
+        return [];
+      }
+    }
+    return trimmed
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  };
+
   useEffect(() => {
     initializeAuth();
   }, [initializeAuth]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchTopExperts = async () => {
+      try {
+        const category = getApiCategoryFromLabel(selectedTopTab);
+        const response = await expertService.getTopExperts(category);
+        if (!isActive) {
+          return;
+        }
+        const mapped = response.data.top3.map((expert, index) => ({
+          id: index,
+          name: expert.name,
+          summary: expert.introduction,
+          tags: expert.category ? [getLabelFromApiCategory(expert.category)] : [],
+          thumbnail: expert.profileImage,
+        }));
+        setTopExperts(mapped);
+      } catch (error) {
+        console.error("Failed to fetch top experts:", error);
+      }
+    };
+
+    fetchTopExperts();
+
+    return () => {
+      isActive = false;
+    };
+  }, [selectedTopTab]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchReviews = async () => {
+      try {
+        const category = getApiCategoryFromLabel(selectedHomeTab);
+        const response = await reviewService.getRecentReviews({
+          category,
+          page: 0,
+          size: 5,
+        });
+        if (!isActive) {
+          return;
+        }
+        const mapped = response.data.map((review) => ({
+          id: review.reviewId,
+          name: "익명",
+          rating: review.rating,
+          date: formatDate(review.createdAt),
+          content: review.content,
+          category: getLabelFromApiCategory(review.category),
+          concern: "후기",
+          images: parseMediaUrls(review.mediaUrls).slice(0, 2),
+        }));
+        setReviews(mapped);
+      } catch (error) {
+        console.error("Failed to fetch reviews:", error);
+      }
+    };
+
+    fetchReviews();
+
+    return () => {
+      isActive = false;
+    };
+  }, [selectedHomeTab]);
 
   const homeTabs: TabItem[] = useMemo(
     () => [
@@ -683,56 +793,10 @@ const HomePage = () => {
   ];
 
   const topTabs = [
-    { label: "전체", minWidth: 47 },
     { label: "헤어", minWidth: 47 },
+    { label: "패션", minWidth: 47 },
     { label: "메이크업", minWidth: 69 },
     { label: "스킨", minWidth: 47 },
-  ];
-
-  const topExperts: TopExpert[] = [
-    {
-      id: 1,
-      name: "강현우",
-      summary: "전문가가 작성한 자신만의 강점 1줄을 이렇게 적어두기!!",
-      tags: ["헤어라인", "두상분석"],
-    },
-    {
-      id: 2,
-      name: "강현우",
-      summary: "전문가가 작성한 자신만의 강점 1줄을 이렇게 적어두기!!",
-      tags: ["헤어라인", "두상분석"],
-    },
-    {
-      id: 3,
-      name: "강현우",
-      summary: "전문가가 작성한 자신만의 강점 1줄을 이렇게 적어두기!!",
-      tags: ["헤어라인", "두상분석"],
-    },
-  ];
-
-  const reviews: ReviewCard[] = [
-    {
-      id: 1,
-      name: "성정수 전문가",
-      rating: 4.7,
-      date: "2025.10.08",
-      content:
-        "머리가 악성곱슬이어서 너무 고민이었는데 성정수 전문가님 만나고 광명 찾았어요~!!! 원래는 2주만 지나도 바로 곱슬곱슬해지는데 지금 한 달이 지나도 직모에요.",
-      category: "헤어",
-      concern: "탈모",
-      images: ["", ""],
-    },
-    {
-      id: 2,
-      name: "옹민호 전문가",
-      rating: 4.7,
-      date: "2025.10.08",
-      content:
-        "평소에 여드름도 많아서 메이크업 받으면 둥둥 떴는데 성정수 상담가님 덕분에 너무 멋지게 프로필 사진 촬영하고 왔어요! 상세하게 알려주셔서 덕분에 메이크업 잘하고 갔습니다.",
-      category: "메이크업",
-      concern: "?",
-      images: ["", ""],
-    },
   ];
 
   const consultingTabs = [
@@ -775,28 +839,28 @@ const HomePage = () => {
     },
   ];
 
-  const handleMyPageClick = () => {
-    if (isAuthenticated) {
-      navigate("/profile");
-    } else {
-      navigate("/auth/login");
-    }
-  };
-
   // ✅ 추가: 예약 플로우 시작
   const openReservationFlow = () => {
     setOpenCalendarSheet(false);
     setOpenTypeSheet(true);
   };
 
+  const getReviewRoute = () => {
+    if (selectedHomeTab === "전체") {
+      return "/category/hair/reviews";
+    }
+    const tab = homeTabs.find((item) => item.label === selectedHomeTab);
+    if (tab?.route) {
+      return `${tab.route}/reviews`;
+    }
+    return "/category/hair/reviews";
+  };
+
   return (
     <div className="flex h-full flex-col bg-white">
-      <header className="flex h-[56px] items-center justify-between px-4 pt-[14px]">
-        <div className="flex items-center gap-1 text-[18px] font-semibold tracking-tight text-[#0f0f10]">
-          <span>MENUAL</span>
-          <span>.</span>
-        </div>
-        <div className="flex items-center gap-[14px]">
+      <header className="flex h-[56px] items-center justify-between px-4">
+        <Logo />
+        <div className="flex items-center gap-4">
           <button className="flex h-6 w-6 items-center justify-center">
             <Search className="h-6 w-6 text-[#0f0f10]" />
           </button>
@@ -937,7 +1001,10 @@ const HomePage = () => {
           <div className="px-4 pt-[22px]">
             <div className="flex items-center justify-between">
               <h2 className="text-[18px] font-semibold text-[#0f0f10]">전체 후기</h2>
-              <button className="flex items-center gap-[2px] text-[14px] text-[#70737c]">
+              <button
+                onClick={() => navigate(getReviewRoute())}
+                className="flex items-center gap-[2px] text-[14px] text-[#70737c]"
+              >
                 전체보기
                 <ChevronRight className="h-4 w-4" />
               </button>
@@ -1113,37 +1180,7 @@ const HomePage = () => {
         </section>
       </main>
 
-      <nav className="flex h-[69px] items-center justify-between border-t border-[#f4f4f5] px-4 pb-[12px] pt-[12px]">
-        <button className="flex flex-1 flex-col items-center gap-1 text-[#0f0f10]">
-          <img src={homeIcon} alt="홈" className="h-6 w-6" />
-          <span className="text-[12px] font-semibold">홈</span>
-        </button>
-        <button className="flex flex-1 flex-col items-center gap-1 text-[#aeb0b6]">
-          <img src={exploreIcon} alt="탐색" className="h-6 w-6" />
-          <span className="text-[12px]">탐색</span>
-        </button>
-        <button
-          onClick={() => navigate("/chat")}
-          className="flex flex-1 flex-col items-center gap-1 text-[#aeb0b6]"
-        >
-          <img src={chatIcon} alt="채팅" className="h-6 w-6" />
-          <span className="text-[12px]">채팅</span>
-        </button>
-        <button
-          onClick={() => navigate("/reservation/fashion?step=9")}
-          className="flex flex-1 flex-col items-center gap-1 text-[#aeb0b6]"
-        >
-          <img src={communityIcon} alt="커뮤니티" className="h-6 w-6" />
-          <span className="text-[12px]">커뮤니티</span>
-        </button>
-        <button
-          onClick={handleMyPageClick}
-          className="flex flex-1 flex-col items-center gap-1 text-[#aeb0b6]"
-        >
-          <img src={mypageIcon} alt="마이페이지" className="h-6 w-6" />
-          <span className="text-[12px]">마이페이지</span>
-        </button>
-      </nav>
+      <BottomNav />
 
       {/* ✅ 추가: 1) 상담 방식(typeReservation) */}
       <ConsultationMethodSheet

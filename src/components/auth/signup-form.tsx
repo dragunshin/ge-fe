@@ -135,7 +135,7 @@ export function SignUpForm() {
       const response = await authService.signup(validatedData);
 
       // 회원가입 성공
-      if (response.statusCode === 0) {
+      if (response.statusCode === 0 || response.statusCode === 200) {
         const { nickname, userType: responseUserType } = response.data;
 
         // 로그인 정보 저장
@@ -182,9 +182,9 @@ export function SignUpForm() {
     formData.passwordConfirm;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-full bg-white flex flex-col">
       {/* Header */}
-      <header className="flex items-center px-4 py-4">
+      <header className="shrink-0 flex items-center px-4 py-4">
         <button onClick={() => navigate(-1)} className="mr-3">
           <img src={backIcon} alt="back" className="w-2.5 h-[18px]" />
         </button>
@@ -192,7 +192,7 @@ export function SignUpForm() {
       </header>
 
       {/* Tabs */}
-      <div className="flex">
+      <div className="shrink-0 flex">
         <button
           onClick={() => setUserType('customer')}
           className={`flex-1 py-4 text-base font-medium transition-all border-b ${
@@ -213,7 +213,7 @@ export function SignUpForm() {
 
       {/* Form - 스크롤 가능 영역 */}
       <div className="flex-1 overflow-y-auto">
-        <form onSubmit={handleSubmit} className="px-4 pt-6 flex flex-col gap-6">
+        <form onSubmit={handleSubmit} className="px-4 pt-6 pb-6 flex flex-col gap-6">
           {/* 닉네임 */}
           <div>
             <label className="block text-base font-medium text-black mb-3">닉네임</label>
@@ -317,12 +317,12 @@ export function SignUpForm() {
       </div>
 
       {/* Submit Button - 하단 고정 */}
-      <div className="mt-auto">
+      <div className="shrink-0">
         <button
           type="submit"
           onClick={handleSubmit}
           disabled={isLoading || !isFormValid}
-          className={`w-full h-[90px] text-[16px] font-semibold text-white transition-colors ${
+          className={`w-full h-[56px] text-[16px] font-semibold text-white transition-colors ${
             isFormValid ? 'bg-[#0f0f10]' : 'bg-[#aeb0b6]'
           }`}
         >

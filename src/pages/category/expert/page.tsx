@@ -174,8 +174,8 @@ const ExpertInfoPage = () => {
   return (
     <div className="flex h-full flex-col bg-white">
       <main className="relative flex-1 overflow-x-hidden overflow-y-auto pb-[120px] scrollbar-hide">
-        <div className="relative mx-auto h-[2545px] w-[375px] bg-white">
-          <div className="absolute left-[16px] top-[53px] flex items-center gap-[15px]">
+        <div className="relative mx-auto min-h-[2545px] w-full max-w-[375px] bg-white">
+          <div className="absolute left-[16px] top-0 flex items-center gap-[15px] pt-[14px]">
             <button
               onClick={() => navigate(-1)}
               className="flex h-[24px] w-[24px] items-center justify-center"

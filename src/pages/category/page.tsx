@@ -1,12 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useMemo, useState, type KeyboardEvent } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ChevronRight, Search } from 'lucide-react';
 import heartIcon from '../../images/mypage/heart.svg';
-import homeIcon from '../../images/home/home.svg';
-import exploreIcon from '../../images/home/search.svg';
-import chatIcon from '../../images/home/chat.svg';
-import communityIcon from '../../images/home/community.svg';
-import mypageIcon from '../../images/home/mypage.svg';
+import BottomNav from '@/components/navigation/bottom-nav';
+import Logo from '@/components/ui/logo';
 import starIcon from '../../images/reviews/star.svg';
 import { expertService } from '../../services/expert.service';
 import { reviewService } from '../../services/review.service';
@@ -56,6 +53,7 @@ type StyleCard = {
 
 type ImmediateCard = {
   id: number;
+  expertId?: number;
   title: string;
   subtitle: string;
   expert: string;
@@ -68,6 +66,7 @@ type ImmediateCard = {
 
 const CategoryLandingPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const params = useParams();
   const categoryKey = params.category ?? 'hair';
   const apiCategory = getApiCategoryFromRoute(categoryKey);
@@ -87,6 +86,16 @@ const CategoryLandingPage = () => {
 
   const handleExpertProfile = (expertId: number) => {
     navigate(`/experts/${expertId}`);
+  };
+
+  const handleExpertKeyDown = (
+    event: KeyboardEvent<HTMLDivElement>,
+    expertId: number,
+  ) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleExpertProfile(expertId);
+    }
   };
 
   const handleReservationSchedule = () => {
@@ -246,6 +255,7 @@ const CategoryLandingPage = () => {
   const immediateCards: ImmediateCard[] = [
     {
       id: 1,
+      expertId: 1,
       title: '소개팅 필승 펌',
       subtitle: '“여심을 흔들만한 스핀 스왈로브펌”',
       expert: '성정수 상담사',
@@ -255,6 +265,7 @@ const CategoryLandingPage = () => {
     },
     {
       id: 2,
+      expertId: 2,
       title: '여심 저격 컷',
       subtitle: '“콧대가 높아보이는 가일컷”',
       expert: '성정수 상담사',
@@ -265,15 +276,33 @@ const CategoryLandingPage = () => {
   ];
 
   const underlineLeft = categoryTabs.find((tab) => tab.label === categoryLabel)?.underlineLeft ?? 85;
+  const scrollToSection = (section?: string | null) => {
+    if (!section) {
+      return;
+    }
+    const target =
+      section === 'immediate'
+        ? document.getElementById('immediate-section')
+        : section === 'experts'
+          ? document.getElementById('expert-section')
+          : null;
+    if (target) {
+      requestAnimationFrame(() => {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+  };
+
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    scrollToSection(query.get('section'));
+  }, [location.search]);
 
   return (
     <div className="flex h-full flex-col bg-white">
-      <header className="flex h-[56px] items-center justify-between px-4 pt-[14px]">
-        <div className="flex items-center gap-1 text-[18px] font-semibold text-[#0f0f10]">
-          <span>MENUAL</span>
-          <span>.</span>
-        </div>
-        <div className="flex items-center gap-[14px]">
+      <header className="flex h-[56px] items-center justify-between px-4">
+        <Logo />
+        <div className="flex items-center gap-4">
           <button className="flex h-6 w-6 items-center justify-center">
             <Search className="h-6 w-6 text-[#0f0f10]" />
           </button>
@@ -473,19 +502,29 @@ const CategoryLandingPage = () => {
           </div>
         </section>
 
-        <section className="px-4 pt-[32px]">
+        <section id="immediate-section" className="px-4 pt-[32px]">
           <div className="flex items-center justify-between">
             <h2 className="text-[18px] font-semibold text-[#0f0f10]">즉시 상담이 가능한 전문가</h2>
-            <button className="flex items-center gap-[2px] text-[14px] text-[#70737c]">
+            <button
+              onClick={() => navigate(`/category/${categoryKey}?section=immediate`)}
+              className="flex items-center gap-[2px] text-[14px] text-[#70737c]"
+            >
               전체보기
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
           <div className="mt-[16px] flex gap-[12px] overflow-x-auto pb-2 scrollbar-hide">
-            {immediateCards.map((card) => (
+            {immediateCards.map((card, index) => (
               <article
                 key={card.id}
-                className="relative h-[288px] w-[301px] shrink-0 rounded-[8px] bg-white shadow-[0px_2px_12px_0px_rgba(0,0,0,0.13)]"
+                onClick={() => {
+                  const fallbackExpertId = expertCards[index]?.id ?? expertCards[0]?.id;
+                  const targetId = card.expertId ?? fallbackExpertId;
+                  if (targetId) {
+                    navigate(`/experts/${targetId}`);
+                  }
+                }}
+                className="relative h-[288px] w-[301px] shrink-0 rounded-[8px] bg-white shadow-[0px_2px_12px_0px_rgba(0,0,0,0.13)] cursor-pointer"
               >
                 <div className="relative h-[170px] w-full overflow-hidden rounded-t-[8px] bg-[#d2d4d8]">
                   {card.image && (
@@ -516,12 +555,14 @@ const CategoryLandingPage = () => {
                 </div>
                 <div className="absolute left-[12px] top-[238px] flex gap-[6px]">
                   {card.times.map((time) => (
-                    <span
+                    <button
                       key={`${card.id}-${time}`}
+                      type="button"
+                      onClick={(event) => event.stopPropagation()}
                       className="flex h-[36px] w-[88px] items-center justify-center rounded-[6px] bg-[#008bff] text-[13px] text-white"
                     >
                       {time}
-                    </span>
+                    </button>
                   ))}
                 </div>
               </article>
@@ -529,10 +570,13 @@ const CategoryLandingPage = () => {
           </div>
         </section>
 
-        <section className="px-4 pt-[32px]">
+        <section id="expert-section" className="px-4 pt-[32px]">
           <div className="flex items-center justify-between">
             <h2 className="text-[18px] font-semibold text-[#0f0f10]">헤어 전문가</h2>
-            <button className="flex items-center gap-[2px] text-[14px] text-[#70737c]">
+            <button
+              onClick={() => navigate(`/category/${categoryKey}?section=experts`)}
+              className="flex items-center gap-[2px] text-[14px] text-[#70737c]"
+            >
               전체보기
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -541,13 +585,13 @@ const CategoryLandingPage = () => {
             {expertCards.map((expert) => (
               <article
                 key={expert.id}
-                className="relative h-[253px] w-[343px] rounded-[8px] bg-white shadow-[0px_2px_12px_0px_rgba(0,0,0,0.13)]"
+                role="button"
+                tabIndex={0}
+                onClick={() => handleExpertProfile(expert.id)}
+                onKeyDown={(event) => handleExpertKeyDown(event, expert.id)}
+                className="relative h-[253px] w-[343px] rounded-[8px] bg-white shadow-[0px_2px_12px_0px_rgba(0,0,0,0.13)] cursor-pointer"
               >
-                <button
-                  type="button"
-                  onClick={() => handleExpertProfile(expert.id)}
-                  className="absolute left-[13px] top-[23px] flex items-center gap-[10px] text-left"
-                >
+                <div className="absolute left-[13px] top-[23px] flex items-center gap-[10px] text-left">
                   <div className="h-[42px] w-[42px] shrink-0 rounded-full bg-[#e1e2e4]">
                     {expert.avatar && (
                       <img src={expert.avatar} alt="" className="h-full w-full object-cover" />
@@ -559,7 +603,7 @@ const CategoryLandingPage = () => {
                     </p>
                     <p className="mt-[6px] text-[13px] text-[#878a93]">{expert.summary}</p>
                   </div>
-                </button>
+                </div>
                 <div className="absolute right-[13px] top-[23px] flex items-center gap-[6px] text-[13px] text-[#878a93]">
                   <div className="flex items-center gap-[2px]">
                     <img src={starIcon} alt="" className="h-[18px] w-[18px]" />
@@ -567,7 +611,10 @@ const CategoryLandingPage = () => {
                   </div>
                   <span>{expert.reviewCount}</span>
                 </div>
-                <div className="absolute left-[12px] top-[79px] flex gap-[2px]">
+                <div
+                  className="absolute left-[12px] top-[79px] flex gap-[2px]"
+                  onClick={() => handleExpertProfile(expert.id)}
+                >
                   {expert.images.map((image, index) => (
                     <div
                       key={`${expert.id}-review-${index}`}
@@ -585,7 +632,10 @@ const CategoryLandingPage = () => {
                 </div>
                 <button
                   className="absolute right-[12px] top-[198px] h-[36px] w-[95px] rounded-[4px] bg-[#171719] text-[14px] font-medium text-white"
-                  onClick={handleReservationSchedule}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleReservationSchedule();
+                  }}
                 >
                   상담 예약
                 </button>
@@ -609,37 +659,7 @@ const CategoryLandingPage = () => {
         </section>
       </main>
 
-      <nav className="flex h-[69px] items-center justify-between border-t border-[#f4f4f5] px-4 pb-[12px] pt-[12px]">
-        <button
-          onClick={() => navigate('/')}
-          className="flex flex-1 flex-col items-center gap-1 text-[#aeb0b6]"
-        >
-          <img src={homeIcon} alt="홈" className="h-6 w-6" />
-          <span className="text-[12px]">홈</span>
-        </button>
-        <button className="flex flex-1 flex-col items-center gap-1 text-[#0f0f10]">
-          <img src={exploreIcon} alt="탐색" className="h-6 w-6" />
-          <span className="text-[12px] font-semibold">탐색</span>
-        </button>
-        <button
-          onClick={() => navigate('/chat')}
-          className="flex flex-1 flex-col items-center gap-1 text-[#aeb0b6]"
-        >
-          <img src={chatIcon} alt="채팅" className="h-6 w-6" />
-          <span className="text-[12px]">채팅</span>
-        </button>
-        <button
-          onClick={() => navigate('/reservation/fashion?step=9')}
-          className="flex flex-1 flex-col items-center gap-1 text-[#aeb0b6]"
-        >
-          <img src={communityIcon} alt="커뮤니티" className="h-6 w-6" />
-          <span className="text-[12px]">커뮤니티</span>
-        </button>
-        <button className="flex flex-1 flex-col items-center gap-1 text-[#aeb0b6]">
-          <img src={mypageIcon} alt="마이페이지" className="h-6 w-6" />
-          <span className="text-[12px]">마이페이지</span>
-        </button>
-      </nav>
+      <BottomNav />
     </div>
   );
 };

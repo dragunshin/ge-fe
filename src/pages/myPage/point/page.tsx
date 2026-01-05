@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
 import Back from "@/images/login/back.svg?react";
 import Point from "@/images/mypage/point.svg?react";
+import BottomNav from "@/components/navigation/bottom-nav";
 
 /** types */
 type PointHistoryItem = {
@@ -48,8 +49,9 @@ export default function PointPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="mx-auto w-full max-w-md">
+    <div className="flex h-full flex-col bg-white">
+      <main className="flex-1 overflow-y-auto">
+        <div className="mx-auto w-full max-w-md">
         <div className="pt-6">
           {/* header */}
           <header className="flex items-center px-1 py-2 ml-3 bg-white">
@@ -156,7 +158,9 @@ export default function PointPage() {
             </div>
           </section>
         </div>
-      </div>
+        </div>
+      </main>
+      <BottomNav />
     </div>
   );
 }

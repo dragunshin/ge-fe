@@ -32,7 +32,7 @@ export default function FaceStep() {
   // const canContinue = selected.size > 0 || etc.trim().length > 0;
 
   return (
-    <div className="h-screen flex flex-col bg-white text-gray-900 overflow-hidden">
+    <div className="min-h-full flex flex-col bg-white text-gray-900 overflow-hidden">
       {/* Top bar */}
       <header className="shrink-0 flex h-12 items-center justify-between bg-white px-3">
         <button

@@ -6,6 +6,7 @@ import Write from "@/images/mypage/wirte.svg?react";
 import Message from "@/images/mypage/message.svg?react";
 import SandClock from "@/images/mypage/sandClock.svg?react";
 import { useNavigate } from "react-router-dom";
+import BottomNav from "@/components/navigation/bottom-nav";
 
 /** utils */
 function cn(...classes: Array<string | false | null | undefined>) {
@@ -267,17 +268,18 @@ export default function ReservationHistoryView() {
   }, [past, selected]);
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* header */}
-      <header className="flex items-center px-4 py-4 bg-white">
-        <button onClick={() => navigate(-1)} className="mr-3">
-          <Back className="w-[18px] h-[18px]" />
-        </button>
-        <h1 className="pre_title_semi_20">예약 내역</h1>
-      </header>
+    <div className="flex h-full flex-col bg-white">
+      <main className="flex-1 overflow-y-auto">
+        {/* header */}
+        <header className="flex items-center px-4 py-4 bg-white">
+          <button onClick={() => navigate(-1)} className="mr-3">
+            <Back className="w-[18px] h-[18px]" />
+          </button>
+          <h1 className="pre_title_semi_20">예약 내역</h1>
+        </header>
 
-      {/* content */}
-      <div className="px-5 pb-10 pt-4">
+        {/* content */}
+        <div className="px-5 pb-10 pt-4">
         {/* waiting */}
         <span className="pre_body_med_14 text-[#878a93]">확정 대기 중인 예약 일정이에요</span>
         <div className="mt-2">
@@ -318,7 +320,9 @@ export default function ReservationHistoryView() {
             filteredPast.map((it) => <PastItem key={it.id} item={it} />)
           )}
         </div>
-      </div>
+        </div>
+      </main>
+      <BottomNav />
     </div>
   );
 }

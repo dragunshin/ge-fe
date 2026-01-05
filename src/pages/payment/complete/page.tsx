@@ -38,7 +38,7 @@ export function PaymentCompletePage() {
   return (
     <div className="min-h-screen bg-white text-[#0f0f10]">
       <header className="flex items-center gap-[15px] px-4 pt-[53px]">
-        <button onClick={() => navigate("/")} className="h-6 w-6">
+        <button onClick={() => navigate("/reservation/fashion?step=9")} className="h-6 w-6">
           <img src={backIcon} alt="뒤로가기" className="h-6 w-6" />
         </button>
         <h1 className="text-[20px] font-semibold leading-[1.4]">주문하기</h1>

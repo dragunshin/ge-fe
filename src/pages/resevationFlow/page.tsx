@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ConsultationMethodSheet from "./reservationSheet/typeReservation";
 import DateTimeBottomSheet from "./reservationSheet/calendar";
@@ -84,6 +85,17 @@ export default function ConsultationSheetTestPage() {
   return (
     <div className="min-h-dvh bg-[#F5F6F8]">
       <div className={["mx-auto w-full px-5 py-8", containerMax].join(" ")}>
+        <header className="flex items-center gap-2 pb-4">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-[#e7e9ed]"
+            aria-label="뒤로가기"
+          >
+            <ChevronLeft className="h-5 w-5 text-[#111827]" />
+          </button>
+          <span className="text-[16px] font-semibold text-[#111827]">상담 예약</span>
+        </header>
         <h1 className="text-[20px] font-semibold text-[#111827]">Bottom Sheet 테스트</h1>
         <p className="mt-2 text-[13px] leading-5 text-[#6B7280]">
           아래 카드에서 각각 시트를 열어보고 동작(선택/닫기/다음)을 확인하세요.
