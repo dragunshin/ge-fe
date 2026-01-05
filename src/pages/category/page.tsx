@@ -89,7 +89,7 @@ const CategoryLandingPage = () => {
   };
 
   const handleExpertKeyDown = (
-    event: KeyboardEvent<HTMLDivElement>,
+    event: KeyboardEvent<HTMLElement>,
     expertId: number,
   ) => {
     if (event.key === 'Enter' || event.key === ' ') {
