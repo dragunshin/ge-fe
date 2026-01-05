@@ -58,3 +58,20 @@ export type SocketResponse<T> = {
   chatroomId: number;
   payload: T;
 };
+
+export type LastMessageType = "TEXT" | "IMAGE" | "MIXED" | "QUESTION" | "SOLUTION" | "SYSTEM";
+
+export type ChatRoomListItem = {
+  chatroomId: number;
+  consultationId: number;
+  chatroomType: ChatroomType;
+  opponentId: number;
+  opponentNickname: string;
+  opponentProfileImage?: string | null;
+  expertCategory?: string | null;
+  lastMessage?: string | null;
+  lastMessageAt?: string | null; // 서버가 null 가능
+  createdAt: string;
+  unreadCount?: number;
+  lastMessageType?: LastMessageType; // 명세서에 있다고 했으니 optional
+};

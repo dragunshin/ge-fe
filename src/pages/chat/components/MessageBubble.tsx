@@ -1,64 +1,16 @@
-// // import type { Message } from "@/types";
-// // import { useFriends } from "../../../store/friendsStore";
-// // import { toTimeLabelChat } from "@/utils/time";
-
-// // export default function MessageBubble({ m }: { m: Message }) {
-// //   const me = useFriends((s) => s.me);
-// //   const users = useFriends((s) => s.friends);
-
-// //   const myId = me?.id ?? "me";
-// //   const isMine = m.userId === myId || m.userId === "me";
-
-// //   const sender = isMine
-// //     ? me
-// //     : (users.find((u) => u.id === m.userId) ?? {
-// //         name: "알수없음",
-// //         avatar: "/images/avatar.svg",
-// //       });
-
-// //   const time = m.createdAt ? toTimeLabelChat(m.createdAt) : "";
-
-// //   const bubbleBase =
-// //     "w-fit max-w-[212px] rounded-lg !py-2 !px-4 text-body-6 text-gray-900 whitespace-pre-line break-words";
-
-// //   if (isMine) {
-// //     return (
-// //       <div className="!mb-5 flex w-full items-end !px-4 justify-end">
-// //         <time className="text-caption text-gray-600 !mr-2">{time}</time>
-// //         {/* <div className=" rounded-lg bg-yellow-500 !py-2 !px-4 text-body-6 text-gray-900 whitespace-pre-line">
-// //           {m.text}
-// //         </div> */}
-// //         <div className={`${bubbleBase} bg-yellow-800`}>{m.text}</div>
-// //       </div>
-// //     );
-// //   }
-
-// //   return (
-// //     <div className="flex items-end !px-4 !mb-5">
-// //       <div className=" flex items-start">
-// //         {/* <img src={sender?.avatar} className="h-9 w-9 object-cover" /> */}
-// //         <img src="/images/avatar.svg" className="h-9 w-9 object-cover z-10 !mr-3" />
-// //         <div className={`${bubbleBase} bg-gray-300 !px-4 !py-2`}>{m.text}</div>
-// //       </div>
-// //       <time className="text-caption self-end !ml-2 whitespace-nowrap text-gray-600">{time}</time>
-// //     </div>
-// //   );
-// // }
-
 // "use client";
 
 // import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-// import type { ChatMessage } from "@/stores/useChatStore";
+// import type { ChatMessage } from "@/types/chat";
 
-// // TODO: 실제 로그인 유저 ID로 교체
-// const MY_ID = "me";
-
-// interface MessageBubbleProps {
+// type Props = {
 //   message: ChatMessage;
-// }
+//   myUserId?: number;
+// };
 
-// export function MessageBubble({ message }: MessageBubbleProps) {
-//   const isMine = message.senderId === MY_ID;
+// export function MessageBubble({ message, myUserId }: Props) {
+//   const isMine = myUserId != null && message.senderId === myUserId;
+
 //   const isCard = message.messageType === "QUESTION" || message.messageType === "SOLUTION";
 
 //   const actionLabel =
@@ -68,16 +20,13 @@
 //         ? "솔루션지 보기"
 //         : undefined;
 
-//   // 공통 말풍선 스타일
 //   const baseBubble = "max-w-[80%] rounded-[20px] px-4 py-3 text-[13px] leading-relaxed";
 
-//   // 내가 보낸 메시지 (오른쪽, 파란색)
 //   if (isMine) {
 //     return (
 //       <div className="flex justify-end">
 //         <div className={`${baseBubble} bg-[#2F80FF] text-white shadow-sm`}>
 //           <p className="whitespace-pre-line">{message.content}</p>
-
 //           {isCard && actionLabel && (
 //             <button
 //               type="button"
@@ -91,22 +40,15 @@
 //     );
 //   }
 
-//   // 상대/전문가가 보낸 메시지 (왼쪽, 아바타 포함)
 //   return (
 //     <div className="flex items-start gap-2">
 //       <Avatar className="mt-1 h-8 w-8 bg-[#D9D9D9] text-slate-600">
-//         <AvatarFallback className="text-xs">박</AvatarFallback>
+//         <AvatarFallback className="text-xs">?</AvatarFallback>
 //       </Avatar>
-
 //       <div
-//         className={`${baseBubble} ${
-//           isCard
-//             ? "bg-[#F8F8FC] text-slate-900 border border-slate-200"
-//             : "bg-white text-slate-900 shadow-sm"
-//         }`}
+//         className={`${baseBubble} ${isCard ? "bg-[#F8F8FC] text-slate-900 border border-slate-200" : "bg-white text-slate-900 shadow-sm"}`}
 //       >
 //         <p className="whitespace-pre-line">{message.content}</p>
-
 //         {isCard && actionLabel && (
 //           <button
 //             type="button"
@@ -122,8 +64,9 @@
 
 "use client";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 import type { ChatMessage } from "@/types/chat";
+import Minho from "@/images/chat/minho.png";
 
 type Props = {
   message: ChatMessage;
@@ -131,9 +74,14 @@ type Props = {
 };
 
 export function MessageBubble({ message, myUserId }: Props) {
+  // TODO: userId 조회하기
+  const myUserIdLocal = 1;
+  myUserId = myUserIdLocal;
   const isMine = myUserId != null && message.senderId === myUserId;
 
-  const isCard = message.messageType === "QUESTION" || message.messageType === "SOLUTION";
+  const isQuestionCard = message.messageType === "QUESTION";
+  const isSolutionCard = message.messageType === "SOLUTION";
+  //const isCard = isQuestionCard || isSolutionCard;
 
   const actionLabel =
     message.messageType === "QUESTION"
@@ -142,18 +90,26 @@ export function MessageBubble({ message, myUserId }: Props) {
         ? "솔루션지 보기"
         : undefined;
 
-  const baseBubble = "max-w-[80%] rounded-[20px] px-4 py-3 text-[13px] leading-relaxed";
+  const cardBox =
+    "w-full max-w-[286px] border border-[#f1f1f6] rounded-[8px] bg-white px-4 py-3 pre_body_reg_13 text-[#181818]";
 
-  if (isMine) {
+  const cardButton =
+    "mt-3 w-full rounded-[8px] bg-[#EAF3FF] py-3 text-[13px] font-semibold text-[#2B6DEB]";
+
+  const textBubbleOthers =
+    "max-w-[254px] border border-[#f1f1f6] rounded-[8px] bg-white px-[15px] py-[12px] pre_body_reg_13 text-[#181818]";
+
+  const textBubbleMine =
+    "max-w-[291px] border border-[#f1f1f6] rounded-[8px] bg-white px-[15px] py-[12px] pre_body_reg_13 text-[#181818]";
+
+  // QUESTION 카드: 가운데 카드 (아바타 없음)
+  if (isQuestionCard) {
     return (
-      <div className="flex justify-end">
-        <div className={`${baseBubble} bg-[#2F80FF] text-white shadow-sm`}>
-          <p className="whitespace-pre-line">{message.content}</p>
-          {isCard && actionLabel && (
-            <button
-              type="button"
-              className="mt-3 w-full rounded-xl bg-white py-3 text-[13px] font-semibold text-[#2F80FF]"
-            >
+      <div className="flex justify-center">
+        <div className={cardBox}>
+          <p className="text-center">{message.content}</p>
+          {actionLabel && (
+            <button type="button" className={cardButton}>
               {actionLabel}
             </button>
           )}
@@ -162,23 +118,49 @@ export function MessageBubble({ message, myUserId }: Props) {
     );
   }
 
+  // SOLUTION 카드: 왼쪽 + 아바타 + 카드
+  if (isSolutionCard) {
+    return (
+      <div className="flex items-end gap-3">
+        <Avatar className="h-9 w-9">
+          <img src={Minho} alt="용민호 전문가" className="h-full w-full object-cover" />
+        </Avatar>
+
+        <div className={cardBox}>
+          <p>{message.content}</p>
+          {actionLabel && (
+            <button type="button" className={cardButton}>
+              {actionLabel}
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // 일반 텍스트 (내 메시지): 가운데 흰 말풍선
+  if (isMine) {
+    console.log(myUserId, message.senderId);
+
+    return (
+      <div className="flex justify-end">
+        <div className={textBubbleMine}>
+          <p className="whitespace-pre-line">{message.content}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 나머지는 전부 "상대방 메시지"로 처리 (NOTICE/SYSTEM/INFO도 여기로 떨어짐)
   return (
-    <div className="flex items-start gap-2">
-      <Avatar className="mt-1 h-8 w-8 bg-[#D9D9D9] text-slate-600">
-        <AvatarFallback className="text-xs">?</AvatarFallback>
+    <div className="flex items-start gap-3">
+      <> {console.log(myUserId, message.senderId)}</>
+      <Avatar className="h-9 w-9">
+        <img src={Minho} alt="용민호 전문가" className="h-full w-full object-cover" />
       </Avatar>
-      <div
-        className={`${baseBubble} ${isCard ? "bg-[#F8F8FC] text-slate-900 border border-slate-200" : "bg-white text-slate-900 shadow-sm"}`}
-      >
+
+      <div className={textBubbleOthers}>
         <p className="whitespace-pre-line">{message.content}</p>
-        {isCard && actionLabel && (
-          <button
-            type="button"
-            className="mt-3 w-full rounded-xl bg-white py-3 text-[13px] font-semibold text-slate-800"
-          >
-            {actionLabel}
-          </button>
-        )}
       </div>
     </div>
   );

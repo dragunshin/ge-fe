@@ -263,6 +263,9 @@ input {
   .pre_cap_reg_13 {
     @apply text-[13px] leading-[140%] font-normal;
   }
+  .pre_cap_med_12 {
+    @apply text-[12px] leading-[140%] font-medium;
+  }
 }
 /* Hide scrollbars while keeping scroll behavior. */
 .hide-scrollbar {

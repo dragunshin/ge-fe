@@ -1,4 +1,4 @@
-import type { ChatMessage } from "@/types/chat";
+import type { ChatMessage, ChatRoomListItem } from "@/types/chat";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 
@@ -17,7 +17,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 // }
 
 export async function fetchChatMessages(roomId: number): Promise<ChatMessage[]> {
-  const res = await fetch(`${API_BASE}/chatrooms/${roomId}/messages`, {
+  const res = await fetch(`${API_BASE}/chat/room/${roomId}/messages`, {
     method: "GET",
     credentials: "include",
     headers: { Accept: "application/json" },
@@ -87,5 +87,17 @@ export async function createChatroom(consultationId: number, chatroomType: Chatr
   const json = (await res.json().catch(() => null)) as ApiResponse<CreateChatroomResponse> | null;
 
   if (!res.ok || !json) throw new Error(json?.message ?? "Failed to create chatroom");
+  return json.data;
+}
+
+export async function fetchChatRooms(): Promise<ChatRoomListItem[]> {
+  const res = await fetch(`${API_BASE}/chat/room`, {
+    method: "GET",
+    credentials: "include",
+    headers: { Accept: "application/json" },
+  });
+
+  const json = (await res.json().catch(() => null)) as ApiResponse<ChatRoomListItem[]> | null;
+  if (!res.ok || !json) throw new Error(json?.message ?? "Failed to fetch chat rooms");
   return json.data;
 }

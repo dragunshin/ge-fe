@@ -1,42 +1,52 @@
-// import { useLocation, useNavigate } from "react-router-dom";
-// import { BatteryFull, ChevronLeft, MoreVertical, SignalHigh, Wifi } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BackIcon from "@/images/login/back.svg?react";
 import More from "@/images/chat/more.svg?react";
-// import { Button } from "@/components/ui/button";
 import { ChatExpertHeader } from "./ChatExpertHeader";
-
-// type ChatHeaderState = {
-//   title?: string;
-//   subtitle?: string;
-// };
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import Minho from "@/images/chat/minho.png";
 
 export default function ChatHeader() {
   const navigate = useNavigate();
-  // const location = useLocation();
 
   return (
-    <div className="flex flex-col">
-      <header className="px-4 pt-4 pb-2">
+    <div className="bg-white mt-2">
+      <header className="px-4 pt-3 pb-3 mb-1">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <button onClick={() => navigate(-1)} className="mr-2">
-              {/* <img src={backIcon} alt="back" className="w-2.5 h-[18px]" /> */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => navigate(-1)}
+              className="-ml-2 grid h-9 w-9 place-items-center rounded-full active:bg-black/5"
+              aria-label="뒤로가기"
+              type="button"
+            >
               <BackIcon className="h-4 w-4 text-black" />
             </button>
-            <div className="flex flex-col">
-              <span className="text-[16px] font-semibold text-black">박오징</span>
-              <span className="text-[12px] text-[#878A93]">패션</span>
+
+            <Avatar className="h-9 w-9 mr-1">
+              {/* <AvatarFallback className="bg-neutral-200 text-[12px] font-semibold text-neutral-700">
+                용
+              </AvatarFallback> */}
+              <img src={Minho} alt="용민호 전문가" className="h-full w-full object-cover" />
+            </Avatar>
+
+            <div className="flex flex-col leading-tight">
+              <span className="pre_subtitle_semi_16 text-black">용민호 전문가</span>
+              <span className="mt-[2px] pre_body_med_12 text-[#878a93]">헤어</span>
             </div>
           </div>
 
-          {/* <Button type="button" variant="ghost" className="h-6 w-6 p-0">
-            <More className="h-6 w-6 text-black" />
-          </Button> */}
-          <More className="h-6 w-6 text-black" />
+          <button
+            type="button"
+            className="-mr-2 grid color-[#292a2d] place-items-center rounded-full active:bg-black/5"
+            aria-label="더보기"
+          >
+            <More className="h-6 w-6 text-[#292a2d]" />
+          </button>
         </div>
       </header>
-      <ChatExpertHeader name="박오징" />
+
+      {/* 날짜 구분선*/}
+      <ChatExpertHeader />
     </div>
   );
 }

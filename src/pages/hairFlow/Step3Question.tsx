@@ -1,0 +1,96 @@
+import TopNav from "./component/TopNav";
+import Footer from "./component/Footer";
+import { MultiPhotoPicker } from "./component/MultiPhotoPicker";
+import { useStyleSetupStore } from "@/stores/useHairSetupStore";
+
+type SubmitPayload = {
+  sideLeftKey: string;
+  sideRightKey: string;
+  desiredTags: string[];
+  desiredOtherText: string;
+  questionText: string;
+  referenceImageKeys: string[];
+};
+
+async function submitAll(payload: SubmitPayload) {
+  const res = await fetch("/api/v1/style-setup/submit", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error("제출 실패");
+  return res.json();
+}
+
+export function Step3Question({ onBack, onDone }: { onBack?: () => void; onDone?: () => void }) {
+  const s = useStyleSetupStore();
+
+  const canSubmit =
+    Boolean(s.sidePhotoKeys.LEFT && s.sidePhotoKeys.RIGHT) && s.questionText.length <= 400;
+
+  const handleSubmit = async () => {
+    if (!s.sidePhotoKeys.LEFT || !s.sidePhotoKeys.RIGHT) return;
+
+    try {
+      await submitAll({
+        sideLeftKey: s.sidePhotoKeys.LEFT,
+        sideRightKey: s.sidePhotoKeys.RIGHT,
+        desiredTags: s.desiredTags,
+        desiredOtherText: s.desiredOtherText,
+        questionText: s.questionText,
+        referenceImageKeys: s.referenceImageKeys,
+      });
+
+      // 필요하면 제출 후 초기화
+      // s.resetAll();
+
+      onDone?.();
+      alert("제출 완료!");
+    } catch {
+      alert("제출에 실패했어요. 다시 시도해주세요.");
+    }
+  };
+
+  return (
+    <div className="mx-auto bg-white">
+      <TopNav onBack={onBack} />
+
+      <div className="px-5">
+        <p className="pre_body_med_16 text-[#008bff]">3/3</p>
+
+        <p className="mt-2 pre_title_semi_20 text-[#0f0f10]">
+          스타일링 시 느낀 어려움이나 궁금증이 있다면 알려주세요.
+        </p>
+        <p className="mt-2 pre_body_reg_14 leading-relaxed text-[#656870]">
+          상담하실 전문가에게 전달해드려요.
+        </p>
+
+        <div className="mt-5">
+          <div className="relative">
+            <textarea
+              value={s.questionText}
+              onChange={(e) => s.setQuestionText(e.target.value)}
+              placeholder=""
+              className="h-[177px] w-full bg-[#f4f4f5] pre_body_reg_14 placeholder:text-[#989ba2] resize-none rounded-[8px] border border-[#e1e2e4] px-4 py-3 pb-8 outline-none"
+            />
+            <div className="absolute bottom-5 right-4 pre_body_reg_14">
+              <span className="text-[#008bff]">{s.questionText.length}</span>
+              <span className="text-[#656870]">/400</span>
+            </div>
+          </div>
+        </div>
+
+        <MultiPhotoPicker
+          keys={s.referenceImageKeys}
+          max={3}
+          prefix="style/reference"
+          onAddKey={s.addReferenceKey}
+          onRemoveKey={s.removeReferenceKey}
+        />
+      </div>
+
+      <Footer label="다음" disabled={!canSubmit} onClick={handleSubmit} />
+    </div>
+  );
+}
