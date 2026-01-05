@@ -41,7 +41,13 @@ function Radio({ checked }: { checked: boolean }) {
     //   />
     // </span>
 
-    <>{checked ? <SelectedRadio /> : <Radioo />}</>
+    <>
+      {checked ? (
+        <SelectedRadio className="h-[18px] w-[18px] shrink-0" />
+      ) : (
+        <Radioo className="h-[18px] w-[18px] shrink-0" />
+      )}
+    </>
   );
 }
 

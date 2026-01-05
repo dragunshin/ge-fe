@@ -1,14 +1,9 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import backIcon from '../../../images/login/back.svg';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import backIcon from "../../../images/login/back.svg";
 
 const StepArrow = () => (
-  <svg
-    aria-hidden="true"
-    className="h-[18px] w-[18px] rotate-180"
-    viewBox="0 0 18 18"
-    fill="none"
-  >
+  <svg aria-hidden="true" className="h-[18px] w-[18px] rotate-180" viewBox="0 0 18 18" fill="none">
     <path
       d="M7 4.5L11.5 9L7 13.5"
       stroke="#989BA2"
@@ -22,7 +17,7 @@ const StepArrow = () => (
 const OrderChevron = ({ expanded }: { expanded: boolean }) => (
   <svg
     aria-hidden="true"
-    className={`h-[24px] w-[24px] ${expanded ? 'rotate-270' : 'rotate-90'}`}
+    className={`h-[24px] w-[24px] ${expanded ? "rotate-270" : "rotate-90"}`}
     viewBox="0 0 24 24"
     fill="none"
   >
@@ -43,7 +38,7 @@ export function PaymentCompletePage() {
   return (
     <div className="min-h-screen bg-white text-[#0f0f10]">
       <header className="flex items-center gap-[15px] px-4 pt-[53px]">
-        <button onClick={() => navigate('/')} className="h-6 w-6">
+        <button onClick={() => navigate("/")} className="h-6 w-6">
           <img src={backIcon} alt="뒤로가기" className="h-6 w-6" />
         </button>
         <h1 className="text-[20px] font-semibold leading-[1.4]">주문하기</h1>
@@ -77,7 +72,7 @@ export function PaymentCompletePage() {
           상담 주문이 완료되었어요.
         </p>
         <p className="mx-auto mt-[8px] w-[260px] text-[13px] leading-[1.4] text-[#989ba2]">
-          상담 확정을 위해{' '}
+          상담 확정을 위해{" "}
           <span className="font-semibold text-[#171719]">2025년 12월 13일 23:59</span>
           까지 입금을 완료해주세요.
         </p>
@@ -93,9 +88,7 @@ export function PaymentCompletePage() {
           <span className="font-semibold">입금 계좌</span>
           <div className="flex items-center gap-[6px] text-[#70737c]">
             <span>우리</span>
-            <span className="border-b border-[#70737c] pb-[2px]">
-              0000-0000-0000-0000
-            </span>
+            <span className="border-b border-[#70737c] pb-[2px]">0000-0000-0000-0000</span>
           </div>
         </div>
         <div className="mt-[18px] h-px w-full bg-[#e1e2e4]" />
@@ -107,15 +100,12 @@ export function PaymentCompletePage() {
       </div>
 
       <div className="px-4 pt-[16px]">
-        <button
-          onClick={() => setIsExpanded((prev) => !prev)}
-          className="flex w-full items-center"
-        >
+        <button onClick={() => setIsExpanded((prev) => !prev)} className="flex w-full items-center">
           <div className="flex w-[315px] items-center gap-[28px]">
             <span className="text-[16px] font-semibold leading-[1.4]">주문 정보</span>
             <span
               className={`w-[225px] overflow-hidden text-ellipsis whitespace-nowrap text-[16px] leading-[1.4] text-[#70737c] ${
-                isExpanded ? 'pointer-events-none opacity-0' : ''
+                isExpanded ? "pointer-events-none opacity-0" : ""
               }`}
             >
               메세지 상담 | 성정수 상담사 (헤어 전문)
@@ -141,13 +131,13 @@ export function PaymentCompletePage() {
       <div className="px-4 pt-[24px]">
         <div className="flex gap-[12px]">
           <button
-            onClick={() => navigate('/chat')}
+            onClick={() => navigate("/chatlist")}
             className="flex h-[44px] flex-1 items-center justify-center rounded-[4px] border border-[#dbdcdf] text-[14px] leading-[1.4] text-[#171719]"
           >
             채팅으로 이동
           </button>
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate("/")}
             className="flex h-[44px] flex-1 items-center justify-center rounded-[4px] bg-[#181818] text-[14px] font-medium leading-[1.4] text-white"
           >
             홈으로

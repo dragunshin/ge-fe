@@ -2,6 +2,7 @@ import TopNav from "./component/TopNav";
 import Footer from "./component/Footer";
 import { MultiPhotoPicker } from "./component/MultiPhotoPicker";
 import { useStyleSetupStore } from "@/stores/useHairSetupStore";
+import { useNavigate } from "react-router-dom";
 
 type SubmitPayload = {
   sideLeftKey: string;
@@ -25,31 +26,36 @@ async function submitAll(payload: SubmitPayload) {
 
 export function Step3Question({ onBack, onDone }: { onBack?: () => void; onDone?: () => void }) {
   const s = useStyleSetupStore();
+  const nav = useNavigate();
 
   const canSubmit =
     Boolean(s.sidePhotoKeys.LEFT && s.sidePhotoKeys.RIGHT) && s.questionText.length <= 400;
 
+  // const handleSubmit = async () => {
+  //   if (!s.sidePhotoKeys.LEFT || !s.sidePhotoKeys.RIGHT) return;
+
+  //   try {
+  //     await submitAll({
+  //       sideLeftKey: s.sidePhotoKeys.LEFT,
+  //       sideRightKey: s.sidePhotoKeys.RIGHT,
+  //       desiredTags: s.desiredTags,
+  //       desiredOtherText: s.desiredOtherText,
+  //       questionText: s.questionText,
+  //       referenceImageKeys: s.referenceImageKeys,
+  //     });
+
+  //     // 필요하면 제출 후 초기화
+  //     // s.resetAll();
+
+  //     onDone?.();
+  //     alert("제출 완료!");
+  //   } catch {
+  //     alert("제출에 실패했어요. 다시 시도해주세요.");
+  //   }
+  // };
+
   const handleSubmit = async () => {
-    if (!s.sidePhotoKeys.LEFT || !s.sidePhotoKeys.RIGHT) return;
-
-    try {
-      await submitAll({
-        sideLeftKey: s.sidePhotoKeys.LEFT,
-        sideRightKey: s.sidePhotoKeys.RIGHT,
-        desiredTags: s.desiredTags,
-        desiredOtherText: s.desiredOtherText,
-        questionText: s.questionText,
-        referenceImageKeys: s.referenceImageKeys,
-      });
-
-      // 필요하면 제출 후 초기화
-      // s.resetAll();
-
-      onDone?.();
-      alert("제출 완료!");
-    } catch {
-      alert("제출에 실패했어요. 다시 시도해주세요.");
-    }
+    nav("/payment/order");
   };
 
   return (
@@ -90,7 +96,8 @@ export function Step3Question({ onBack, onDone }: { onBack?: () => void; onDone?
         />
       </div>
 
-      <Footer label="다음" disabled={!canSubmit} onClick={handleSubmit} />
+      <Footer label="다음" disabled={canSubmit} onClick={handleSubmit} />
+      {/* <Footer label="다음" disabled={!canSubmit} onClick={handleSubmit} /> */}
     </div>
   );
 }
