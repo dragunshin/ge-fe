@@ -4,27 +4,28 @@ import { MultiPhotoPicker } from "./component/MultiPhotoPicker";
 import { useStyleSetupStore } from "@/stores/useHairSetupStore";
 import { useNavigate } from "react-router-dom";
 
-type SubmitPayload = {
-  sideLeftKey: string;
-  sideRightKey: string;
-  desiredTags: string[];
-  desiredOtherText: string;
-  questionText: string;
-  referenceImageKeys: string[];
-};
+// type SubmitPayload = {
+//   sideLeftKey: string;
+//   sideRightKey: string;
+//   desiredTags: string[];
+//   desiredOtherText: string;
+//   questionText: string;
+//   referenceImageKeys: string[];
+// };
 
-async function submitAll(payload: SubmitPayload) {
-  const res = await fetch("/api/v1/style-setup/submit", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error("제출 실패");
-  return res.json();
-}
+// async function submitAll(payload: SubmitPayload) {
+//   const res = await fetch("/api/v1/style-setup/submit", {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     credentials: "include",
+//     body: JSON.stringify(payload),
+//   });
+//   if (!res.ok) throw new Error("제출 실패");
+//   return res.json();
+// }
 
-export function Step3Question({ onBack, onDone }: { onBack?: () => void; onDone?: () => void }) {
+// export function Step3Question({ onBack, onDone }: { onBack?: () => void; onDone?: () => void }) {
+export function Step3Question({ onBack }: { onBack?: () => void; onDone?: () => void }) {
   const s = useStyleSetupStore();
   const nav = useNavigate();
 
