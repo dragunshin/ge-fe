@@ -923,7 +923,7 @@ const HomePage = () => {
                         </span>
                       ))}
                     </div>
-                  </button>
+                  </div>
                 </div>
                 <button className="flex h-6 w-6 items-center justify-center">
                   <img src={heartIcon} alt="찜" className="h-6 w-6" />
@@ -1039,11 +1039,7 @@ const HomePage = () => {
                 key={expert.id}
                 className="relative h-[253px] w-[343px] rounded-[8px] bg-white shadow-[0px_2px_12px_0px_rgba(0,0,0,0.13)]"
               >
-                <button
-                  type="button"
-                  onClick={() => handleExpertProfile(expert.id)}
-                  className="absolute left-[13px] top-[23px] flex items-center gap-[10px] text-left"
-                >
+                <div className="absolute left-[13px] top-[23px] flex items-center gap-[10px]">
                   <div className="h-[42px] w-[42px] shrink-0 rounded-full bg-[#e1e2e4]">
                     {expert.avatar && (
                       <img src={expert.avatar} alt="" className="h-full w-full object-cover" />
