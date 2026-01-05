@@ -13,7 +13,12 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["vite-plugin-svgr/client"]
+    "types": ["vite-plugin-svgr/client"],
+    // 선언만 하고 사용하지 않은 지역 변수 무시
+    "noUnusedLocals": false,
+
+    // 선언만 하고 사용하지 않은 함수 파라미터 무시
+    "noUnusedParameters": false
   },
   "include": ["svg.d.ts"]
 }
