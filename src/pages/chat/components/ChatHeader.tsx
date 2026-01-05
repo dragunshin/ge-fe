@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import BackIcon from "@/images/login/back.svg?react";
 import More from "@/images/chat/more.svg?react";
 import { ChatExpertHeader } from "./ChatExpertHeader";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 import Minho from "@/images/chat/minho.png";
 
 export default function ChatHeader() {

@@ -45,7 +45,8 @@ const STORAGE_KEY = "style-setup-v1";
 
 export const useStyleSetupStore = create<State>()(
   persist(
-    (set, get) => ({
+    //(set, get)
+    (set) => ({
       sidePhotoKeys: {},
       desiredTags: ["귀여움"],
       desiredOtherText: "",
