@@ -9,7 +9,7 @@ export function Step3OutfitPhotos({
   onRemoveOutfit,
 }: {
   outfits: OutfitImage[];
-  outfitInputRef: RefObject<HTMLInputElement>;
+  outfitInputRef: RefObject<HTMLInputElement | null>;
   onUploadOutfits: (files: FileList | null) => void;
   onRemoveOutfit: (id: string) => void;
 }) {

@@ -12,7 +12,7 @@ export function Step9Purpose({
 }: {
   purposeText: string;
   purposeImages: OutfitImage[];
-  purposeInputRef: RefObject<HTMLInputElement>;
+  purposeInputRef: RefObject<HTMLInputElement | null>;
   onPurposeTextChange: (value: string) => void;
   onUploadPurpose: (files: FileList | null) => void;
   onRemovePurpose: (id: string) => void;

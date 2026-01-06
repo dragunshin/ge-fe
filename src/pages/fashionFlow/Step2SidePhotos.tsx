@@ -15,8 +15,8 @@ export function Step2SidePhotos({
 }: {
   leftImage: OutfitImage | null;
   rightImage: OutfitImage | null;
-  leftInputRef: RefObject<HTMLInputElement>;
-  rightInputRef: RefObject<HTMLInputElement>;
+  leftInputRef: RefObject<HTMLInputElement | null>;
+  rightInputRef: RefObject<HTMLInputElement | null>;
   onRemoveLeft: () => void;
   onRemoveRight: () => void;
   onUploadLeft: (files: FileList | null) => void;

@@ -95,6 +95,9 @@ export interface ExpertInfoResponse {
 
 export interface ReviewSummaryResponse {
   reviewId: number;
+  expertNickname?: string;
+  expertProfileImage?: string;
+  expertRatingAverage?: number;
   rating: number;
   content: string;
   mediaUrls: string[];

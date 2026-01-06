@@ -12,7 +12,7 @@ export function Step1Guide({
 }: {
   introStage: 1 | 2;
   frontImage: OutfitImage | null;
-  frontInputRef: RefObject<HTMLInputElement>;
+  frontInputRef: RefObject<HTMLInputElement | null>;
   onRemoveFront: () => void;
   onUploadFront: (files: FileList | null) => void;
 }) {
