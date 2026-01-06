@@ -594,7 +594,7 @@ type ConsultType = "MESSAGE" | "LIVE";
 type Banner = {
   id: number;
   eyebrow?: string;
-  title: string;
+  title?: string;
   subtitle?: string;
   author?: string;
   role?: string;
