@@ -1116,7 +1116,7 @@ export default function FashionReservationFlowPage() {
         )}
       </main>
 
-      <div className="fixed bottom-0 left-1/2 w-full max-w-[375px] -translate-x-1/2 bg-white">
+      <div className="fixed bottom-0 left-1/2 w-full max-w-[375px] -translate-x-1/2 border-t border-[#f4f4f5] bg-white shadow-[0_-6px_16px_rgba(0,0,0,0.06)]">
         <div className="px-[16px] pb-[8px] pt-[4px]">
           <div className="flex justify-end">
             <button

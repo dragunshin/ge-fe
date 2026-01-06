@@ -30,7 +30,7 @@ export const authService = {
 
   // 소셜 회원 추가정보 입력
   async socialSignup(data: SocialSignupRequest): Promise<ApiResponse<SocialSignupResponse>> {
-    return await api.post<ApiResponse<SocialSignupResponse>>('/auth/social-signup', data);
+    return await api.post<ApiResponse<SocialSignupResponse>>('/user/social-signup', data);
   },
 
   // 로그아웃
