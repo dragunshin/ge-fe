@@ -22,7 +22,6 @@ const StepArrow = () => (
 export function PaymentOrderPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const backTarget = (location.state as { from?: string } | null)?.from;
   const [agreements, setAgreements] = useState({
     order: false,
     privacy: false,

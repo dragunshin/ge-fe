@@ -29,9 +29,6 @@ export function Step3Question({ onBack }: { onBack?: () => void; onDone?: () => 
   const s = useStyleSetupStore();
   const nav = useNavigate();
 
-  const canSubmit =
-    Boolean(s.sidePhotoKeys.LEFT && s.sidePhotoKeys.RIGHT) && s.questionText.length <= 400;
-
   // const handleSubmit = async () => {
   //   if (!s.sidePhotoKeys.LEFT || !s.sidePhotoKeys.RIGHT) return;
 
@@ -97,7 +94,7 @@ export function Step3Question({ onBack }: { onBack?: () => void; onDone?: () => 
         />
       </div>
 
-      <Footer label="다음" disabled={canSubmit} onClick={handleSubmit} />
+      <Footer label="다음" onClick={handleSubmit} />
       {/* <Footer label="다음" disabled={!canSubmit} onClick={handleSubmit} /> */}
     </div>
   );

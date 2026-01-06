@@ -6,8 +6,6 @@ import { useStyleSetupStore } from "@/stores/useHairSetupStore";
 export function Step1SidePhotos({ onNext, onBack }: { onNext: () => void; onBack?: () => void }) {
   const { sidePhotoKeys, setSidePhotoKey, removeSidePhotoKey } = useStyleSetupStore();
 
-  const canNext = Boolean(sidePhotoKeys.LEFT && sidePhotoKeys.RIGHT);
-
   return (
     <div className="relative mx-auto flex h-full w-full max-w-[420px] flex-col bg-white overflow-hidden">
       <TopNav onBack={onBack} />
@@ -47,11 +45,7 @@ export function Step1SidePhotos({ onNext, onBack }: { onNext: () => void; onBack
         />
       </div>
 
-      <Footer
-        //disabled={!canNext}
-        disabled={canNext}
-        onClick={onNext}
-      />
+      <Footer onClick={onNext} />
     </div>
   );
 }
