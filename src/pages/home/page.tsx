@@ -829,7 +829,7 @@ const HomePage = () => {
   const expertCards: ExpertListCard[] = [
     {
       id: 1,
-      name: "김푸힝",
+      name: "옹민호",
       rating: 4.7,
       reviewCount: "(1,130)",
       summary: "탈모 삭제 마법사 | 탈모인만의 컨설팅",
@@ -839,7 +839,7 @@ const HomePage = () => {
     },
     {
       id: 2,
-      name: "김푸힝",
+      name: "이민아",
       rating: 4.7,
       reviewCount: "(1,130)",
       summary: "탈모 삭제 마법사 | 탈모인만의 컨설팅",
@@ -849,7 +849,7 @@ const HomePage = () => {
     },
     {
       id: 3,
-      name: "김푸힝",
+      name: "고현진",
       rating: 4.7,
       reviewCount: "(1,130)",
       summary: "탈모 삭제 마법사 | 탈모인만의 컨설팅",
@@ -1243,7 +1243,7 @@ const HomePage = () => {
             onClick={() => navigate("/reservation/fashion")}
             className="flex h-[52px] w-full items-center justify-center rounded-[12px] bg-[#171719] text-[16px] font-semibold text-white"
           >
-            예약
+            예약(임시버튼)
           </button>
         </section>
       </main>

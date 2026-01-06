@@ -22,6 +22,7 @@ type TabItem = {
 type ReviewCard = {
   id: number;
   name: string;
+  expertName?: string;
   rating: number;
   date: string;
   content: string;
@@ -159,11 +160,13 @@ const CategoryLandingPage = () => {
         const mapped = response.data.map((review) => ({
           id: review.reviewId,
           name: '익명',
+          expertName: review.expertNickname,
           rating: review.rating,
           date: formatDate(review.createdAt),
           content: review.content,
           category: getLabelFromApiCategory(review.category),
           concern: '후기',
+          avatar: review.expertProfileImage,
           images: parseMediaUrls(review.mediaUrls).slice(0, 2),
         }));
         setReviews(mapped);
@@ -279,6 +282,17 @@ const CategoryLandingPage = () => {
   ];
 
   const underlineLeft = categoryTabs.find((tab) => tab.label === categoryLabel)?.underlineLeft ?? 85;
+  const renderStars = (rating: number) => {
+    const filledCount = Math.max(0, Math.min(5, Math.round(rating)));
+    return Array.from({ length: 5 }).map((_, index) => (
+      <img
+        key={`star-${rating}-${index}`}
+        src={starIcon}
+        alt=""
+        className={`h-[18px] w-[18px] ${index < filledCount ? '' : 'opacity-40 grayscale'}`}
+      />
+    ));
+  };
   const scrollToSection = (section?: string | null) => {
     if (!section) {
       return;
@@ -423,7 +437,7 @@ const CategoryLandingPage = () => {
           </div>
         </section>
 
-        <section className="mt-[32px] bg-[#f4f8fb]">
+        <section className="mt-[32px] bg-[#f4f4f5]">
           <div className="px-4 pt-[22px]">
             <div className="flex items-center justify-between">
               <h2 className="text-[18px] font-semibold text-[#0f0f10]">실시간 후기 확인하기</h2>
@@ -440,11 +454,11 @@ const CategoryLandingPage = () => {
             {reviews.map((review) => (
               <article
                 key={review.id}
-                className="flex h-[393px] w-[300px] shrink-0 flex-col rounded-[8px] border border-[#e1e2e4] bg-white snap-start"
+                className="relative h-[393px] w-[300px] shrink-0 overflow-hidden rounded-[8px] bg-white snap-start"
               >
-                <div className="flex items-center justify-between px-4 pt-[14px]">
+                <div className="border-b border-[#f4f4f5] px-4 py-[14px]">
                   <div className="flex items-center gap-[10px]">
-                    <div className="h-[36px] w-[36px] shrink-0 overflow-hidden rounded-full bg-[#e1e2e4]">
+                    <div className="h-[36px] w-[36px] shrink-0 overflow-hidden rounded-full bg-[#f4f4f5]">
                       {review.avatar && (
                         <img src={review.avatar} alt="" className="h-full w-full object-cover" />
                       )}
@@ -452,42 +466,45 @@ const CategoryLandingPage = () => {
                     <div className="flex flex-col gap-[4px]">
                       <div className="flex items-center gap-[2px]">
                         <span className="text-[14px] font-semibold text-[#0f0f10]">
-                          {review.name}
+                          {review.expertName ?? '상담사'}
                         </span>
                         <ChevronRight className="h-4 w-4 text-[#0f0f10]" />
                       </div>
-                      <div className="flex items-center gap-[8px] text-[13px] text-[#989ba2]">
-                        <div className="flex items-center gap-1 text-[#ffb800]">★★★★★</div>
-                        <span>{review.rating}</span>
+                      <div className="flex items-center gap-[2px] text-[13px] text-[#989ba2]">
+                        <img src={starIcon} alt="" className="h-[18px] w-[18px]" />
+                        <span className="font-semibold">{review.rating.toFixed(1)}</span>
                       </div>
                     </div>
                   </div>
-                  <button className="text-[14px] text-[#70737c]">프로필 보기</button>
                 </div>
-                <div className="px-4 pt-[14px]">
+                <div className="px-4 pt-[16px]">
                   <div className="flex gap-[8px]">
-                    {review.images.map((image, index) => (
-                      <div
-                        key={`${review.id}-image-${index}`}
-                        className="h-[130px] w-[130px] overflow-hidden rounded-[4px] bg-[#e1e2e4]"
-                      >
-                        {image && (
-                          <img src={image} alt="" className="h-full w-full object-cover" />
-                        )}
-                      </div>
-                    ))}
+                    {Array.from({ length: 2 }).map((_, index) => {
+                      const image = review.images[index];
+                      return (
+                        <div
+                          key={`${review.id}-image-${index}`}
+                          className="h-[130px] w-[130px] overflow-hidden rounded-[4px] bg-[#e1e2e4]"
+                        >
+                          {image && (
+                            <img src={image} alt="" className="h-full w-full object-cover" />
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                </div>
-                <div className="px-4 pt-3">
-                  <div className="flex items-center gap-[12px] text-[13px] text-[#989ba2]">
-                    <span className="font-semibold text-[#878a93]">박덕호</span>
+                  <div className="mt-[16px] flex items-center gap-[12px] text-[13px] text-[#989ba2]">
+                    <span className="font-semibold text-[#878a93]">{review.name}</span>
+                    <span className="h-[14px] w-px bg-[#e1e2e4]" />
+                    <div className="flex items-center gap-[2px]">{renderStars(review.rating)}</div>
+                    <span className="h-[14px] w-px bg-[#e1e2e4]" />
                     <span>{review.date}</span>
                   </div>
-                  <p className="mt-2 text-[13px] leading-[1.4] text-[#505158]">
+                  <p className="mt-[8px] line-clamp-2 text-[13px] leading-[1.4] text-[#505158]">
                     {review.content}
                   </p>
                 </div>
-                <div className="mt-auto flex gap-[6px] px-4 pb-4 pt-2">
+                <div className="mt-[8px] flex gap-[6px] px-4 pb-[16px]">
                   <span className="rounded-[2px] bg-[#e5f4ff] px-[8px] py-[4px] text-[12px] text-[#008bff]">
                     {review.category}
                   </span>
@@ -592,69 +609,75 @@ const CategoryLandingPage = () => {
                 tabIndex={0}
                 onClick={() => handleExpertProfile(expert.id)}
                 onKeyDown={(event) => handleExpertKeyDown(event, expert.id)}
-                className="relative h-[253px] w-[343px] rounded-[8px] bg-white shadow-[0px_2px_12px_0px_rgba(0,0,0,0.13)] cursor-pointer"
+                className="w-full min-h-[251px] cursor-pointer rounded-[8px] bg-white px-[12px] py-[20px] shadow-[0px_2px_12px_0px_rgba(0,0,0,0.13)]"
               >
-                <div className="absolute left-[13px] top-[23px] flex items-center gap-[10px] text-left">
-                  <div className="h-[42px] w-[42px] shrink-0 rounded-full bg-[#e1e2e4]">
-                    {expert.avatar && (
-                      <img src={expert.avatar} alt="" className="h-full w-full object-cover" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-[16px] font-semibold leading-[1.1] text-[#292a2d]">
-                      {expert.name}
-                    </p>
-                    <p className="mt-[6px] text-[13px] text-[#878a93]">{expert.summary}</p>
-                  </div>
-                </div>
-                <div className="absolute right-[13px] top-[23px] flex items-center gap-[6px] text-[13px] text-[#878a93]">
-                  <div className="flex items-center gap-[2px]">
-                    <img src={starIcon} alt="" className="h-[18px] w-[18px]" />
-                    <span className="font-semibold text-[#505158]">{expert.rating}</span>
-                  </div>
-                  <span>{expert.reviewCount}</span>
-                </div>
-                <div
-                  className="absolute left-[12px] top-[79px] flex gap-[2px]"
-                  onClick={() => handleExpertProfile(expert.id)}
-                >
-                  {expert.images.map((image, index) => (
-                    <div
-                      key={`${expert.id}-review-${index}`}
-                      className="relative h-[105px] w-[105px] overflow-hidden rounded-[4px] bg-[#e1e2e4]"
-                    >
-                      {image && (
-                        <img src={image} alt="" className="h-full w-full object-cover" />
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60" />
-                      <span className="absolute bottom-[10px] left-[10px] text-[12px] text-white">
-                        {expert.reviewTags[index]}
-                      </span>
+                <div className="flex flex-col gap-[14px]">
+                  <div className="flex items-start justify-between gap-[8px]">
+                    <div className="min-w-0 flex items-center gap-[9px]">
+                      <div className="h-[42px] w-[42px] shrink-0 overflow-hidden rounded-full bg-[#e1e2e4]">
+                        {expert.avatar && (
+                          <img src={expert.avatar} alt="" className="h-full w-full object-cover" />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex flex-col gap-[6px] text-left">
+                        <p className="text-[16px] font-semibold leading-[1.1] text-[#292a2d]">
+                          {expert.name}
+                        </p>
+                        <p className="line-clamp-1 text-[13px] text-[#878a93]">
+                          {expert.summary}
+                        </p>
+                      </div>
                     </div>
-                  ))}
-                </div>
-                <button
-                  className="absolute right-[12px] top-[198px] h-[36px] w-[95px] rounded-[4px] bg-[#171719] text-[14px] font-medium text-white"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    handleReservationSchedule();
-                  }}
-                >
-                  상담 예약
-                </button>
-                <div className="absolute left-[13px] top-[204px] flex gap-[6px]">
-                  {expert.tags.map((tag, index) => (
-                    <span
-                      key={`${expert.id}-tag-${tag}-${index}`}
-                      className={
-                        tag === '헤어'
-                          ? 'rounded-[2px] bg-[#f5f9fd] px-[6px] py-[4px] text-[12px] text-[#429ff0]'
-                          : 'rounded-[2px] bg-[#f4f4f5] px-[8px] py-[4px] text-[12px] text-[#46474c]'
-                      }
+                    <div className="flex shrink-0 items-center gap-[6px] text-[13px] text-[#878a93]">
+                      <div className="flex items-center gap-[2px]">
+                        <img src={starIcon} alt="" className="h-[18px] w-[18px]" />
+                        <span className="font-semibold text-[#505158]">{expert.rating}</span>
+                      </div>
+                      <span className="whitespace-nowrap">{expert.reviewCount}</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-[2px]" onClick={() => handleExpertProfile(expert.id)}>
+                    {Array.from({ length: 3 }).map((_, index) => {
+                      const image = expert.images[index];
+                      return (
+                      <div
+                        key={`${expert.id}-review-${index}`}
+                        className="relative h-[105px] w-[105px] overflow-hidden rounded-[4px] bg-[#e1e2e4]"
+                      >
+                        {image && <img src={image} alt="" className="h-full w-full object-cover" />}
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60" />
+                        <span className="absolute bottom-[27px] left-[10px] text-[12px] text-white">
+                          {expert.reviewTags[index]}
+                        </span>
+                      </div>
+                      );
+                    })}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex gap-[6px]">
+                      {expert.tags.map((tag, index) => (
+                        <span
+                          key={`${expert.id}-tag-${tag}-${index}`}
+                          className={
+                            tag === '헤어'
+                              ? 'rounded-[2px] bg-[#f5f9fd] px-[6px] py-[4px] text-[12px] text-[#429ff0]'
+                              : 'rounded-[2px] bg-[#f4f4f5] px-[8px] py-[4px] text-[12px] text-[#46474c]'
+                          }
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <button
+                      className="h-[36px] w-[95px] rounded-[4px] bg-[#171719] text-[14px] font-medium text-white"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleReservationSchedule();
+                      }}
                     >
-                      {tag}
-                    </span>
-                  ))}
+                      상담 예약
+                    </button>
+                  </div>
                 </div>
               </article>
             ))}
