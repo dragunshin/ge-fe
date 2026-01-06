@@ -137,12 +137,12 @@ export default function DateTimeBottomSheet({
   const canNext = Boolean(selectedDate && selectedTimeId);
 
   return (
-    <div className="absolute inset-0 z-50">
+    <div className="fixed inset-0 z-50">
       {/* backdrop */}
       <button type="button" className="absolute inset-0 bg-black/45" onClick={onClose} />
 
       {/* sheet */}
-      <div className="absolute inset-x-0 bottom-0 mx-auto w-full max-w-[375px] rounded-none bg-white shadow-[0_-10px_30px_rgba(0,0,0,0.12)]">
+      <div className="absolute inset-x-0 bottom-0 mx-auto w-full max-w-[375px] rounded-t-[24px] bg-white shadow-[0_-10px_30px_rgba(0,0,0,0.12)]">
         <div className="px-6 pt-6">
           <DayPicker
             mode="single"
@@ -229,7 +229,7 @@ export default function DateTimeBottomSheet({
               onNext({ date: selectedDate, timeId: selectedTimeId });
             }}
             className={cn(
-              "mt-5 h-[54px] w-full rounded-none pre_subtitle_semi_16",
+              "mt-5 mb-5 w-[342px] h-[54px] w-full rounded-[4px] pre_subtitle_semi_16",
               canNext ? "bg-[#0f0f10] text-white active:opacity-90" : "bg-[#E6E7EA] text-[#A9ADB6]",
             )}
           >

@@ -100,7 +100,7 @@ export default function ConsultationMethodSheet({
   if (!open) return null;
 
   return (
-    <div className="absolute inset-0 z-50">
+    <div className="fixed inset-0 z-50">
       {/* overlay */}
       <button
         type="button"
@@ -111,7 +111,7 @@ export default function ConsultationMethodSheet({
 
       {/* bottom sheet wrapper */}
       <div className="absolute inset-x-0 bottom-0 mx-auto w-full max-w-[375px]">
-        <div className="rounded-none bg-white px-5 pb-0 pt-5 shadow-[0_-12px_32px_rgba(0,0,0,0.18)]">
+        <div className="rounded-t-[16px] bg-white px-5 pb-6 pt-5 shadow-[0_-12px_32px_rgba(0,0,0,0.18)]">
           {/* header */}
           <div className="flex items-center justify-between">
             <h2 className="pre_subtitle_semi_18 text-[#000000]">
@@ -178,7 +178,7 @@ export default function ConsultationMethodSheet({
           {/* next button */}
           <button
             type="button"
-            className="mt-6 h-[48px] w-full rounded-none bg-[#181818] pre_subtitle_semi_16 text-white active:scale-[0.99]"
+            className="mt-10 h-[48px] w-[342px] rounded-[4px] bg-[#181818] pre_subtitle_semi_16 text-white active:scale-[0.99]"
             onClick={() => onNext?.(selected)}
           >
             다음

@@ -6,11 +6,13 @@ import { useStyleSetupStore } from "@/stores/useHairSetupStore";
 export function Step1SidePhotos({ onNext, onBack }: { onNext: () => void; onBack?: () => void }) {
   const { sidePhotoKeys, setSidePhotoKey, removeSidePhotoKey } = useStyleSetupStore();
 
+  const canNext = Boolean(sidePhotoKeys.LEFT && sidePhotoKeys.RIGHT);
+
   return (
-    <div className="relative mx-auto flex h-full w-full max-w-[420px] flex-col bg-white overflow-hidden">
+    <div className="mx-auto min-h-[100dvh] w-full max-w-[420px] bg-white pb-28">
       <TopNav onBack={onBack} />
 
-      <div className="flex-1 overflow-y-auto px-5 pb-[120px] scrollbar-hide">
+      <div className="px-5">
         <p className="text-[14px] font-semibold text-[#008bff]">1/3</p>
 
         <div className="mt-2">
@@ -26,26 +28,31 @@ export function Step1SidePhotos({ onNext, onBack }: { onNext: () => void; onBack
             안경을 착용하지 않은 상태에서 헤어라인이 모두 보이도록 촬영해 주세요.
           </p>
         </div>
-        <SinglePhotoField
-          title="왼쪽 측면 사진을 올려주세요."
-          helper="얼굴을 왼쪽으로 45도 돌린 촬영본을 올려주세요."
-          valueKey={sidePhotoKeys.LEFT}
-          prefix="style/side-left"
-          onUploadedKey={(key) => setSidePhotoKey("LEFT", key)}
-          onRemove={() => removeSidePhotoKey("LEFT")}
-        />
-
-        <SinglePhotoField
-          title="오른쪽 측면 사진을 올려주세요."
-          helper="얼굴을 오른쪽으로 45도 돌린 촬영본을 올려주세요."
-          valueKey={sidePhotoKeys.RIGHT}
-          prefix="style/side-right"
-          onUploadedKey={(key) => setSidePhotoKey("RIGHT", key)}
-          onRemove={() => removeSidePhotoKey("RIGHT")}
-        />
       </div>
 
-      <Footer onClick={onNext} />
+      <SinglePhotoField
+        title="왼쪽 측면 사진을 올려주세요."
+        helper="얼굴을 왼쪽으로 45도 돌린 촬영본을 올려주세요."
+        valueKey={sidePhotoKeys.LEFT}
+        prefix="style/side-left"
+        onUploadedKey={(key) => setSidePhotoKey("LEFT", key)}
+        onRemove={() => removeSidePhotoKey("LEFT")}
+      />
+
+      <SinglePhotoField
+        title="오른쪽 측면 사진을 올려주세요."
+        helper="얼굴을 오른쪽으로 45도 돌린 촬영본을 올려주세요."
+        valueKey={sidePhotoKeys.RIGHT}
+        prefix="style/side-right"
+        onUploadedKey={(key) => setSidePhotoKey("RIGHT", key)}
+        onRemove={() => removeSidePhotoKey("RIGHT")}
+      />
+
+      <Footer
+        //disabled={!canNext}
+        disabled={canNext}
+        onClick={onNext}
+      />
     </div>
   );
 }

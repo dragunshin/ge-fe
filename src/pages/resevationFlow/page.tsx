@@ -1,6 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useMemo, useState } from "react";
 import ConsultationMethodSheet from "./reservationSheet/typeReservation";
 import DateTimeBottomSheet from "./reservationSheet/calendar";
 
@@ -35,8 +33,6 @@ function formatKoDate(date: Date) {
 }
 
 export default function ConsultationSheetTestPage() {
-  const navigate = useNavigate();
-  const STORAGE_KEY = "reservation_sheet_logs_v1";
   // 상담방식 시트
   const [openConsult, setOpenConsult] = useState(false);
   const [defaultConsult, setDefaultConsult] = useState<ConsultType>("MESSAGE");
@@ -46,56 +42,11 @@ export default function ConsultationSheetTestPage() {
   const [openDateTime, setOpenDateTime] = useState(false);
   const [dateTimeLog, setDateTimeLog] = useState<DateTimeLog[]>([]);
 
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-    const stored = sessionStorage.getItem(STORAGE_KEY);
-    if (!stored) {
-      return;
-    }
-    try {
-      const parsed = JSON.parse(stored) as {
-        consultLog?: ConsultLog[];
-        dateTimeLog?: DateTimeLog[];
-      };
-      if (parsed.consultLog) {
-        setConsultLog(parsed.consultLog);
-      }
-      if (parsed.dateTimeLog) {
-        setDateTimeLog(parsed.dateTimeLog);
-      }
-    } catch {
-      sessionStorage.removeItem(STORAGE_KEY);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-    sessionStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ consultLog, dateTimeLog }),
-    );
-  }, [consultLog, dateTimeLog]);
-
   const containerMax = useMemo(() => "max-w-[420px]", []);
 
   return (
-    <div className="min-h-full bg-[#F5F6F8]">
+    <div className="min-h-dvh bg-[#F5F6F8]">
       <div className={["mx-auto w-full px-5 py-8", containerMax].join(" ")}>
-        <header className="app-header flex items-center gap-2 pb-4">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-[#e7e9ed]"
-            aria-label="뒤로가기"
-          >
-            <ChevronLeft className="h-5 w-5 text-[#111827]" />
-          </button>
-          <span className="text-[16px] font-semibold text-[#111827]">상담 예약</span>
-        </header>
         <h1 className="text-[20px] font-semibold text-[#111827]">Bottom Sheet 테스트</h1>
         <p className="mt-2 text-[13px] leading-5 text-[#6B7280]">
           아래 카드에서 각각 시트를 열어보고 동작(선택/닫기/다음)을 확인하세요.
@@ -261,7 +212,6 @@ export default function ConsultationSheetTestPage() {
             ...prev,
           ]);
           setOpenDateTime(false);
-          navigate("/reservation/fashion");
         }}
       />
     </div>

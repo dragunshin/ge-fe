@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 
 const StepArrow = () => (
@@ -33,12 +33,30 @@ const OrderChevron = ({ expanded }: { expanded: boolean }) => (
 
 export function PaymentCompletePage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(false);
+  const state = location.state as { from?: string; flowFrom?: string; step?: number } | null;
+  const appendStep = (path: string, step?: number) => {
+    if (!step || path.includes("step=")) return path;
+    const joiner = path.includes("?") ? "&" : "?";
+    return `${path}${joiner}step=${step}`;
+  };
+  const handleBack = () => {
+    if (state?.flowFrom) {
+      navigate(appendStep(state.flowFrom, state.step));
+      return;
+    }
+    if (state?.from) {
+      navigate(state.from);
+      return;
+    }
+    navigate(-1);
+  };
 
   return (
     <div className="min-h-full bg-white text-[#0f0f10]">
       <header className="app-header flex h-[44px] items-center gap-[15px] px-4">
-        <button onClick={() => navigate("/payment/order")} aria-label="뒤로가기">
+        <button onClick={handleBack} aria-label="뒤로가기">
           <ChevronLeft className="h-[24px] w-[24px]" />
         </button>
         <h1 className="text-[20px] font-semibold leading-[1.4]">주문하기</h1>

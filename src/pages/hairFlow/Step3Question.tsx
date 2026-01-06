@@ -29,6 +29,9 @@ export function Step3Question({ onBack }: { onBack?: () => void; onDone?: () => 
   const s = useStyleSetupStore();
   const nav = useNavigate();
 
+  const canSubmit =
+    Boolean(s.sidePhotoKeys.LEFT && s.sidePhotoKeys.RIGHT) && s.questionText.length <= 400;
+
   // const handleSubmit = async () => {
   //   if (!s.sidePhotoKeys.LEFT || !s.sidePhotoKeys.RIGHT) return;
 
@@ -53,14 +56,17 @@ export function Step3Question({ onBack }: { onBack?: () => void; onDone?: () => 
   // };
 
   const handleSubmit = async () => {
-    nav("/payment/order");
+    // 라우팅 수정 신용섭: 원본
+    // nav("/payment/order");
+    // 라우팅 수정 신용섭: 결제에서 마지막 단계로 복귀할 수 있도록 step 전달
+    nav("/payment/order", { state: { from: "/hair/setup", step: 3 } });
   };
 
   return (
-    <div className="relative mx-auto flex h-full w-full max-w-[420px] flex-col bg-white overflow-hidden">
+    <div className="mx-auto bg-white">
       <TopNav onBack={onBack} />
 
-      <div className="flex-1 overflow-y-auto px-5 pb-[120px] scrollbar-hide">
+      <div className="px-5">
         <p className="pre_body_med_16 text-[#008bff]">3/3</p>
 
         <p className="mt-2 pre_title_semi_20 text-[#0f0f10]">
@@ -94,7 +100,7 @@ export function Step3Question({ onBack }: { onBack?: () => void; onDone?: () => 
         />
       </div>
 
-      <Footer label="다음" onClick={handleSubmit} />
+      <Footer label="다음" disabled={canSubmit} onClick={handleSubmit} />
       {/* <Footer label="다음" disabled={!canSubmit} onClick={handleSubmit} /> */}
     </div>
   );

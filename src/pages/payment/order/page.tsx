@@ -37,6 +37,11 @@ export function PaymentOrderPage() {
   const totalPoints = 0;
   const formatCurrency = (value: number) => `${value.toLocaleString('ko-KR')}원`;
   const formatPoint = (value: number) => `${value.toLocaleString('ko-KR')}P`;
+  const appendStep = (path: string, step?: number) => {
+    if (!step || path.includes('step=')) return path;
+    const joiner = path.includes('?') ? '&' : '?';
+    return `${path}${joiner}step=${step}`;
+  };
 
   const handleOrderAgreementChange = (checked: boolean) => {
     setAgreements({
@@ -60,7 +65,12 @@ export function PaymentOrderPage() {
   };
 
   const handleBack = () => {
-    navigate('/hair/setup', { state: { step: 3 } });
+    const state = location.state as { from?: string; step?: number } | null;
+    if (state?.from) {
+      navigate(appendStep(state.from, state.step), { state });
+      return;
+    }
+    navigate(-1);
   };
 
   return (
@@ -155,7 +165,7 @@ export function PaymentOrderPage() {
           <div className="mt-[13px] w-[247px] rounded-[4px] border border-[#e1e2e4] px-[20px] py-[16px]">
             <p className="text-[14px] leading-[1.4] text-[#878a93]">입금 계좌 번호</p>
             <p className="mt-[4px] text-[14px] font-semibold leading-[1.4] text-[#0f0f10]">
-              {formatCurrency(totalPrice)}
+              {formatCurrency(0)} {/*  {formatCurrency(totalPrice)} */}
             </p>
           </div>
         </div>
@@ -266,7 +276,11 @@ export function PaymentOrderPage() {
         <button
           onClick={() =>
             navigate('/payment/complete', {
-              state: { from: `${location.pathname}${location.search}` },
+              state: {
+                from: `${location.pathname}${location.search}`,
+                step: (location.state as { step?: number } | null)?.step,
+                flowFrom: (location.state as { from?: string } | null)?.from,
+              },
             })
           }
           disabled={!canPay}

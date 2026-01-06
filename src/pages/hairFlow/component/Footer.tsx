@@ -1,17 +1,23 @@
 export default function Footer({
   label = "다음",
+  disabled,
   onClick,
 }: {
   label?: string;
+  disabled?: boolean;
   onClick: () => void;
 }) {
   return (
-    <div className="absolute inset-x-0 bottom-0 z-50 bg-white">
-      <div className="mx-auto w-full max-w-[375px] px-5 pb-[calc(env(safe-area-inset-bottom)+16px)]">
+    <div className="fixed inset-x-0 bottom-0 z-50">
+      <div className="mx-auto w-full max-w-[420px] px-5 pb-[calc(env(safe-area-inset-bottom)+16px)]">
         <button
           type="button"
+          disabled={disabled}
           onClick={onClick}
-          className="flex h-[54px] w-full items-center justify-center rounded-none pre_subtitle_semi_16 bg-[#0f0f10] text-white active:opacity-90"
+          className={[
+            "h-[64px] w-full pre_subtitle_semi_16",
+            disabled ? "bg-black/40 text-white/70" : "bg-black text-white active:bg-black/90",
+          ].join(" ")}
         >
           {label}
         </button>

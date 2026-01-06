@@ -1,0 +1,105 @@
+import { Check } from "lucide-react";
+import { COLOR_OPTIONS, FIT_IMAGE_OPTIONS, MOOD_IMAGE_OPTIONS } from "./constants";
+
+export function Step6StylePreference({
+  colorSelections,
+  fitSelection,
+  moodSelections,
+  onToggleColor,
+  onToggleMood,
+  onFitChange,
+}: {
+  colorSelections: Set<string>;
+  fitSelection: string | null;
+  moodSelections: Set<string>;
+  onToggleColor: (option: string) => void;
+  onToggleMood: (option: string) => void;
+  onFitChange: (value: string) => void;
+}) {
+  return (
+    <section className="pt-[8px]">
+      <p className="text-[16px] font-medium text-[#008bff]">6/9</p>
+      <h1 className="mt-[6px] text-[20px] font-semibold leading-[1.4] text-black">
+        선호하는 스타일을 알려주세요.
+      </h1>
+
+      <div className="mt-[24px]">
+        <p className="text-[16px] font-semibold text-black">색상</p>
+        <div className="mt-[12px] grid grid-cols-2 gap-[12px]">
+          {COLOR_OPTIONS.map((option) => {
+            const selected = colorSelections.has(option);
+            return (
+              <button
+                key={option}
+                type="button"
+                className={`flex h-[44px] w-full items-center justify-between rounded-[8px] px-[20px] text-[14px] font-medium ${
+                  selected
+                    ? "bg-[#eff7fd] text-[#70737c]"
+                    : "bg-[#f4f4f5] text-[#70737c]"
+                }`}
+                onClick={() => onToggleColor(option)}
+              >
+                <span>{option}</span>
+                <span
+                  className={`flex h-[18px] w-[18px] items-center justify-center rounded-full ${
+                    selected ? "opacity-100" : "opacity-0"
+                  }`}
+                >
+                  <Check className="h-[12px] w-[12px] text-[#008bff]" />
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="mt-[32px]">
+        <p className="text-[16px] font-semibold text-black">핏감</p>
+        <div className="mt-[12px] grid grid-cols-3 gap-[8px]">
+          {FIT_IMAGE_OPTIONS.map((item) => {
+            const selected = fitSelection === item.label;
+            return (
+              <button
+                key={item.label}
+                type="button"
+                className="flex flex-col items-center gap-[8px]"
+                onClick={() => onFitChange(item.label)}
+              >
+                <div
+                  className={`h-[109px] w-[109px] overflow-hidden rounded-[8px] ${
+                    selected ? "ring-2 ring-[#008bff]" : ""
+                  }`}
+                />
+                <span className="text-[14px] text-[#70737c]">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="mt-[32px]">
+        <p className="text-[16px] font-semibold text-black">무드</p>
+        <div className="mt-[12px] grid grid-cols-3 gap-[8px]">
+          {MOOD_IMAGE_OPTIONS.map((item) => {
+            const selected = moodSelections.has(item.label);
+            return (
+              <button
+                key={item.label}
+                type="button"
+                className="flex flex-col items-center gap-[8px]"
+                onClick={() => onToggleMood(item.label)}
+              >
+                <div
+                  className={`h-[109px] w-[109px] overflow-hidden rounded-[8px] ${
+                    selected ? "ring-2 ring-[#008bff]" : ""
+                  }`}
+                />
+                <span className="text-[14px] text-[#70737c]">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}

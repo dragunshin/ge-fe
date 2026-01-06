@@ -26,7 +26,7 @@ import ExpertInfoPage from "@/pages/category/expert/page";
 import PortfolioLandingPage from "@/pages/category/portfolio/page";
 import { PaymentOrderPage } from "@/pages/payment/order/page";
 import { PaymentCompletePage } from "@/pages/payment/complete/page";
-import FashionReservationFlowPage from "@/pages/reservation/fashion/page";
+import FashionReservationFlowPage from "@/pages/fashionFlow/page";
 import { HairSetup } from "@/pages/hairFlow/page";
 
 export const router = createBrowserRouter([
@@ -137,20 +137,4 @@ export const router = createBrowserRouter([
     path: "/hair/setup",
     element: <HairSetup />,
   },
-  // {
-  //   path: '/profile/writing-list',
-  //   element: <ProfileWritingListPage />,
-  // },
-  // {
-  //   path: '/profile/detail/:id',
-  //   element: <ProfileDetailPage />,
-  // },
-  // {
-  //   path: '/profile/write/:id',
-  //   element: <ProfileWritePage />,
-  // },
-  // {
-  //   path: '/profile/evaluation/:id',
-  //   element: <ProfileEvaluationPage />,
-  // },
 ]);
