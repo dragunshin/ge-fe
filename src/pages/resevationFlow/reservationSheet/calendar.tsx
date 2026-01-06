@@ -143,7 +143,7 @@ export default function DateTimeBottomSheet({
 
       {/* sheet */}
       <div className="absolute inset-x-0 bottom-0 mx-auto w-full max-w-[375px] rounded-none bg-white shadow-[0_-10px_30px_rgba(0,0,0,0.12)]">
-        <div className="flex max-h-[80dvh] flex-col px-6 pt-6">
+        <div className="flex h-[80dvh] flex-col px-6 pt-6">
           <div className="flex-1 overflow-y-auto pb-6">
             <DayPicker
               mode="single"
@@ -194,7 +194,7 @@ export default function DateTimeBottomSheet({
             </div>
           </div>
 
-          <div className="app-footer bg-white pb-6 pt-5">
+          <div className="app-footer mt-auto bg-white pb-6 pt-5">
             <button
               type="button"
               disabled={!canNext}

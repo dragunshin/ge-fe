@@ -111,7 +111,7 @@ export default function ConsultationMethodSheet({
 
       {/* bottom sheet wrapper */}
       <div className="absolute inset-x-0 bottom-0 mx-auto w-full max-w-[375px]">
-        <div className="flex max-h-[80dvh] flex-col rounded-none bg-white px-5 pt-5 shadow-[0_-12px_32px_rgba(0,0,0,0.18)]">
+        <div className="flex h-[80dvh] flex-col rounded-none bg-white px-5 pt-5 shadow-[0_-12px_32px_rgba(0,0,0,0.18)]">
           {/* header */}
           <div className="flex items-center justify-between">
             <h2 className="pre_subtitle_semi_18 text-[#000000]">
@@ -176,7 +176,7 @@ export default function ConsultationMethodSheet({
           </div>
 
           {/* next button */}
-          <div className="app-footer bg-white pb-5">
+          <div className="app-footer mt-auto bg-white pb-5">
             <button
               type="button"
               className="h-[48px] w-full rounded-none bg-[#181818] pre_subtitle_semi_16 text-white active:scale-[0.99]"
