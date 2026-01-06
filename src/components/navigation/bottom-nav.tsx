@@ -26,11 +26,11 @@ export default function BottomNav() {
   const navItems: NavItem[] = [
     { key: "home", label: "홈", onClick: () => navigate("/") },
     { key: "category", label: "탐색", onClick: () => navigate("/category/hair") },
-    { key: "chat", label: "채팅", onClick: () => navigate("/chat") },
+    { key: "chat", label: "채팅", onClick: () => navigate("/chatlist") },
     {
       key: "community",
       label: "커뮤니티",
-      onClick: () => navigate("/reservation/fashion?step=9"),
+      onClick: () => {},
     },
     {
       key: "mypage",
@@ -51,7 +51,7 @@ export default function BottomNav() {
       ? "home"
       : path.startsWith("/category")
         ? "category"
-        : path.startsWith("/chat")
+          : path.startsWith("/chat")
           ? "chat"
           : path.startsWith("/reservation")
             ? "community"
