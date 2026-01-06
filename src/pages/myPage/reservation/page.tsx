@@ -271,7 +271,7 @@ export default function ReservationHistoryView() {
     <div className="flex h-full flex-col bg-white">
       <main className="flex-1 overflow-y-auto">
         {/* header */}
-        <header className="flex items-center px-4 py-4 bg-white">
+        <header className="app-header flex items-center px-4 py-4 bg-white">
           <button onClick={() => navigate(-1)} className="mr-3">
             <Back className="w-[18px] h-[18px]" />
           </button>

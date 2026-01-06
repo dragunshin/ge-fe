@@ -85,7 +85,7 @@ export default function ConsultationSheetTestPage() {
   return (
     <div className="min-h-dvh bg-[#F5F6F8]">
       <div className={["mx-auto w-full px-5 py-8", containerMax].join(" ")}>
-        <header className="flex items-center gap-2 pb-4">
+        <header className="app-header flex items-center gap-2 pb-4">
           <button
             type="button"
             onClick={() => navigate(-1)}

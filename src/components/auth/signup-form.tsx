@@ -184,7 +184,7 @@ export function SignUpForm() {
   return (
     <div className="min-h-full bg-white flex flex-col">
       {/* Header */}
-      <header className="shrink-0 flex items-center px-4 py-4">
+      <header className="app-header shrink-0 flex items-center px-4 py-4">
         <button onClick={() => navigate(-1)} className="mr-3">
           <img src={backIcon} alt="back" className="w-2.5 h-[18px]" />
         </button>

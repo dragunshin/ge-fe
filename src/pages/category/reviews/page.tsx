@@ -138,7 +138,7 @@ const CategoryBestReviewsPage = () => {
 
   return (
     <div className="flex h-full flex-col bg-white">
-      <header className="flex items-center gap-[15px] px-4 pt-[14px]">
+      <header className="app-header flex items-center gap-[15px] px-4 pt-[14px]">
         <button
           onClick={() => navigate(-1)}
           className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-50"

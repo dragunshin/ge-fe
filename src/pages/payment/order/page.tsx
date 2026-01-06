@@ -74,7 +74,7 @@ export function PaymentOrderPage() {
 
   return (
     <div className="flex h-full flex-col bg-white text-[#0f0f10]">
-      <header className="flex items-center gap-[15px] px-4 pt-[53px]">
+      <header className="app-header flex items-center gap-[15px] px-4 pt-[53px]">
         <button onClick={handleBack} className="h-6 w-6">
           <img src={backIcon} alt="뒤로가기" className="h-6 w-6" />
         </button>

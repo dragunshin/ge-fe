@@ -10,7 +10,7 @@ export default function ChatHeader() {
 
   return (
     <div className="bg-white mt-2">
-      <header className="px-4 pt-3 pb-3 mb-1">
+      <header className="app-header px-4 pt-3 pb-3 mb-1">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">
             <button

@@ -34,7 +34,7 @@ export default function FaceStep() {
   return (
     <div className="min-h-full flex flex-col bg-white text-gray-900 overflow-hidden">
       {/* Top bar */}
-      <header className="shrink-0 flex h-12 items-center justify-between bg-white px-3">
+      <header className="app-header shrink-0 flex h-12 items-center justify-between bg-white px-3">
         <button
           className="flex items-center gap-1 text-gray-900"
           onClick={() => history.back()}

@@ -68,7 +68,7 @@ export default function LikedListPage() {
         <div className="mx-auto w-full max-w-md px-4 pb-12">
         <div className="pt-6">
           {/* header */}
-          <header className="flex items-center px-1 py-2 bg-white">
+          <header className="app-header flex items-center px-1 py-2 bg-white">
             <button onClick={() => navigate(-1)} className="mr-3">
               <Back className="w-[18px] h-[18px]" />
             </button>

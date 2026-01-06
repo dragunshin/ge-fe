@@ -7,7 +7,7 @@ const PortfolioLandingPage = () => {
 
   return (
     <div className="flex h-full flex-col bg-white">
-      <header className="flex items-center gap-[15px] px-4 pt-[14px]">
+      <header className="app-header flex items-center gap-[15px] px-4 pt-[14px]">
         <button
           onClick={() => navigate(-1)}
           className="flex h-[24px] w-[24px] items-center justify-center"

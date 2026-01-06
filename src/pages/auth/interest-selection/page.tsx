@@ -36,7 +36,7 @@ export function InterestSelectionPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4">
+      <header className="app-header flex items-center justify-between px-6 py-4">
         <button onClick={() => navigate(-1)}>
           <img src={backIcon} alt="back" className="w-2.5 h-[18px]" />
         </button>
