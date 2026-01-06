@@ -60,10 +60,10 @@ export function Step3Question({ onBack }: { onBack?: () => void; onDone?: () => 
   };
 
   return (
-    <div className="mx-auto bg-white">
+    <div className="relative mx-auto flex h-full w-full max-w-[420px] flex-col bg-white overflow-hidden">
       <TopNav onBack={onBack} />
 
-      <div className="px-5">
+      <div className="flex-1 overflow-y-auto px-5 pb-[120px] scrollbar-hide">
         <p className="pre_body_med_16 text-[#008bff]">3/3</p>
 
         <p className="mt-2 pre_title_semi_20 text-[#0f0f10]">

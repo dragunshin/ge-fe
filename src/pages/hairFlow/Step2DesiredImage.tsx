@@ -23,10 +23,10 @@ export function Step2DesiredImage({ onNext, onBack }: { onNext: () => void; onBa
   const isSelected = (t: DesiredTag) => desiredTags.includes(t);
 
   return (
-    <div className="mx-auto min-h-[100dvh] w-full max-w-[420px] bg-white pb-28">
+    <div className="relative mx-auto flex h-full w-full max-w-[420px] flex-col bg-white overflow-hidden">
       <TopNav onBack={onBack} />
 
-      <div className="px-5">
+      <div className="flex-1 overflow-y-auto px-5 pb-[120px] scrollbar-hide">
         <p className="pre_body_med_16 text-[#008bff]">2/3</p>
         <p className="mt-2 pre_title_semi_20 text-[#0f0f10]">
           <span className="text-[#429ff0]">추구하는 이미지</span>를 선택해주세요.

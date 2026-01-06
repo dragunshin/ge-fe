@@ -1,5 +1,4 @@
-//import { ChevronLeft } from "lucide-react";
-import Back from "@/images/login/back.svg?react";
+import { ChevronLeft } from "lucide-react";
 
 export default function TopNav({ onBack }: { onBack?: () => void }) {
   return (
@@ -14,9 +13,9 @@ export default function TopNav({ onBack }: { onBack?: () => void }) {
     //   </button>
     // </header>
 
-    <header className="sticky top-0 z-50 flex items-center bg-white px-1 pt-4 pb-1">
-      <button onClick={onBack} className="mx-4 my-[18px]">
-        <Back className="w-[18px] h-[18px]" />
+    <header className="app-header flex h-[44px] items-center bg-white px-4">
+      <button onClick={onBack} aria-label="뒤로가기">
+        <ChevronLeft className="h-[24px] w-[24px]" />
       </button>
       {/* <h1 className="pre_title_semi_20">찜목록</h1> */}
     </header>

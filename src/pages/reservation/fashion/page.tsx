@@ -369,7 +369,7 @@ export default function FashionReservationFlowPage() {
   return (
     <div className="flex min-h-full flex-col bg-white text-[#0f0f10]">
       <header className="app-header">
-        <div className="flex h-[44px] items-center px-[16px]">
+        <div className="flex h-[44px] items-center px-4">
           <button onClick={handleBack} aria-label="뒤로가기">
             <ChevronLeft className="h-[24px] w-[24px]" />
           </button>

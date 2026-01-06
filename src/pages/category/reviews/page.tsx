@@ -43,9 +43,12 @@ const CategoryBestReviewsPage = () => {
     return `${year}.${month}.${day}`;
   };
 
-  const parseMediaUrls = (value?: string) => {
+  const parseMediaUrls = (value?: string | string[]) => {
     if (!value) {
       return [];
+    }
+    if (Array.isArray(value)) {
+      return value.filter(Boolean);
     }
     const trimmed = value.trim();
     if (!trimmed) {

@@ -566,7 +566,7 @@
 // export default HomePage;
 
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronRight, Search } from "lucide-react";
 import { useAuthStore } from "../../stores/useAuthStore";
 import heartIcon from "../../images/mypage/heart.svg";
@@ -643,6 +643,7 @@ type ExpertListCard = {
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { initializeAuth } = useAuthStore();
   const [selectedTopTab, setSelectedTopTab] = useState("헤어");
   const [selectedConsultingTab, setSelectedConsultingTab] = useState("전체");
@@ -669,9 +670,12 @@ const HomePage = () => {
     return `${year}.${month}.${day}`;
   };
 
-  const parseMediaUrls = (value?: string) => {
+  const parseMediaUrls = (value?: string | string[]) => {
     if (!value) {
       return [];
+    }
+    if (Array.isArray(value)) {
+      return value.filter(Boolean);
     }
     const trimmed = value.trim();
     if (!trimmed) {
@@ -696,6 +700,14 @@ const HomePage = () => {
   useEffect(() => {
     initializeAuth();
   }, [initializeAuth]);
+
+  useEffect(() => {
+    const state = location.state as { openCalendarSheet?: boolean } | null;
+    if (state?.openCalendarSheet) {
+      setOpenCalendarSheet(true);
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location.pathname, location.state, navigate]);
 
   useEffect(() => {
     let isActive = true;

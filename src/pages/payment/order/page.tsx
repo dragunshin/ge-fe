@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import backIcon from '../../../images/login/back.svg';
+import { ChevronLeft } from "lucide-react";
 
 const StepArrow = () => (
   <svg
@@ -61,22 +61,14 @@ export function PaymentOrderPage() {
   };
 
   const handleBack = () => {
-    if (backTarget) {
-      navigate(backTarget);
-      return;
-    }
-    if (window.history.length > 1) {
-      navigate(-1);
-      return;
-    }
-    navigate('/');
+    navigate('/hair/setup', { state: { step: 3 } });
   };
 
   return (
     <div className="flex min-h-full flex-col bg-white text-[#0f0f10]">
       <header className="app-header flex h-[44px] items-center gap-[15px] px-4">
-        <button onClick={handleBack} className="h-6 w-6">
-          <img src={backIcon} alt="뒤로가기" className="h-6 w-6" />
+        <button onClick={handleBack} aria-label="뒤로가기">
+          <ChevronLeft className="h-[24px] w-[24px]" />
         </button>
         <h1 className="text-[20px] font-semibold leading-[1.4]">주문하기</h1>
       </header>

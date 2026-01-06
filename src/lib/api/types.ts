@@ -97,7 +97,7 @@ export interface ReviewSummaryResponse {
   reviewId: number;
   rating: number;
   content: string;
-  mediaUrls: string;
+  mediaUrls: string[];
   likeCount: number;
   category: string;
   createdAt: string;
