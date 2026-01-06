@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { authService } from '../../../services/auth.service';
 import { getErrorMessage } from '../../../lib/api/error-handler';
 import { getKakaoCodeFromUrl, getKakaoErrorFromUrl } from '../../../lib/utils/kakao';
+import { useAuthStore } from '../../../stores/useAuthStore';
 
 export default function KakaoCallbackPage() {
   const navigate = useNavigate();
+  const login = useAuthStore((state) => state.login);
 
   useEffect(() => {
     const handleKakaoCallback = async () => {
@@ -33,8 +35,21 @@ export default function KakaoCallbackPage() {
         });
 
         if (response.statusCode === 0 || response.statusCode === 200) {
-          const { role, nickname } = response.data;
-          navigate('/auth/social-signup', { state: { nickname, role } });
+          const { nickname } = response.data;
+          const role = response.data.role ?? (response.data as { userType?: string }).userType;
+
+          if (role === 'TMP_USER') {
+            navigate('/auth/social-signup', { state: { nickname, role } });
+            return;
+          }
+
+          if (role === 'MEMBER' || role === 'EXPERT') {
+            login({ nickname, userType: role });
+            navigate('/');
+            return;
+          }
+
+          navigate('/auth/login');
         }
       } catch (err) {
         const errorMessage = getErrorMessage(err);

@@ -573,6 +573,9 @@ import heartIcon from "../../images/mypage/heart.svg";
 import BottomNav from "@/components/navigation/bottom-nav";
 import Logo from "@/components/ui/logo";
 import starIcon from "../../images/reviews/star.svg";
+import banner1 from "@/images/home/banner1.svg";
+import banner2 from "@/images/home/banner2.png";
+import banner3 from "@/images/home/banner3.png";
 import { expertService } from "../../services/expert.service";
 import { reviewService } from "../../services/review.service";
 import {
@@ -607,6 +610,7 @@ type TabItem = {
 
 type TopExpert = {
   id: number;
+  expertId?: number;
   name: string;
   summary: string;
   tags: string[];
@@ -699,17 +703,27 @@ const HomePage = () => {
     const fetchTopExperts = async () => {
       try {
         const category = getApiCategoryFromLabel(selectedTopTab);
-        const response = await expertService.getTopExperts(category);
+        const [popularResponse, listResponse] = await Promise.all([
+          expertService.getTopExperts(category),
+          expertService.getExpertList({ category, page: 0, size: 100 }),
+        ]);
         if (!isActive) {
           return;
         }
-        const mapped = response.data.top3.map((expert, index) => ({
-          id: index,
+        const expertIdByName = new Map(
+          listResponse.data.map((expert) => [expert.nickname, expert.expertId]),
+        );
+        const mapped = popularResponse.data.top3.map((expert, index) => {
+          const expertId = expertIdByName.get(expert.name);
+          return {
+            id: expertId ?? index,
+            expertId,
           name: expert.name,
           summary: expert.introduction,
           tags: expert.category ? [getLabelFromApiCategory(expert.category)] : [],
           thumbnail: expert.profileImage,
-        }));
+          };
+        });
         setTopExperts(mapped);
       } catch (error) {
         console.error("Failed to fetch top experts:", error);
@@ -774,21 +788,15 @@ const HomePage = () => {
   const banners: Banner[] = [
     {
       id: 1,
-      title: "3분 투자로 완성하는",
-      subtitle: "관리하는 남자의 인상",
+      image: banner1,
     },
     {
       id: 2,
-      eyebrow: "이제 슬슬 준비해야지",
-      title: "소개팅 필수 헤어스타일",
-      subtitle: "‘스핀 스왈로브펌’",
-      author: "박서령",
-      role: "헤어디자이너",
+      image: banner2,
     },
     {
       id: 3,
-      title: "박철옹이 알려주는",
-      subtitle: "진짜 남자의 메이크업",
+      image: banner3,
     },
   ];
 
@@ -898,41 +906,59 @@ const HomePage = () => {
 
         <section className="px-4 pt-5">
           <div className="flex gap-[4px] overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
-            {banners.map((banner) => (
-              <article
-                key={banner.id}
-                className="relative h-[340px] w-[340px] shrink-0 overflow-hidden rounded-[12px] bg-[#c7c9cf] snap-start"
-              >
-                {banner.image && (
-                  <img
-                    src={banner.image}
-                    alt=""
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
-                )}
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background:
-                      "linear-gradient(180deg, rgba(111,111,111,0) 52.404%, rgba(89,89,89,0.9) 100%)",
-                  }}
-                />
-                <div className="absolute left-6 top-[220px] w-[292px] text-white">
-                  {banner.eyebrow && <p className="text-[12px] leading-[1.4]">{banner.eyebrow}</p>}
-                  <p className="text-[25.5px] font-semibold leading-[1.5]">{banner.title}</p>
-                  {banner.subtitle && (
-                    <p className="text-[25.5px] font-semibold leading-[1.5]">{banner.subtitle}</p>
+            {banners.map((banner) => {
+              const hasText =
+                banner.eyebrow ||
+                banner.title ||
+                banner.subtitle ||
+                banner.author ||
+                banner.role;
+              return (
+                <article
+                  key={banner.id}
+                  className="relative h-[340px] w-[340px] shrink-0 overflow-hidden rounded-[12px] bg-[#c7c9cf] snap-start"
+                >
+                  {banner.image && (
+                    <img
+                      src={banner.image}
+                      alt=""
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
                   )}
-                  {banner.author && banner.role && (
-                    <div className="mt-3 inline-flex h-[22px] items-center gap-[6px] rounded-[2px] bg-[#008bff] px-[8px] text-[12px] font-semibold">
-                      <span>{banner.author}</span>
-                      <span className="h-[7px] w-px bg-white/80" />
-                      <span className="text-[10px] font-medium">{banner.role}</span>
-                    </div>
-                  )}
-                </div>
-              </article>
-            ))}
+                  {hasText ? (
+                    <>
+                      <div
+                        className="absolute inset-0"
+                        style={{
+                          background:
+                            "linear-gradient(180deg, rgba(111,111,111,0) 52.404%, rgba(89,89,89,0.9) 100%)",
+                        }}
+                      />
+                      <div className="absolute left-6 top-[220px] w-[292px] text-white">
+                        {banner.eyebrow && (
+                          <p className="text-[12px] leading-[1.4]">{banner.eyebrow}</p>
+                        )}
+                        <p className="text-[25.5px] font-semibold leading-[1.5]">
+                          {banner.title}
+                        </p>
+                        {banner.subtitle && (
+                          <p className="text-[25.5px] font-semibold leading-[1.5]">
+                            {banner.subtitle}
+                          </p>
+                        )}
+                        {banner.author && banner.role && (
+                          <div className="mt-3 inline-flex h-[22px] items-center gap-[6px] rounded-[2px] bg-[#008bff] px-[8px] text-[12px] font-semibold">
+                            <span>{banner.author}</span>
+                            <span className="h-[7px] w-px bg-white/80" />
+                            <span className="text-[10px] font-medium">{banner.role}</span>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  ) : null}
+                </article>
+              );
+            })}
           </div>
         </section>
 
@@ -961,7 +987,23 @@ const HomePage = () => {
 
           <div className="mt-4 space-y-4 px-4">
             {topExperts.map((expert, index) => (
-              <div key={expert.id} className="flex h-[72px] w-[342px] items-start justify-between">
+              <div
+                key={expert.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  if (expert.expertId) {
+                    navigate(`/experts/${expert.expertId}`);
+                  }
+                }}
+                onKeyDown={(event) => {
+                  if ((event.key === "Enter" || event.key === " ") && expert.expertId) {
+                    event.preventDefault();
+                    navigate(`/experts/${expert.expertId}`);
+                  }
+                }}
+                className="flex h-[72px] w-[342px] items-start justify-between"
+              >
                 <div className="flex items-end gap-[12px]">
                   <div className="relative h-[72px] w-[72px] shrink-0 overflow-hidden rounded-[4px] bg-[#e1e2e4]">
                     {expert.thumbnail && (
@@ -974,7 +1016,15 @@ const HomePage = () => {
                     </div>
                   </div>
                   <div className="flex w-[218px] flex-col items-start gap-[10px]">
-                    <p className="h-[40px] w-[218px] text-[14px] font-semibold leading-[1.4] text-[#292a2d]">
+                    <p
+                      className="h-[40px] w-[218px] text-[14px] font-semibold leading-[1.4] text-[#292a2d]"
+                      style={{
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }}
+                    >
                       {expert.name} | <span className="font-normal">{expert.summary}</span>
                     </p>
                     <div className="flex items-center gap-[4px]">
@@ -989,7 +1039,13 @@ const HomePage = () => {
                     </div>
                   </div>
                 </div>
-                <button className="flex h-6 w-6 items-center justify-center">
+                <button
+                  className="flex h-6 w-6 items-center justify-center"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                  }}
+                  type="button"
+                >
                   <img src={heartIcon} alt="찜" className="h-6 w-6" />
                 </button>
               </div>

@@ -14,7 +14,7 @@ export default function TopNav({ onBack }: { onBack?: () => void }) {
     //   </button>
     // </header>
 
-    <header className="flex items-center bg-white ml-1 mt-4 mb-1">
+    <header className="sticky top-0 z-50 flex items-center bg-white px-1 pt-4 pb-1">
       <button onClick={onBack} className="mx-4 my-[18px]">
         <Back className="w-[18px] h-[18px]" />
       </button>

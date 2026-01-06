@@ -60,39 +60,44 @@ export default function BottomNav() {
               : "";
 
   return (
-    <nav className="flex h-[69px] items-center justify-between border-t border-[#f4f4f5] px-4 pb-[12px] pt-[12px]">
-      {navItems.map((item) => {
-        const isActive = item.key === activeKey;
-        const iconClass = `h-6 w-6 ${isActive ? "text-[#0f0f10]" : "text-[#aeb0b6]"}`;
-        return (
-          <button
-            key={item.key}
-            onClick={item.onClick}
-            className="flex flex-1 flex-col items-center gap-1"
-          >
-            {item.key === "home" && <HomeIcon className={iconClass} />}
-            {item.key === "category" && (
-              <ExploreIcon className={iconClass} />
-            )}
-            {item.key === "chat" && (
-              <ChatIcon className={iconClass} />
-            )}
-            {item.key === "community" && (
-              <CommunityIcon className={iconClass} />
-            )}
-            {item.key === "mypage" && (
-              <MypageIcon className={iconClass} />
-            )}
-            <span
-              className={`text-[12px] ${
-                isActive ? "text-[#0f0f10] font-semibold" : "text-[#aeb0b6]"
-              }`}
-            >
-              {item.label}
-            </span>
-          </button>
-        );
-      })}
-    </nav>
+    <>
+      <div className="h-[69px]" aria-hidden />
+      <nav className="absolute inset-x-0 bottom-0 z-50 border-t border-[#f4f4f5] bg-white">
+        <div className="mx-auto flex h-[69px] max-w-[420px] items-center justify-between px-4 pb-[12px] pt-[12px]">
+          {navItems.map((item) => {
+            const isActive = item.key === activeKey;
+            const iconClass = `h-6 w-6 ${isActive ? "text-[#0f0f10]" : "text-[#aeb0b6]"}`;
+            return (
+              <button
+                key={item.key}
+                onClick={item.onClick}
+                className="flex flex-1 flex-col items-center gap-1"
+              >
+                {item.key === "home" && <HomeIcon className={iconClass} />}
+                {item.key === "category" && (
+                  <ExploreIcon className={iconClass} />
+                )}
+                {item.key === "chat" && (
+                  <ChatIcon className={iconClass} />
+                )}
+                {item.key === "community" && (
+                  <CommunityIcon className={iconClass} />
+                )}
+                {item.key === "mypage" && (
+                  <MypageIcon className={iconClass} />
+                )}
+                <span
+                  className={`text-[12px] ${
+                    isActive ? "text-[#0f0f10] font-semibold" : "text-[#aeb0b6]"
+                  }`}
+                >
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+    </>
   );
 }

@@ -1116,8 +1116,8 @@ export default function FashionReservationFlowPage() {
         )}
       </main>
 
-      <div className="fixed bottom-0 left-1/2 w-full max-w-[375px] -translate-x-1/2 border-t border-[#f4f4f5] bg-white shadow-[0_-6px_16px_rgba(0,0,0,0.06)]">
-        <div className="px-[16px] pb-[8px] pt-[4px]">
+      <div className="fixed bottom-0 left-1/2 w-full max-w-[375px] -translate-x-1/2 bg-transparent">
+        <div className="px-[16px] pb-[4px]">
           <div className="flex justify-end">
             <button
               type="button"
@@ -1130,7 +1130,7 @@ export default function FashionReservationFlowPage() {
         </div>
         <button
           type="button"
-          className={`flex h-[90px] w-full items-center justify-center text-[16px] font-semibold text-white ${
+          className={`flex h-[90px] w-full items-center justify-center rounded-none text-[16px] font-semibold text-white ${
             canProceed() ? "bg-[#0f0f10]" : "bg-[#aeb0b6]"
           }`}
           onClick={handleNext}
@@ -1138,9 +1138,6 @@ export default function FashionReservationFlowPage() {
         >
           다음
         </button>
-        <div className="flex h-[34px] items-center justify-center bg-transparent">
-          <div className="h-[5px] w-[134px] rounded-[100px] bg-transparent" />
-        </div>
       </div>
     </div>
   );
