@@ -37,7 +37,7 @@ export function PaymentCompletePage() {
 
   return (
     <div className="min-h-full bg-white text-[#0f0f10]">
-      <header className="app-header flex items-center gap-[15px] px-4 pt-[53px]">
+      <header className="app-header flex h-[44px] items-center gap-[15px] px-4">
         <button onClick={() => navigate("/reservation/fashion?step=9")} className="h-6 w-6">
           <img src={backIcon} alt="뒤로가기" className="h-6 w-6" />
         </button>
