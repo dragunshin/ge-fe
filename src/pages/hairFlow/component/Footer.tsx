@@ -8,7 +8,7 @@ export default function Footer({
   onClick: () => void;
 }) {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50">
+    <div className="app-footer">
       <div className="mx-auto w-full max-w-[420px] px-5 pb-[calc(env(safe-area-inset-bottom)+16px)]">
         <button
           type="button"

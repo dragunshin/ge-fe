@@ -485,7 +485,7 @@ const ExpertInfoPage = () => {
         </div>
       </main>
 
-      <div className="fixed bottom-0 left-1/2 w-[375px] -translate-x-1/2 bg-white px-[16px] py-[10px]">
+      <div className="app-footer bg-white px-[16px] py-[10px]">
         <button className="h-[44px] w-full rounded-[4px] bg-[#008bff] text-[16px] font-semibold text-white">
           상담 신청하기
         </button>

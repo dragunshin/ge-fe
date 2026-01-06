@@ -368,7 +368,7 @@ export default function FashionReservationFlowPage() {
 
   return (
     <div className="flex min-h-full flex-col bg-white text-[#0f0f10]">
-      <header className="fixed top-0 left-1/2 z-10 w-full max-w-[375px] -translate-x-1/2 bg-white">
+      <header className="app-header">
         <div className="flex h-[44px] items-center px-[16px]">
           <button onClick={handleBack} aria-label="뒤로가기">
             <ChevronLeft className="h-[24px] w-[24px]" />
@@ -376,7 +376,7 @@ export default function FashionReservationFlowPage() {
         </div>
       </header>
 
-      <main className="hide-scrollbar flex-1 overflow-y-auto px-[16px] pb-[160px] pt-[44px]">
+      <main className="hide-scrollbar flex-1 overflow-y-auto px-[16px] pb-[160px]">
         {step === 1 && introStage === 1 && (
           <section className="pt-[8px]">
             <p className="text-[16px] font-medium text-[#008bff]">1/9</p>
@@ -1116,7 +1116,7 @@ export default function FashionReservationFlowPage() {
         )}
       </main>
 
-      <div className="fixed bottom-0 left-1/2 w-full max-w-[375px] -translate-x-1/2 bg-transparent">
+      <footer className="app-footer bg-transparent">
         <div className="px-[16px] pb-[4px]">
           <div className="flex justify-end">
             <button
@@ -1130,15 +1130,17 @@ export default function FashionReservationFlowPage() {
         </div>
         <button
           type="button"
-          className={`flex h-[90px] w-full items-center justify-center rounded-none text-[16px] font-semibold text-white ${
-            canProceed() ? "bg-[#0f0f10]" : "bg-[#aeb0b6]"
+          className={`flex h-[54px] w-full items-center justify-center rounded-none pre_subtitle_semi_16 ${
+            canProceed()
+              ? "bg-[#0f0f10] text-white active:opacity-90"
+              : "bg-[#E6E7EA] text-[#A9ADB6]"
           }`}
           onClick={handleNext}
           disabled={!canProceed()}
         >
           다음
         </button>
-      </div>
+      </footer>
     </div>
   );
 }

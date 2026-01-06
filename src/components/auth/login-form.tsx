@@ -95,7 +95,7 @@ export function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-full bg-white flex flex-col">
       <header className="app-header flex items-center px-4 pt-4">
         <button
           onClick={() => navigate(-1)}

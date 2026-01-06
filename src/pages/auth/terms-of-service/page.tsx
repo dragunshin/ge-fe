@@ -5,7 +5,7 @@ export function TermsOfServicePage() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-full bg-white flex flex-col">
       {/* Header */}
       <header className="app-header flex items-center px-6 py-4">
         <button onClick={() => navigate(-1)} className="mr-3">

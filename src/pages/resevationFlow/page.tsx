@@ -83,7 +83,7 @@ export default function ConsultationSheetTestPage() {
   const containerMax = useMemo(() => "max-w-[420px]", []);
 
   return (
-    <div className="min-h-dvh bg-[#F5F6F8]">
+    <div className="min-h-full bg-[#F5F6F8]">
       <div className={["mx-auto w-full px-5 py-8", containerMax].join(" ")}>
         <header className="app-header flex items-center gap-2 pb-4">
           <button

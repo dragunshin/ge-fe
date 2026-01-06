@@ -73,7 +73,7 @@ export function PaymentOrderPage() {
   };
 
   return (
-    <div className="flex h-full flex-col bg-white text-[#0f0f10]">
+    <div className="flex min-h-full flex-col bg-white text-[#0f0f10]">
       <header className="app-header flex items-center gap-[15px] px-4 pt-[53px]">
         <button onClick={handleBack} className="h-6 w-6">
           <img src={backIcon} alt="뒤로가기" className="h-6 w-6" />
@@ -271,7 +271,7 @@ export function PaymentOrderPage() {
         </div>
       </main>
 
-      <footer className="border-t border-[#f4f4f5] px-4 py-[16px]">
+      <footer className="app-footer border-t border-[#f4f4f5] px-4 py-[16px]">
         <button
           onClick={() =>
             navigate('/payment/complete', {

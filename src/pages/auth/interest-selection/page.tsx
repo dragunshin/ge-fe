@@ -34,7 +34,7 @@ export function InterestSelectionPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-full bg-white flex flex-col">
       {/* Header */}
       <header className="app-header flex items-center justify-between px-6 py-4">
         <button onClick={() => navigate(-1)}>

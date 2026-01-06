@@ -530,8 +530,8 @@ export function ChatList() {
   }, [raw, activeFilter]);
 
   return (
-    <div className="min-h-dvh w-full bg-[#ffffff]">
-      <div className="mx-auto flex h-dvh w-full max-w-[420px] flex-col bg-white">
+    <div className="min-h-full w-full bg-[#ffffff]">
+      <div className="mx-auto flex h-full w-full max-w-[420px] flex-col bg-white">
         {/* sticky header */}
         <header className="sticky top-0 z-10 bg-white px-5 pt-6 pb-3">
           <h1 className="pre_title_semi_20 text-[#000000]">채팅</h1>

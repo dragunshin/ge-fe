@@ -36,7 +36,7 @@ export function PaymentCompletePage() {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="min-h-screen bg-white text-[#0f0f10]">
+    <div className="min-h-full bg-white text-[#0f0f10]">
       <header className="app-header flex items-center gap-[15px] px-4 pt-[53px]">
         <button onClick={() => navigate("/reservation/fashion?step=9")} className="h-6 w-6">
           <img src={backIcon} alt="뒤로가기" className="h-6 w-6" />
