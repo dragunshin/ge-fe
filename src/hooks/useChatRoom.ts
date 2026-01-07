@@ -114,7 +114,8 @@ export function useChatRoom({ roomId }: UseChatRoomArgs) {
         {
           messageId: tempId,
           chatroomId: roomId,
-          senderId: -1, // 내 userId를 알고 있으면 여기 넣어도 됨
+          //  senderId: -1, // 내 userId를 알고 있으면 여기 넣어도 됨
+          senderId: 1,
           senderRole: "MEMBER",
           messageType: "TEXT",
           content: text,

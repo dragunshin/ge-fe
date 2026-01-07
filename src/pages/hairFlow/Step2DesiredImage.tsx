@@ -4,6 +4,7 @@ import Footer from "./component/Footer";
 import { cn } from "@/lib/utils";
 import { useStyleSetupStore } from "@/stores/useHairSetupStore";
 import type { DesiredTag } from "@/stores/useHairSetupStore";
+import { useEffect } from "react";
 
 const TAGS: DesiredTag[] = [
   "섹시함",
@@ -21,6 +22,15 @@ export function Step2DesiredImage({ onNext, onBack }: { onNext: () => void; onBa
     useStyleSetupStore();
 
   const isSelected = (t: DesiredTag) => desiredTags.includes(t);
+
+  useEffect(() => {
+    // 1) window 스크롤을 쓰는 구조라면 이게 먹음
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+
+    // 2) iOS에서 간혹 body/documentElement 중 하나만 먹는 경우 방어
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, []);
 
   return (
     <div className="mx-auto min-h-[100dvh] w-full max-w-[420px] bg-white pb-28">
@@ -42,7 +52,7 @@ export function Step2DesiredImage({ onNext, onBack }: { onNext: () => void; onBa
                 onClick={() => toggleDesiredTag(t)}
                 className={cn(
                   "relative w-[166px] h-[44px] rounded-[8px] px-4 text-left pre_body_med_14 text-[#70737c]",
-                  selected ? "bg-[#eff7fd] ]" : "bg-[#f4f4f5]",
+                  selected ? "bg-[#eff7fd]" : "bg-[#f4f4f5]",
                 )}
               >
                 {t}

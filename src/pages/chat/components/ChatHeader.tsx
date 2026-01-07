@@ -3,7 +3,7 @@ import BackIcon from "@/images/login/back.svg?react";
 import More from "@/images/chat/more.svg?react";
 import { ChatExpertHeader } from "./ChatExpertHeader";
 import { Avatar } from "@/components/ui/avatar";
-import Minho from "@/images/chat/minho.png";
+import Minho from "@/images/chat/minho2.png";
 
 export default function ChatHeader() {
   const navigate = useNavigate();
@@ -26,11 +26,11 @@ export default function ChatHeader() {
               {/* <AvatarFallback className="bg-neutral-200 text-[12px] font-semibold text-neutral-700">
                 용
               </AvatarFallback> */}
-              <img src={Minho} alt="용민호 전문가" className="h-full w-full object-cover" />
+              <img src={Minho} alt="옹민호 전문가" className="h-full w-full object-cover" />
             </Avatar>
 
             <div className="flex flex-col leading-tight">
-              <span className="pre_subtitle_semi_16 text-black">용민호 전문가</span>
+              <span className="pre_subtitle_semi_16 text-black">옹민호 전문가</span>
               <span className="mt-[2px] pre_body_med_12 text-[#878a93]">헤어</span>
             </div>
           </div>
