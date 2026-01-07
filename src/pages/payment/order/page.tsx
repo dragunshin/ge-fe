@@ -22,13 +22,25 @@ const StepArrow = () => (
 export function PaymentOrderPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const state = location.state as { consultType?: "MESSAGE" | "LIVE"; from?: string; step?: number } | null;
+  const consultType =
+    state?.consultType ??
+    (state?.from === "/hair/setup"
+      ? (sessionStorage.getItem("consult_type") as "MESSAGE" | "LIVE" | null)
+      : null) ??
+    "MESSAGE";
+  const consultLabel = consultType === "LIVE" ? "실시간 화상 상담" : "메세지 상담";
+  const consultPriceMap: Record<"MESSAGE" | "LIVE", number> = {
+    MESSAGE: 24000,
+    LIVE: 40000,
+  };
   const [agreements, setAgreements] = useState({
     order: false,
     privacy: false,
     thirdParty: false,
   });
   const canPay = agreements.order && agreements.privacy && agreements.thirdParty;
-  const orderPrice = 24000;
+  const orderPrice = consultPriceMap[consultType];
   const feePrice = 0;
   const couponDiscount = 0;
   const pointUsed = 0;
@@ -65,7 +77,6 @@ export function PaymentOrderPage() {
   };
 
   const handleBack = () => {
-    const state = location.state as { from?: string; step?: number } | null;
     if (state?.from) {
       navigate(appendStep(state.from, state.step), { state });
       return;
@@ -115,7 +126,7 @@ export function PaymentOrderPage() {
             </div>
             <div className="mt-[10px] rounded-[4px] border border-[#e1e2e4] bg-[#fafafa] px-[16px] py-[12px]">
               <div className="flex items-start justify-between text-[14px] font-semibold leading-[1.4] text-[#171719]">
-                <span className="flex-1">실시간 화상 상담</span>
+                <span className="flex-1">{consultLabel}</span>
                 <span>{formatCurrency(orderPrice)}</span>
               </div>
               <p className="mt-[6px] text-[13px] leading-[1.4] text-[#656870]">
@@ -278,8 +289,9 @@ export function PaymentOrderPage() {
             navigate('/payment/complete', {
               state: {
                 from: `${location.pathname}${location.search}`,
-                step: (location.state as { step?: number } | null)?.step,
-                flowFrom: (location.state as { from?: string } | null)?.from,
+                step: state?.step,
+                flowFrom: state?.from,
+                paymentAmount: totalPrice,
               },
             })
           }

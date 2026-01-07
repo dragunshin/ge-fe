@@ -565,7 +565,7 @@
 
 // export default HomePage;
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronRight, Search } from "lucide-react";
 import { useAuthStore } from "../../stores/useAuthStore";
@@ -605,7 +605,6 @@ type TabItem = {
   id: string;
   label: string;
   route?: string;
-  underlineLeft: number;
 };
 
 type TopExpert = {
@@ -650,6 +649,9 @@ const HomePage = () => {
   const [selectedHomeTab, setSelectedHomeTab] = useState("전체");
   const [topExperts, setTopExperts] = useState<TopExpert[]>([]);
   const [reviews, setReviews] = useState<ReviewCard[]>([]);
+  const homeTabTrackRef = useRef<HTMLDivElement | null>(null);
+  const homeTabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [homeUnderlineStyle, setHomeUnderlineStyle] = useState({ left: 0, width: 0 });
 
   // ✅ 추가: bottom sheet 제어 + 선택값 저장(원하면 다음 페이지로 넘길 수 있음)
   const [openTypeSheet, setOpenTypeSheet] = useState(false);
@@ -696,6 +698,33 @@ const HomePage = () => {
       .map((item) => item.trim())
       .filter(Boolean);
   };
+
+  const updateHomeUnderline = () => {
+    const track = homeTabTrackRef.current;
+    const active = homeTabRefs.current[selectedHomeTab];
+    if (!track || !active) {
+      return;
+    }
+    const trackRect = track.getBoundingClientRect();
+    const activeRect = active.getBoundingClientRect();
+    setHomeUnderlineStyle({
+      left: activeRect.left - trackRect.left,
+      width: activeRect.width,
+    });
+  };
+
+  useLayoutEffect(() => {
+    updateHomeUnderline();
+  }, [selectedHomeTab]);
+
+  useEffect(() => {
+    const handleResize = () => updateHomeUnderline();
+    window.addEventListener("resize", handleResize);
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(updateHomeUnderline).catch(() => {});
+    }
+    return () => window.removeEventListener("resize", handleResize);
+  }, [selectedHomeTab]);
 
   useEffect(() => {
     initializeAuth();
@@ -788,11 +817,11 @@ const HomePage = () => {
 
   const homeTabs: TabItem[] = useMemo(
     () => [
-      { id: "all", label: "전체", route: "/", underlineLeft: 16 },
-      { id: "hair", label: "헤어", route: "/category/hair", underlineLeft: 85 },
-      { id: "makeup", label: "메이크업", route: "/category/makeup", underlineLeft: 153 },
-      { id: "fashion", label: "패션", route: "/category/fashion", underlineLeft: 249 },
-      { id: "skin", label: "스킨", route: "/category/skin", underlineLeft: 317 },
+      { id: "all", label: "전체", route: "/" },
+      { id: "hair", label: "헤어", route: "/category/hair" },
+      { id: "makeup", label: "메이크업", route: "/category/makeup" },
+      { id: "fashion", label: "패션", route: "/category/fashion" },
+      { id: "skin", label: "스킨", route: "/category/skin" },
     ],
     [],
   );
@@ -865,6 +894,20 @@ const HomePage = () => {
     setOpenTypeSheet(true);
   };
 
+  const handleExpertProfile = (expertId: number) => {
+    navigate(`/experts/${expertId}`);
+  };
+
+  const handleExpertKeyDown = (
+    event: React.KeyboardEvent<HTMLElement>,
+    expertId: number,
+  ) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      handleExpertProfile(expertId);
+    }
+  };
+
   const getReviewRoute = () => {
     if (selectedHomeTab === "전체") {
       return "/category/hair/reviews";
@@ -896,6 +939,9 @@ const HomePage = () => {
             {homeTabs.map((tab) => (
               <button
                 key={tab.id}
+                ref={(element) => {
+                  homeTabRefs.current[tab.label] = element;
+                }}
                 onClick={() => {
                   setSelectedHomeTab(tab.label);
                   if (tab.route && tab.route !== "/") {
@@ -908,10 +954,10 @@ const HomePage = () => {
               </button>
             ))}
           </div>
-          <div className="relative mt-[12px] h-px bg-[#e1e2e4]">
+          <div ref={homeTabTrackRef} className="relative mt-[12px] h-px bg-[#e1e2e4]">
             <span
-              className="absolute top-0 h-px w-[41px] bg-[#0f0f10]"
-              style={{ left: homeTabs.find((tab) => tab.label === selectedHomeTab)?.underlineLeft }}
+              className="absolute top-0 h-px bg-[#0f0f10]"
+              style={{ left: homeUnderlineStyle.left, width: homeUnderlineStyle.width }}
             />
           </div>
         </section>
@@ -1172,6 +1218,10 @@ const HomePage = () => {
             {expertCards.map((expert) => (
               <article
                 key={expert.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => handleExpertProfile(expert.id)}
+                onKeyDown={(event) => handleExpertKeyDown(event, expert.id)}
                 className="relative h-[253px] w-[343px] rounded-[8px] bg-white shadow-[0px_2px_12px_0px_rgba(0,0,0,0.13)]"
               >
                 <div className="absolute left-[13px] top-[23px] flex items-center gap-[10px]">
@@ -1213,7 +1263,10 @@ const HomePage = () => {
 
                 {/* ✅ 여기만 기능 추가: 상담 예약 -> typeReservation 오픈 */}
                 <button
-                  onClick={openReservationFlow}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    openReservationFlow();
+                  }}
                   className="absolute right-[12px] top-[198px] h-[36px] w-[95px] rounded-[4px] bg-[#171719] text-[14px] font-medium text-white"
                 >
                   상담 예약
@@ -1257,6 +1310,7 @@ const HomePage = () => {
         defaultValue={selectedConsultType}
         onNext={(selected) => {
           setSelectedConsultType(selected);
+          sessionStorage.setItem("consult_type", selected);
           setOpenTypeSheet(false);
           setOpenCalendarSheet(true);
         }}

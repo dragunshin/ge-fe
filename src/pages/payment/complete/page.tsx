@@ -35,7 +35,9 @@ export function PaymentCompletePage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(false);
-  const state = location.state as { from?: string; flowFrom?: string; step?: number } | null;
+  const state = location.state as { from?: string; flowFrom?: string; step?: number; paymentAmount?: number } | null;
+  const paymentAmount = state?.paymentAmount ?? 0;
+  const formatCurrency = (value: number) => `${value.toLocaleString("ko-KR")}원`;
   const appendStep = (path: string, step?: number) => {
     if (!step || path.includes("step=")) return path;
     const joiner = path.includes("?") ? "&" : "?";
@@ -99,7 +101,7 @@ export function PaymentCompletePage() {
       <div className="px-4 pt-[50px]">
         <div className="flex items-center gap-[28px] text-[16px] font-semibold leading-[1.4]">
           <span>결제 금액</span>
-          <span>00,000원</span>
+          <span>{formatCurrency(paymentAmount)}</span>
         </div>
         <div className="mt-[18px] h-px w-full bg-[#e1e2e4]" />
         <div className="mt-[16px] flex items-center gap-[28px] text-[16px] leading-[1.4]">
