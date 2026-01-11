@@ -139,7 +139,13 @@ const CategoryLandingPage = () => {
     const minute = parsed ? Number(parsed[2]) : 0;
     const value = new Date(date);
     value.setHours(hour24, minute, 0, 0);
-    return value.toISOString();
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, "0");
+    const day = String(value.getDate()).padStart(2, "0");
+    const hour = String(value.getHours()).padStart(2, "0");
+    const minuteStr = String(value.getMinutes()).padStart(2, "0");
+    const second = String(value.getSeconds()).padStart(2, "0");
+    return `${year}-${month}-${day}T${hour}:${minuteStr}:${second}`;
   };
 
   // 패션 예약 임시 생성 후 reservationId 전달
