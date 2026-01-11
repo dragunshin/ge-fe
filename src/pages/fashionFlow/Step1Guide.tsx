@@ -78,7 +78,7 @@ export function Step1Guide({
         </div>
       )}
 
-      <div className="mt-[16px]">
+      <div className="mt-[16px] flex justify-center">
         <input
           ref={frontInputRef}
           type="file"

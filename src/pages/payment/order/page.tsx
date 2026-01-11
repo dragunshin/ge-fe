@@ -23,6 +23,8 @@ export function PaymentOrderPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as { consultType?: "MESSAGE" | "LIVE"; from?: string; step?: number } | null;
+  const scheduleLabel =
+    sessionStorage.getItem("consult_schedule_label") ?? "2025년 10월 28일 오전 11:30";
   const consultType =
     state?.consultType ??
     (state?.from === "/hair/setup"
@@ -130,7 +132,7 @@ export function PaymentOrderPage() {
                 <span>{formatCurrency(orderPrice)}</span>
               </div>
               <p className="mt-[6px] text-[13px] leading-[1.4] text-[#656870]">
-                2025년 10월 28일 오전 11:30
+                {scheduleLabel}
               </p>
             </div>
           </div>
@@ -199,12 +201,12 @@ export function PaymentOrderPage() {
                   {formatCurrency(feePrice)}
                 </span>
               </div>
-              <div className="flex items-center justify-between">
+              {/* <div className="flex items-center justify-between">
                 <span className="text-[#505158]">쿠폰 할인</span>
                 <span className="font-semibold text-[#0f0f10]">
                   {formatCurrency(couponDiscount)}
                 </span>
-              </div>
+              </div> */}
               <div className="flex items-center justify-between">
                 <span className="text-[#505158]">포인트 사용</span>
                 <span className="font-semibold text-[#0f0f10]">

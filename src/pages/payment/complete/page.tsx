@@ -165,11 +165,11 @@ export function PaymentCompletePage() {
         </div>
       </div>
 
-      <div className="mt-[28px] h-[8px] w-full bg-[#f4f4f5]" />
+      {/* <div className="mt-[28px] h-[8px] w-full bg-[#f4f4f5]" />
 
       <div className="px-4 pb-[40px] pt-[40px]">
         <p className="text-[18px] font-semibold leading-[1.4]">인기 많은 상담사 추천</p>
-      </div>
+      </div> */}
     </div>
   );
 }

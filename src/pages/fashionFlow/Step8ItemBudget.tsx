@@ -100,10 +100,12 @@ export function Step8ItemBudget({
             />
           </div>
         </div>
-        <div className="mt-[8px] flex justify-between text-[13px] text-[#878a93]">
-          <span>0원</span>
-          <span>20만원</span>
-          <span>40만원 이상</span>
+        <div className="mt-[8px] flex justify-center">
+          <div className="flex w-[306px] justify-between text-[13px] text-[#878a93]">
+            <span>0원</span>
+            <span className="text-center">20만원</span>
+            <span className="text-right">40만원 이상</span>
+          </div>
         </div>
         <div className="mt-[16px] flex w-[340px] flex-wrap gap-x-[6px] gap-y-[10px]">
           {PRICE_PRESETS.map((preset) => (

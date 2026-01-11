@@ -71,14 +71,16 @@ export function Step2SidePhotos({
               event.currentTarget.value = "";
             }}
           />
-          <button
-            type="button"
-            className="mt-[16px] flex h-[52px] w-[306px] items-center justify-center gap-[8px] rounded-[12px] border border-[#dbdcdf] text-[16px] font-medium text-[#46474c]"
-            onClick={() => leftInputRef.current?.click()}
-          >
-            <Camera className="h-[20px] w-[20px]" />
-            {leftImage ? "다시 업로드하기" : "사진 업로드"}
-          </button>
+          <div className="mt-[16px] flex justify-center">
+            <button
+              type="button"
+              className="flex h-[52px] w-[306px] items-center justify-center gap-[8px] rounded-[12px] border border-[#dbdcdf] text-[16px] font-medium text-[#46474c]"
+              onClick={() => leftInputRef.current?.click()}
+            >
+              <Camera className="h-[20px] w-[20px]" />
+              {leftImage ? "다시 업로드하기" : "사진 업로드"}
+            </button>
+          </div>
         </div>
 
         <div>
@@ -108,14 +110,16 @@ export function Step2SidePhotos({
               event.currentTarget.value = "";
             }}
           />
-          <button
-            type="button"
-            className="mt-[16px] flex h-[52px] w-[306px] items-center justify-center gap-[8px] rounded-[12px] border border-[#dbdcdf] text-[16px] font-medium text-[#46474c]"
-            onClick={() => rightInputRef.current?.click()}
-          >
-            <Camera className="h-[20px] w-[20px]" />
-            {rightImage ? "다시 업로드하기" : "사진 업로드"}
-          </button>
+          <div className="mt-[16px] flex justify-center">
+            <button
+              type="button"
+              className="flex h-[52px] w-[306px] items-center justify-center gap-[8px] rounded-[12px] border border-[#dbdcdf] text-[16px] font-medium text-[#46474c]"
+              onClick={() => rightInputRef.current?.click()}
+            >
+              <Camera className="h-[20px] w-[20px]" />
+              {rightImage ? "다시 업로드하기" : "사진 업로드"}
+            </button>
+          </div>
         </div>
       </div>
     </section>

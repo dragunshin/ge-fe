@@ -93,6 +93,12 @@ export interface ExpertInfoResponse {
   likes: number;
 }
 
+export interface ExpertScheduleResponse {
+  consultationType: 'VIDEO' | 'MESSAGE';
+  price: number;
+  isActive: boolean;
+}
+
 export interface ReviewSummaryResponse {
   reviewId: number;
   expertNickname?: string;

@@ -63,14 +63,16 @@ export function Step3OutfitPhotos({
           event.currentTarget.value = "";
         }}
       />
-      <button
-        type="button"
-        className="mt-[16px] flex h-[52px] w-[306px] items-center justify-center gap-[8px] rounded-[12px] border border-[#dbdcdf] text-[16px] font-medium text-[#46474c]"
-        onClick={() => outfitInputRef.current?.click()}
-      >
-        <Upload className="h-[20px] w-[20px]" />
-        사진 업로드
-      </button>
+      <div className="mt-[16px] flex justify-center">
+        <button
+          type="button"
+          className="flex h-[52px] w-[306px] items-center justify-center gap-[8px] rounded-[12px] border border-[#dbdcdf] text-[16px] font-medium text-[#46474c]"
+          onClick={() => outfitInputRef.current?.click()}
+        >
+          <Upload className="h-[20px] w-[20px]" />
+          사진 업로드
+        </button>
+      </div>
     </section>
   );
 }

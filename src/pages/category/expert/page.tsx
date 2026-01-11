@@ -13,7 +13,7 @@ import heartIcon from '../../../images/mypage/heart.svg';
 import { portfolioItems } from './portfolio-data';
 import { expertService } from '../../../services/expert.service';
 import { reviewService } from '../../../services/review.service';
-import type { ExpertInfoResponse } from '../../../lib/api/types';
+import type { ExpertInfoResponse, ExpertScheduleResponse } from '../../../lib/api/types';
 import {
   getLabelFromApiCategory,
   getRouteCategoryFromApi,
@@ -38,25 +38,12 @@ const ExpertInfoPage = () => {
   const { expertId } = useParams();
   const expertIdNumber = useMemo(() => (expertId ? Number(expertId) : undefined), [expertId]);
   const portfolioPath = `/experts/${expertId ?? '1'}/portfolio`;
-  const [expandedPortfolio, setExpandedPortfolio] = useState<
-    Record<number, { concern: boolean; solution: boolean }>
-  >({});
   const [expertInfo, setExpertInfo] = useState<ExpertInfoResponse | null>(null);
   const [likesCount, setLikesCount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [reviewCards, setReviewCards] = useState<ReviewCard[]>([]);
   const [reviewAverage, setReviewAverage] = useState(0);
-
-  const handleTogglePortfolio = (id: number, field: 'concern' | 'solution') => {
-    setExpandedPortfolio((prev) => ({
-      ...prev,
-      [id]: {
-        concern: prev[id]?.concern ?? false,
-        solution: prev[id]?.solution ?? false,
-        [field]: !(prev[id]?.[field] ?? false),
-      },
-    }));
-  };
+  const [expertSchedules, setExpertSchedules] = useState<ExpertScheduleResponse[]>([]);
 
   const portfolioCards = portfolioItems;
 
@@ -100,7 +87,20 @@ const ExpertInfoPage = () => {
       }
     };
 
+    const fetchExpertSchedules = async () => {
+      try {
+        const response = await expertService.getExpertSchedules(expertIdNumber);
+        if (!isActive) {
+          return;
+        }
+        setExpertSchedules(response.data ?? []);
+      } catch (error) {
+        console.error('Failed to fetch expert schedules:', error);
+      }
+    };
+
     fetchExpertInfo();
+    fetchExpertSchedules();
 
     return () => {
       isActive = false;
@@ -170,11 +170,38 @@ const ExpertInfoPage = () => {
 
   const categoryLabel = getLabelFromApiCategory(expertInfo?.category);
   const reviewCategoryRoute = getRouteCategoryFromApi(expertInfo?.category) ?? 'hair';
+  const activeSchedules = expertSchedules.filter((schedule) => schedule.isActive);
+  const orderedSchedules = (["VIDEO", "MESSAGE"] as const)
+    .map((type) => activeSchedules.find((schedule) => schedule.consultationType === type))
+    .filter((schedule): schedule is ExpertScheduleResponse => Boolean(schedule));
+  const hasReviews = reviewCards.length > 0;
+  const reviewSectionHeight = hasReviews ? 216 : 72;
+  const reviewSectionOffset = hasReviews ? 0 : -(216 - reviewSectionHeight);
+  const layoutTops = {
+    reviewDivider: 771,
+    reviewSection: 779,
+    portfolioDivider: 1003 + reviewSectionOffset,
+    portfolioSection: 1011 + reviewSectionOffset,
+    consultationSection: 1621 + reviewSectionOffset,
+  };
+  const consultationCopy = {
+    VIDEO: {
+      title: '실시간 화상 상담',
+      description:
+        '전문가와 화상으로 15분 상담을 진행합니다. 상담한 내용을 바탕으로 전문가가 작성한 솔루션지는 상담이 끝나고 한 시간 내로 전송해드립니다.',
+    },
+    MESSAGE: {
+      title: '메세지 상담',
+      description:
+        '상담 신청 시 진행되는 설문조사 답변을 바탕으로 전문가가 24시간 내로 솔루션지를 보내드립니다. 솔루션지를 읽고 생기는 추가 질문은 채팅을 통해 한 번 더 문의할 수 있습니다.',
+    },
+  } as const;
+  const formatPrice = (value: number) => `${value.toLocaleString('ko-KR')}원`;
 
   return (
     <div className="flex h-full flex-col bg-white">
       <main className="relative flex-1 overflow-x-hidden overflow-y-auto pb-[120px] scrollbar-hide">
-        <div className="relative mx-auto min-h-[2545px] w-full max-w-[375px] bg-white">
+        <div className="relative mx-auto min-h-[2050px] w-full max-w-[375px] bg-white">
           <div className="absolute left-[16px] top-0 flex items-center gap-[15px] pt-[14px]">
             <button
               onClick={() => navigate(-1)}
@@ -260,62 +287,76 @@ const ExpertInfoPage = () => {
               </div>
             </div>
 
-            <div className="absolute left-[16px] top-[380px] flex h-[40px] w-[342px] items-center justify-center gap-[4px] rounded-[8px] border border-[#f4f4f5]">
-              <span className="text-[12px] font-medium text-[#666]">더보기</span>
-              <ChevronDown className="h-[24px] w-[24px] text-[#666]" />
-            </div>
+
           </div>
 
-          <div className="absolute left-0 top-[771px] h-[8px] w-[375px] bg-[#f4f4f5]" />
-
-          <div className="absolute left-0 top-[779px] h-[216px] w-[375px]">
-            <div className="absolute left-[17px] top-[30px] flex w-[342px] items-center justify-between">
-              <div className="flex items-center gap-[6px] text-[18px] font-semibold">
-                <span className="text-[#0f0f10]">시술 후기</span>
-                <span className="text-[#429ff0]">{reviewCards.length}</span>
-              </div>
-              <button
-                className="flex items-center gap-[2px] text-[14px] text-[#70737c]"
-                onClick={() => navigate(`/category/${reviewCategoryRoute}/reviews`)}
-              >
-                전체보기
-                <ChevronRight className="h-[24px] w-[24px]" />
-              </button>
-            </div>
-            <div className="absolute left-[16px] top-[60px] flex items-center gap-[8px]">
-              <Star className="h-[24px] w-[24px] text-[#ffb800]" />
-              <span className="text-[14px] font-semibold text-[#292a2d]">
-                {reviewAverage || 0}
-              </span>
-            </div>
-            <div className="absolute left-[16px] top-[100px] flex w-[335px] gap-[12px] overflow-x-auto scrollbar-hide">
-              {reviewCards.map((review) => (
-                <article
-                  key={review.id}
-                  className="flex h-[87px] w-[240px] shrink-0 items-center gap-[10px] rounded-[8px] border border-[#e1e2e4] bg-white p-[12px]"
+          <>
+            <div
+              className="absolute left-0 h-[8px] w-[375px] bg-[#f4f4f5]"
+              style={{ top: layoutTops.reviewDivider }}
+            />
+            <div
+              className="absolute left-0 w-[375px]"
+              style={{ top: layoutTops.reviewSection, height: reviewSectionHeight }}
+            >
+              <div className="absolute left-[17px] top-[30px] flex w-[342px] items-center justify-between">
+                <div className="flex items-center gap-[6px] text-[18px] font-semibold">
+                  <span className="text-[#0f0f10]">시술 후기</span>
+                  <span className="text-[#429ff0]">{reviewCards.length}</span>
+                </div>
+                <button
+                  className="flex items-center gap-[2px] text-[14px] text-[#70737c]"
+                  onClick={() => navigate(`/category/${reviewCategoryRoute}/reviews`)}
                 >
-                  <div className="h-[57px] w-[57px] rounded-[4px] bg-[#e1e2e4]" />
-                  <div className="flex flex-1 flex-col gap-[4px]">
-                    <div className="flex items-center gap-[6px]">
-                      <span className="rounded-[4px] bg-[#f5f9fd] px-[8px] py-[2px] text-[12px] text-[#429ff0]">
-                        Best
-                      </span>
-                      <span className="text-[14px] font-medium text-[#46474c]">
-                        {review.title}
-                      </span>
-                    </div>
-                    <p className="line-clamp-2 text-[13px] leading-[1.3] text-[#878a93]">
-                      {review.content}
-                    </p>
+                  전체보기
+                  <ChevronRight className="h-[24px] w-[24px]" />
+                </button>
+              </div>
+              {hasReviews && (
+                <>
+                  <div className="absolute left-[16px] top-[60px] flex items-center gap-[8px]">
+                    <Star className="h-[24px] w-[24px] text-[#ffb800]" />
+                    <span className="text-[14px] font-semibold text-[#292a2d]">
+                      {reviewAverage || 0}
+                    </span>
                   </div>
-                </article>
-              ))}
+                  <div className="absolute left-[16px] top-[100px] flex w-[335px] gap-[12px] overflow-x-auto scrollbar-hide">
+                    {reviewCards.map((review) => (
+                      <article
+                        key={review.id}
+                        className="flex h-[87px] w-[240px] shrink-0 items-center gap-[10px] rounded-[8px] border border-[#e1e2e4] bg-white p-[12px]"
+                      >
+                        <div className="h-[57px] w-[57px] rounded-[4px] bg-[#e1e2e4]" />
+                        <div className="flex flex-1 flex-col gap-[4px]">
+                          <div className="flex items-center gap-[6px]">
+                            <span className="rounded-[4px] bg-[#f5f9fd] px-[8px] py-[2px] text-[12px] text-[#429ff0]">
+                              Best
+                            </span>
+                            <span className="text-[14px] font-medium text-[#46474c]">
+                              {review.title}
+                            </span>
+                          </div>
+                          <p className="line-clamp-2 text-[13px] leading-[1.3] text-[#878a93]">
+                            {review.content}
+                          </p>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
-          </div>
+          </>
 
-          <div className="absolute left-0 top-[1003px] h-[8px] w-[375px] bg-[#f4f4f5]" />
+          <div
+            className="absolute left-0 h-[8px] w-[375px] bg-[#f4f4f5]"
+            style={{ top: layoutTops.portfolioDivider }}
+          />
 
-          <div className="absolute left-0 top-[1011px] h-[610px] w-[375px] bg-white">
+          <div
+            className="absolute left-0 h-[610px] w-[375px] bg-white"
+            style={{ top: layoutTops.portfolioSection }}
+          >
             <div className="absolute left-[15px] top-[40px] flex w-[343px] items-center justify-between">
               <h2 className="text-[18px] font-semibold text-[#0f0f10]">포트폴리오</h2>
               <button
@@ -327,161 +368,137 @@ const ExpertInfoPage = () => {
               </button>
             </div>
             <div className="absolute left-[16px] top-[86px] flex w-[343px] gap-[12px] overflow-x-auto scrollbar-hide">
-              {portfolioCards.map((card) => {
-                const concernExpanded = expandedPortfolio[card.id]?.concern ?? false;
-                const solutionExpanded = expandedPortfolio[card.id]?.solution ?? false;
-                return (
-                  <article
-                    key={card.id}
-                    className="h-[439px] w-[322px] shrink-0 rounded-[12px] border border-[#e1e2e4] bg-white p-[16px]"
-                  >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-[14px] font-semibold text-[#292a2d]">{card.title}</p>
-                      <p className="mt-[4px] text-[13px] text-[#878a93]">Before / After</p>
-                    </div>
-                    <button className="rounded-full p-1 text-[#aeb0b6]">
-                      <ChevronRight className="h-[20px] w-[20px]" />
-                    </button>
-                  </div>
-                  <div className="mt-[12px] flex h-[164px] items-center gap-[8px]">
-                    <div className="relative h-[164px] w-[167.5px] overflow-hidden rounded-[12px] bg-[#e1e2e4]">
+              {portfolioCards.map((card) => (
+                <article
+                  key={card.id}
+                  className="h-[439px] w-[322px] shrink-0 rounded-[12px] border border-[#e1e2e4] bg-white p-[20px]"
+                >
+                  <p className="text-[16px] font-semibold leading-[1.4] text-[#292a2d]">
+                    {card.title}
+                  </p>
+                  <div className="mt-[12px] flex gap-[8px]">
+                    <div className="relative h-[130px] w-[130px] overflow-hidden rounded-[12px] bg-[#e1e2e4]">
                       <span className="absolute bottom-[8px] left-[8px] rounded-[4px] bg-black/40 px-[6px] py-[2px] text-[14px] text-white">
                         전
                       </span>
                     </div>
-                    <div className="relative h-[164px] w-[167.5px] overflow-hidden rounded-[12px] bg-[#e1e2e4]">
+                    <div className="relative h-[130px] w-[130px] overflow-hidden rounded-[12px] bg-[#e1e2e4]">
                       <span className="absolute bottom-[8px] right-[8px] rounded-[4px] bg-black/40 px-[6px] py-[2px] text-[14px] text-white">
                         후
                       </span>
                     </div>
                   </div>
-                  <div className="mt-[12px] flex flex-wrap gap-[6px]">
-                    {card.tags.map((tag) => (
+                  <div className="mt-[17px] flex gap-[8px] overflow-hidden">
+                    {card.tags.map((tag, index) => (
                       <span
-                        key={`${card.id}-${tag}`}
+                        key={`${card.id}-${tag}-${index}`}
                         className="rounded-[2px] bg-[#f4f4f5] px-[6px] py-[4px] text-[12px] text-[#46474c]"
                       >
                         {tag}
                       </span>
                     ))}
                   </div>
-                  <div className="mt-[12px] space-y-[6px]">
+                  <div className="mt-[16px] space-y-[6px]">
                     <p className="text-[14px] font-semibold text-[#292a2d]">고객의 고민</p>
-                    <div
-                      className={`text-[13px] leading-[1.4] text-[#505158] ${
-                        concernExpanded
-                          ? 'max-h-[90px] overflow-y-auto scrollbar-hide'
-                          : 'max-h-[36px] overflow-hidden'
-                      }`}
-                    >
+                    <p className="line-clamp-3 text-[13px] leading-[1.4] text-[#505158]">
                       {card.concern}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleTogglePortfolio(card.id, 'concern')}
-                      className="text-left text-[13px] text-[#c2c4c8]"
-                    >
-                      {concernExpanded ? '접기' : '더보기'}
-                    </button>
+                    </p>
                   </div>
-                  <div className="mt-[12px] space-y-[6px]">
+                  <div className="mt-[16px] space-y-[6px]">
                     <p className="text-[14px] font-semibold text-[#292a2d]">솔루션</p>
-                    <div
-                      className={`text-[13px] leading-[1.4] text-[#505158] ${
-                        solutionExpanded
-                          ? 'max-h-[90px] overflow-y-auto scrollbar-hide'
-                          : 'max-h-[36px] overflow-hidden'
-                      }`}
-                    >
+                    <p className="line-clamp-3 text-[13px] leading-[1.4] text-[#505158]">
                       {card.solution}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleTogglePortfolio(card.id, 'solution')}
-                      className="text-left text-[13px] text-[#c2c4c8]"
-                    >
-                      {solutionExpanded ? '접기' : '더보기'}
-                    </button>
+                    </p>
                   </div>
                 </article>
-              );
-              })}
+              ))}
             </div>
             <div className="absolute left-1/2 top-[551px] h-[3px] w-[55px] -translate-x-1/2 bg-[#e1e2e4]">
               <div className="h-[3px] w-[18px] bg-[#429ff0]" />
             </div>
           </div>
 
-          <div className="absolute left-0 top-[1621px] w-[375px]">
+          <div className="absolute left-0 w-[375px]" style={{ top: layoutTops.consultationSection }}>
             <div className="h-[8px] w-full bg-[#f4f4f5]" />
             <div className="mx-auto mt-[40px] w-[343px] space-y-[12px]">
               <h2 className="text-[18px] font-semibold text-[#0f0f10]">가능한 상담 종류</h2>
-              <div className="rounded-[12px] border border-[#e1e2e4] bg-white p-[16px]">
-                <p className="text-[16px] font-semibold text-[#292a2d]">실시간 화상 상담</p>
-                <p className="mt-[4px] text-[13px] leading-[1.4] text-[#878a93]">
-                  전문가와 화상으로 15분 상담을 진행합니다. 상담한 내용을 바탕으로 전문가가 작성한 솔루션지는 상담이 끝나고 한 시간 내로 전송해드립니다.
-                </p>
-                <div className="my-[12px] h-px bg-[#e1e2e4]" />
-                <div className="flex items-center justify-between text-[13px] text-[#878a93]">
-                  <span>상담 비용</span>
-                  <span className="text-[14px] font-semibold text-[#008bff]">10만원</span>
+              {orderedSchedules.length === 0 ? (
+                <div className="rounded-[12px] border border-dashed border-[#e1e2e4] bg-[#fafafa] px-[16px] py-[20px] text-center text-[14px] font-medium text-[#878a93]">
+                  전문가 상담 준비중
                 </div>
-              </div>
-              <div className="rounded-[12px] border border-[#e1e2e4] bg-white p-[16px]">
-                <p className="text-[16px] font-semibold text-[#292a2d]">메세지 상담</p>
-                <p className="mt-[4px] text-[13px] leading-[1.4] text-[#878a93]">
-                  상담 신청 시 진행되는 설문조사 답변을 바탕으로 전문가가 24시간 내로 솔루션지를 보내드립니다. 솔루션지를 읽고
-                  생기는 추가 질문은 채팅을 통해 한 번 더 문의할 수 있습니다.
-                </p>
-                <div className="my-[12px] h-px bg-[#e1e2e4]" />
-                <div className="flex items-center justify-between text-[13px] text-[#878a93]">
-                  <span>상담 비용</span>
-                  <span className="text-[14px] font-semibold text-[#008bff]">10만원</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="absolute left-0 top-[2074px] w-[375px]">
-            <div className="h-[8px] w-full bg-[#f4f4f5]" />
-            <div className="mx-auto mt-[24px] flex w-[343px] items-center justify-between">
-              <div className="flex items-center gap-[6px] text-[18px] font-semibold">
-                <span className="text-[#0f0f10]">Q&amp;A</span>
-                <span className="text-[#429ff0]">8</span>
-              </div>
-              <ChevronDown className="h-[24px] w-[24px] text-[#70737c]" />
-            </div>
-          </div>
-
-          <div className="absolute left-0 top-[2154px] w-[375px]">
-            <div className="h-[8px] w-full bg-[#f4f4f5]" />
-            <div className="mx-auto mt-[40px] w-[343px]">
-              <h2 className="text-[18px] font-semibold text-[#0f0f10]">
-                이런 <span className="text-[#008bff]">헤어</span> 전문가는 어떠세요?
-              </h2>
-              <div className="mt-[12px] flex w-[343px] gap-[12px] overflow-x-auto scrollbar-hide">
-                {relatedExperts.map((expert) => (
-                  <article
-                    key={expert.id}
-                    className="h-[163px] w-[156px] shrink-0 rounded-[12px] border border-[#e1e2e4] bg-white"
+              ) : (
+                orderedSchedules.map((schedule) => {
+                const copy = consultationCopy[schedule.consultationType];
+                return (
+                  <div
+                    key={schedule.consultationType}
+                    className="rounded-[12px] border border-[#e1e2e4] bg-white p-[16px]"
                   >
-                    <div className="mx-auto mt-[16px] h-[52px] w-[52px] rounded-full bg-[#e1e2e4]" />
-                    <div className="mt-[12px] px-[16px] text-center">
-                      <p className="text-[14px] font-semibold text-[#292a2d]">{expert.name}</p>
-                      <p className="mt-[6px] h-[36px] w-[124px] line-clamp-2 text-[13px] leading-[1.4] text-[#878a93]">
-                        {expert.summary}
-                      </p>
+                    <p className="text-[16px] font-semibold text-[#292a2d]">{copy.title}</p>
+                    <p className="mt-[4px] text-[13px] leading-[1.4] text-[#878a93]">
+                      {copy.description}
+                    </p>
+                    <div className="my-[12px] h-px bg-[#e1e2e4]" />
+                    <div className="flex items-center justify-between text-[13px] text-[#878a93]">
+                      <span>상담 비용</span>
+                      <span className="text-[14px] font-semibold text-[#008bff]">
+                        {formatPrice(schedule.price)}
+                      </span>
                     </div>
-                  </article>
-                ))}
-              </div>
+                  </div>
+                );
+              })
+              )}
             </div>
           </div>
 
-          <div className="absolute left-1/2 top-[2414px] h-[3px] w-[55px] -translate-x-1/2 bg-[#e1e2e4]">
-            <div className="h-[3px] w-[18px] bg-[#429ff0]" />
-          </div>
+          {false && (
+            <div className="absolute left-0 top-[2074px] w-[375px]">
+              <div className="h-[8px] w-full bg-[#f4f4f5]" />
+              <div className="mx-auto mt-[24px] flex w-[343px] items-center justify-between">
+                <div className="flex items-center gap-[6px] text-[18px] font-semibold">
+                  <span className="text-[#0f0f10]">Q&amp;A</span>
+                  <span className="text-[#429ff0]">8</span>
+                </div>
+                <ChevronDown className="h-[24px] w-[24px] text-[#70737c]" />
+              </div>
+            </div>
+          )}
+
+          {false && (
+            <>
+              <div className="absolute left-0 top-[2154px] w-[375px]">
+                <div className="h-[8px] w-full bg-[#f4f4f5]" />
+                <div className="mx-auto mt-[40px] w-[343px]">
+                  <h2 className="text-[18px] font-semibold text-[#0f0f10]">
+                    이런 <span className="text-[#008bff]">헤어</span> 전문가는 어떠세요?
+                  </h2>
+                  <div className="mt-[12px] flex w-[343px] gap-[12px] overflow-x-auto scrollbar-hide">
+                    {relatedExperts.map((expert) => (
+                      <article
+                        key={expert.id}
+                        className="h-[163px] w-[156px] shrink-0 rounded-[12px] border border-[#e1e2e4] bg-white"
+                      >
+                        <div className="mx-auto mt-[16px] h-[52px] w-[52px] rounded-full bg-[#e1e2e4]" />
+                        <div className="mt-[12px] px-[16px] text-center">
+                          <p className="text-[14px] font-semibold text-[#292a2d]">
+                            {expert.name}
+                          </p>
+                          <p className="mt-[6px] h-[36px] w-[124px] line-clamp-2 text-[13px] leading-[1.4] text-[#878a93]">
+                            {expert.summary}
+                          </p>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="absolute left-1/2 top-[2414px] h-[3px] w-[55px] -translate-x-1/2 bg-[#e1e2e4]">
+                <div className="h-[3px] w-[18px] bg-[#429ff0]" />
+              </div>
+            </>
+          )}
         </div>
       </main>
 

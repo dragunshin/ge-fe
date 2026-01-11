@@ -2,6 +2,7 @@ import { api } from '../lib/api/client';
 import type {
   ApiResponse,
   ExpertInfoResponse,
+  ExpertScheduleResponse,
   ExpertSummaryResponse,
   PopularExpertsResponse,
 } from '../lib/api/types';
@@ -19,6 +20,13 @@ export const expertService = {
   },
   async getExpertInfo(userId: number): Promise<ApiResponse<ExpertInfoResponse>> {
     return await api.get<ApiResponse<ExpertInfoResponse>>(`/expert/${userId}`);
+  },
+  async getExpertSchedules(
+    userId: number,
+  ): Promise<ApiResponse<ExpertScheduleResponse[]>> {
+    return await api.get<ApiResponse<ExpertScheduleResponse[]>>(
+      `/expert/${userId}/schedules`,
+    );
   },
 
   async getTopExperts(category?: ApiCategory): Promise<ApiResponse<PopularExpertsResponse>> {

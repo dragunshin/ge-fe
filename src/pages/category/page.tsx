@@ -7,6 +7,8 @@ import Logo from '@/components/ui/logo';
 import starIcon from '../../images/reviews/star.svg';
 import { expertService } from '../../services/expert.service';
 import { reviewService } from '../../services/review.service';
+import ConsultationMethodSheet from '../resevationFlow/reservationSheet/typeReservation';
+import DateTimeBottomSheet from '../resevationFlow/reservationSheet/calendar';
 import {
   getApiCategoryFromRoute,
   getLabelFromApiCategory,
@@ -65,6 +67,8 @@ type ImmediateCard = {
   avatar?: string;
 };
 
+type ConsultType = 'MESSAGE' | 'LIVE';
+
 const CategoryLandingPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -74,6 +78,11 @@ const CategoryLandingPage = () => {
   const [selectedStyleFilter, setSelectedStyleFilter] = useState('전체');
   const [reviews, setReviews] = useState<ReviewCard[]>([]);
   const [expertCards, setExpertCards] = useState<ExpertListCard[]>([]);
+  const [openTypeSheet, setOpenTypeSheet] = useState(false);
+  const [openCalendarSheet, setOpenCalendarSheet] = useState(false);
+  const [selectedConsultType, setSelectedConsultType] =
+    useState<ConsultType>('MESSAGE');
+  const [noticeMessage, setNoticeMessage] = useState<string | null>(null);
 
   const categoryLabel = useMemo(() => {
     const map: Record<string, string> = {
@@ -100,7 +109,37 @@ const CategoryLandingPage = () => {
   };
 
   const handleReservationSchedule = () => {
-    navigate("/sheetTest");
+    if (categoryKey === 'hair') {
+      setOpenTypeSheet(true);
+      return;
+    }
+    if (categoryKey === 'fashion') {
+      setOpenTypeSheet(true);
+      return;
+    }
+    setNoticeMessage('해당 카테고리는 상담 예약이 준비 중입니다.');
+  };
+
+  const getReservationRoute = () => {
+    if (categoryKey === 'fashion') {
+      return '/reservation/fashion';
+    }
+    return '/hair/setup';
+  };
+
+  const formatScheduleLabel = (date: Date, timeId: string) => {
+    const parsed = /^t-(\d{2})(\d{2})$/.exec(timeId);
+    const hour24 = parsed ? Number(parsed[1]) : 0;
+    const minute = parsed ? Number(parsed[2]) : 0;
+    const isAM = hour24 < 12;
+    const meridiem = isAM ? '오전' : '오후';
+    let hour12 = hour24 % 12;
+    if (hour12 === 0) hour12 = 12;
+    const mm = String(minute).padStart(2, '0');
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${year}년 ${month}월 ${day}일 ${meridiem} ${hour12}:${mm}`;
   };
 
   const formatDate = (value?: string) => {
@@ -315,6 +354,14 @@ const CategoryLandingPage = () => {
     scrollToSection(query.get('section'));
   }, [location.search]);
 
+  useEffect(() => {
+    if (!noticeMessage) {
+      return;
+    }
+    const timer = window.setTimeout(() => setNoticeMessage(null), 2000);
+    return () => window.clearTimeout(timer);
+  }, [noticeMessage]);
+
   return (
     <div className="flex h-full flex-col bg-white">
       <header className="flex h-[56px] items-center justify-between px-4">
@@ -335,7 +382,15 @@ const CategoryLandingPage = () => {
             {categoryTabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => tab.route && navigate(tab.route)}
+                onClick={() => {
+                  if (tab.id === 'makeup' || tab.id === 'skin') {
+                    setNoticeMessage('준비중입니다.');
+                    return;
+                  }
+                  if (tab.route) {
+                    navigate(tab.route);
+                  }
+                }}
                 className={
                   tab.label === categoryLabel
                     ? 'text-[#0f0f10]'
@@ -350,6 +405,14 @@ const CategoryLandingPage = () => {
             <span className="absolute top-0 h-px w-[41px] bg-[#0f0f10]" style={{ left: underlineLeft }} />
           </div>
         </section>
+
+        {noticeMessage && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+            <div className="rounded-[999px] bg-[#171719] px-[16px] py-[10px] text-[13px] font-medium text-white shadow-[0px_6px_20px_rgba(0,0,0,0.2)]">
+              {noticeMessage}
+            </div>
+          </div>
+        )}
 
         <section className="relative mt-[20px] h-[246px] w-full overflow-hidden">
           <div className="absolute left-[-25px] top-[-8px] h-[262px] w-[400px] rounded-[12px] bg-[#d2d4d8]" />
@@ -387,6 +450,7 @@ const CategoryLandingPage = () => {
           </div>
         </section>
 
+        {false && (
         <section className="px-4 pt-[32px]">
           <div className="flex items-center justify-between">
             <h2 className="text-[18px] font-semibold text-[#0f0f10]">
@@ -436,6 +500,7 @@ const CategoryLandingPage = () => {
             ))}
           </div>
         </section>
+        )}
 
         <section className="mt-[32px] bg-[#f4f4f5]">
           <div className="px-4 pt-[22px]">
@@ -522,6 +587,7 @@ const CategoryLandingPage = () => {
           </div>
         </section>
 
+        {false && (
         <section id="immediate-section" className="px-4 pt-[32px]">
           <div className="flex items-center justify-between">
             <h2 className="text-[18px] font-semibold text-[#0f0f10]">즉시 상담이 가능한 전문가</h2>
@@ -589,12 +655,15 @@ const CategoryLandingPage = () => {
             ))}
           </div>
         </section>
+        )}
 
         <section id="expert-section" className="px-4 pt-[32px]">
           <div className="flex items-center justify-between">
-            <h2 className="text-[18px] font-semibold text-[#0f0f10]">헤어 전문가</h2>
+            <h2 className="text-[18px] font-semibold text-[#0f0f10]">
+              {categoryLabel} 전문가
+            </h2>
             <button
-              onClick={() => navigate(`/category/${categoryKey}?section=experts`)}
+              onClick={() => navigate(`/explore?category=${categoryKey}`)}
               className="flex items-center gap-[2px] text-[14px] text-[#70737c]"
             >
               전체보기
@@ -686,6 +755,28 @@ const CategoryLandingPage = () => {
       </main>
 
       <BottomNav />
+
+      <ConsultationMethodSheet
+        open={openTypeSheet}
+        onClose={() => setOpenTypeSheet(false)}
+        defaultValue={selectedConsultType}
+        onNext={(selected) => {
+          setSelectedConsultType(selected);
+          sessionStorage.setItem('consult_type', selected);
+          setOpenTypeSheet(false);
+          setOpenCalendarSheet(true);
+        }}
+      />
+
+      <DateTimeBottomSheet
+        open={openCalendarSheet}
+        onClose={() => setOpenCalendarSheet(false)}
+        onNext={({ date, timeId }) => {
+          sessionStorage.setItem('consult_schedule_label', formatScheduleLabel(date, timeId));
+          setOpenCalendarSheet(false);
+          navigate(getReservationRoute());
+        }}
+      />
     </div>
   );
 };
