@@ -1,6 +1,8 @@
 import { Check } from "lucide-react";
 import { SIZE_OPTIONS } from "./constants";
 
+type SizeOption = (typeof SIZE_OPTIONS)[number];
+
 export function Step4BodySize({
   heightValue,
   weightValue,
@@ -17,16 +19,16 @@ export function Step4BodySize({
 }: {
   heightValue: string;
   weightValue: string;
-  topSize: string | null;
-  bottomSize: string | null;
+  topSize: SizeOption | null;
+  bottomSize: SizeOption | null;
   onHeightChange: (value: string) => void;
   onHeightBlur: () => void;
   onHeightFocus: () => void;
   onWeightChange: (value: string) => void;
   onWeightBlur: () => void;
   onWeightFocus: () => void;
-  onTopSizeChange: (value: string) => void;
-  onBottomSizeChange: (value: string) => void;
+  onTopSizeChange: (value: SizeOption) => void;
+  onBottomSizeChange: (value: SizeOption) => void;
 }) {
   return (
     <section className="pt-[8px]">

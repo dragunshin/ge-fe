@@ -2,7 +2,7 @@ import * as React from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import Footer from "./component/Footer";
 import TopNav from "./component/TopNav";
-import { PRICE_MAX } from "./constants";
+import { PRICE_MAX, SIZE_OPTIONS } from "./constants";
 import { uploadImageViaPresignV2 } from "@/lib/s3Upload";
 import type { OutfitImage } from "./types";
 import { Step1Guide } from "./Step1Guide";
@@ -20,6 +20,8 @@ const createPreview = (file: File) => ({
   url: URL.createObjectURL(file),
   file,
 });
+
+type SizeOption = (typeof SIZE_OPTIONS)[number];
 
 const releasePreview = (preview?: OutfitImage | null) => {
   if (preview?.url) {
@@ -40,8 +42,8 @@ export default function FashionFlowPage() {
   const [outfits, setOutfits] = React.useState<OutfitImage[]>([]);
   const [heightValue, setHeightValue] = React.useState("");
   const [weightValue, setWeightValue] = React.useState("");
-  const [topSize, setTopSize] = React.useState<string | null>(null);
-  const [bottomSize, setBottomSize] = React.useState<string | null>(null);
+  const [topSize, setTopSize] = React.useState<SizeOption | null>(null);
+  const [bottomSize, setBottomSize] = React.useState<SizeOption | null>(null);
   const [colorSelections, setColorSelections] = React.useState<Set<string>>(
     () => new Set(),
   );

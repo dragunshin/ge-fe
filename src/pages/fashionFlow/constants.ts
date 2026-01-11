@@ -44,7 +44,7 @@ export const PRICE_PRESETS = [
 
 export const PRICE_MAX = 40;
 
-export const SIZE_OPTIONS = ["S", "M", "L", "XL", "XXL"];
+export const SIZE_OPTIONS = ["S", "M", "L", "XL", "XXL"] as const;
 
 export const FIT_IMAGE_OPTIONS = [
   { label: "머슬핏" },
