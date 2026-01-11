@@ -589,7 +589,7 @@ import {
 import ConsultationMethodSheet from "../resevationFlow/reservationSheet/typeReservation";
 import DateTimeBottomSheet from "../resevationFlow/reservationSheet/calendar";
 
-type ConsultType = "MESSAGE" | "LIVE";
+type ConsultType = "MESSAGE" | "VIDEO";
 
 type Banner = {
   id: number;
@@ -801,7 +801,8 @@ const HomePage = () => {
         if (!isActive) {
           return;
         }
-        const mapped = response.data.map((review) => ({
+        const reviewsData = Array.isArray(response.data) ? response.data : [];
+        const mapped = reviewsData.map((review) => ({
           id: review.reviewId,
           name: "익명",
           rating: review.rating,

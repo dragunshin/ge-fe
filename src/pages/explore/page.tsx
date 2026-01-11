@@ -6,6 +6,7 @@ import BottomNav from '@/components/navigation/bottom-nav';
 import Logo from '@/components/ui/logo';
 import starIcon from '../../images/reviews/star.svg';
 import { expertService } from '../../services/expert.service';
+import { reservationService } from '../../services/reservation.service';
 import ConsultationMethodSheet from '../resevationFlow/reservationSheet/typeReservation';
 import DateTimeBottomSheet from '../resevationFlow/reservationSheet/calendar';
 import {
@@ -66,7 +67,8 @@ type FilterTab = 'style' | 'concern';
 
 type StyleTab = (typeof STYLE_TABS)[number];
 type ConcernTab = (typeof CONCERN_TABS)[number];
-type ConsultType = 'MESSAGE' | 'LIVE';
+
+type ConsultType = 'MESSAGE' | 'VIDEO';
 
 const normalizeTag = (value: string) => value.replace(/\s+/g, '');
 
@@ -152,6 +154,10 @@ const CategoryLandingPage = () => {
   const [openCalendarSheet, setOpenCalendarSheet] = useState(false);
   const [selectedConsultType, setSelectedConsultType] =
     useState<ConsultType>('MESSAGE');
+  // 예약 시작 시 선택한 전문가 저장
+  const [selectedReservationExpertId, setSelectedReservationExpertId] = useState<number | null>(
+    null,
+  );
 
   useEffect(() => {
     let isActive = true;
@@ -240,6 +246,53 @@ const CategoryLandingPage = () => {
       return '/reservation/fashion';
     }
     return '/hair/setup';
+  };
+
+  // timeId를 예약 날짜/시간 ISO로 변환
+  const buildScheduledDateTime = (date: Date, timeId: string) => {
+    const parsed = /^t-(\d{2})(\d{2})$/.exec(timeId);
+    const hour24 = parsed ? Number(parsed[1]) : 0;
+    const minute = parsed ? Number(parsed[2]) : 0;
+    const value = new Date(date);
+    value.setHours(hour24, minute, 0, 0);
+    return value.toISOString();
+  };
+
+  // 패션 예약 임시 생성 후 reservationId 전달
+  const handleTempReservation = async (date: Date, timeId: string) => {
+    if (categoryKey !== 'fashion' && categoryKey !== 'hair') return null;
+    if (!selectedReservationExpertId) {
+      window.alert('전문가 정보가 없습니다. 다시 시도해주세요.');
+      return null;
+    }
+
+    const consultationType = selectedConsultType;
+    const schedulesResponse = await expertService.getExpertSchedules(
+      selectedReservationExpertId,
+    );
+    const schedules = Array.isArray(schedulesResponse.data) ? schedulesResponse.data : [];
+    const matched = schedules.find(
+      (schedule) => schedule.consultationType === consultationType,
+    );
+    if (!matched) {
+      window.alert('상담 가격 정보를 찾을 수 없습니다. 다시 시도해주세요.');
+      return null;
+    }
+    const price = matched.price;
+    // 카테고리별 임시 예약 생성
+    const category = categoryKey === 'fashion' ? 'FASHION' : 'HAIR';
+
+    const response = await reservationService.createTempReservation({
+      expertId: selectedReservationExpertId,
+      category,
+      consultationType,
+      // MESSAGE는 scheduledDateTime을 null로 전송
+      scheduledDateTime:
+        consultationType === 'VIDEO' ? buildScheduledDateTime(date, timeId) : null,
+      price,
+    });
+
+    return response.data.reservationId;
   };
 
   const formatScheduleLabel = (date: Date, timeId: string) => {
@@ -453,6 +506,8 @@ const CategoryLandingPage = () => {
                           setNoticeMessage('해당 카테고리는 상담 예약이 준비 중입니다.');
                           return;
                         }
+                        // 선택한 전문가 ID 저장
+                        setSelectedReservationExpertId(expert.id);
                         setOpenTypeSheet(true);
                       }}
                     >
@@ -649,9 +704,17 @@ const CategoryLandingPage = () => {
       <DateTimeBottomSheet
         open={openCalendarSheet}
         onClose={() => setOpenCalendarSheet(false)}
-        onNext={({ date, timeId }) => {
+        onNext={async ({ date, timeId }) => {
           sessionStorage.setItem('consult_schedule_label', formatScheduleLabel(date, timeId));
           setOpenCalendarSheet(false);
+          // 패션 예약 임시 생성 후 reservationId 전달
+          if (categoryKey === 'fashion' || categoryKey === 'hair') {
+            const reservationId = await handleTempReservation(date, timeId);
+            if (reservationId) {
+              navigate(`${getReservationRoute()}?reservationId=${reservationId}`);
+              return;
+            }
+          }
           navigate(getReservationRoute());
         }}
       />

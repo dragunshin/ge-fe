@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import ConsultationMethodSheet from "./reservationSheet/typeReservation";
 import DateTimeBottomSheet from "./reservationSheet/calendar";
 
-type ConsultType = "MESSAGE" | "LIVE";
+type ConsultType = "MESSAGE" | "VIDEO";
 
 type ConsultLog = {
   at: string;
@@ -77,15 +77,15 @@ export default function ConsultationSheetTestPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setDefaultConsult("LIVE")}
+                onClick={() => setDefaultConsult("VIDEO")}
                 className={[
                   "h-9 rounded-[10px] px-3 text-[13px] font-semibold transition",
-                  defaultConsult === "LIVE"
+                  defaultConsult === "VIDEO"
                     ? "bg-[#0B0B0C] text-white"
                     : "bg-[#F3F4F6] text-[#111827]",
                 ].join(" ")}
               >
-                LIVE
+                VIDEO
               </button>
             </div>
           </div>

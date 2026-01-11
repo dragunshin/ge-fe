@@ -1,20 +1,24 @@
 import { Check } from "lucide-react";
-import { COLOR_OPTIONS, FIT_IMAGE_OPTIONS, MOOD_IMAGE_OPTIONS } from "./constants";
+import { COLOR_OPTIONS, FIT_IMAGE_OPTIONS, IMAGE_STYLE_OPTIONS } from "./constants";
 
 export function Step6StylePreference({
   colorSelections,
   fitSelection,
-  moodSelections,
+  imageStyleSelections,
+  imageStyleEtc,
   onToggleColor,
-  onToggleMood,
   onFitChange,
+  onToggleImageStyle,
+  onImageStyleEtcChange,
 }: {
   colorSelections: Set<string>;
   fitSelection: string | null;
-  moodSelections: Set<string>;
+  imageStyleSelections: Set<string>;
+  imageStyleEtc: string;
   onToggleColor: (option: string) => void;
-  onToggleMood: (option: string) => void;
   onFitChange: (value: string) => void;
+  onToggleImageStyle: (option: string) => void;
+  onImageStyleEtcChange: (value: string) => void;
 }) {
   return (
     <section className="pt-[8px]">
@@ -78,27 +82,43 @@ export function Step6StylePreference({
       </div>
 
       <div className="mt-[32px]">
-        <p className="text-[16px] font-semibold text-black">무드</p>
-        <div className="mt-[12px] grid grid-cols-3 gap-[8px]">
-          {MOOD_IMAGE_OPTIONS.map((item) => {
-            const selected = moodSelections.has(item.label);
+        <p className="text-[16px] font-semibold text-black">이미지</p>
+        <div className="mt-[12px] grid grid-cols-2 gap-[12px]">
+          {IMAGE_STYLE_OPTIONS.map((option) => {
+            const selected = imageStyleSelections.has(option);
             return (
               <button
-                key={item.label}
+                key={option}
                 type="button"
-                className="flex flex-col items-center gap-[8px]"
-                onClick={() => onToggleMood(item.label)}
+                className={`flex h-[44px] w-full items-center justify-between rounded-[8px] px-[20px] text-[14px] font-medium ${
+                  selected
+                    ? "bg-[#eff7fd] text-[#70737c]"
+                    : "bg-[#f4f4f5] text-[#70737c]"
+                }`}
+                onClick={() => onToggleImageStyle(option)}
               >
-                <div
-                  className={`h-[109px] w-[109px] overflow-hidden rounded-[8px] ${
-                    selected ? "ring-2 ring-[#008bff]" : ""
+                <span>{option}</span>
+                <span
+                  className={`flex h-[18px] w-[18px] items-center justify-center rounded-full ${
+                    selected ? "opacity-100" : "opacity-0"
                   }`}
-                />
-                <span className="text-[14px] text-[#70737c]">{item.label}</span>
+                >
+                  <Check className="h-[12px] w-[12px] text-[#008bff]" />
+                </span>
               </button>
             );
           })}
         </div>
+      </div>
+
+      <div className="mt-[32px] w-[342px]">
+        <p className="text-[16px] font-medium text-black">기타</p>
+        <input
+          value={imageStyleEtc}
+          onChange={(event) => onImageStyleEtcChange(event.target.value)}
+          placeholder="직접 입력해주세요."
+          className="mt-[12px] h-[48px] w-full rounded-[4px] border border-[#dbdcdf] px-[20px] text-[13px] text-[#0f0f10] placeholder:text-[#989ba2]"
+        />
       </div>
     </section>
   );

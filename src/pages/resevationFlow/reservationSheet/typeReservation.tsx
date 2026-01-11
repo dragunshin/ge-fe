@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 import Radioo from "@/images/reservationFlow/nomalRadio.svg?react";
 import SelectedRadio from "@/images/reservationFlow/selectedRadio.svg?react";
 
-type ConsultType = "MESSAGE" | "LIVE";
+type ConsultType = "MESSAGE" | "VIDEO";
 
 type Option = {
   id: ConsultType;
@@ -66,7 +66,7 @@ export default function ConsultationMethodSheet({
         description: "설문조사 답변을 바탕으로 전문가가 24시간 내로 솔루션지를 보내드려요.",
       },
       {
-        id: "LIVE",
+        id: "VIDEO",
         title: "실시간 화상 상담",
         priceLabel: "40000원",
         description: "전문가와 화상으로 15분 상담을 진행해요.",

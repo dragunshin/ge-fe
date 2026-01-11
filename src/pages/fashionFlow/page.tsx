@@ -3,20 +3,22 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import Footer from "./component/Footer";
 import TopNav from "./component/TopNav";
 import { PRICE_MAX } from "./constants";
+import { uploadImageViaPresignV2 } from "@/lib/s3Upload";
 import type { OutfitImage } from "./types";
 import { Step1Guide } from "./Step1Guide";
 import { Step2SidePhotos } from "./Step2SidePhotos";
 import { Step3OutfitPhotos } from "./Step3OutfitPhotos";
 import { Step4BodySize } from "./Step4BodySize";
-import { Step5ImageStyle } from "./Step5ImageStyle";
 import { Step6StylePreference } from "./Step6StylePreference";
 import { Step7BodyFlaws } from "./Step7BodyFlaws";
 import { Step8ItemBudget } from "./Step8ItemBudget";
 import { Step9Purpose } from "./Step9Purpose";
+import { reservationService } from "@/services/reservation.service";
 
 const createPreview = (file: File) => ({
   id: crypto.randomUUID(),
   url: URL.createObjectURL(file),
+  file,
 });
 
 const releasePreview = (preview?: OutfitImage | null) => {
@@ -29,6 +31,7 @@ export default function FashionFlowPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [step, setStep] = React.useState(1);
   const [introStage, setIntroStage] = React.useState<1 | 2>(1);
   const [frontImage, setFrontImage] = React.useState<OutfitImage | null>(null);
@@ -43,9 +46,6 @@ export default function FashionFlowPage() {
     () => new Set(),
   );
   const [fitSelection, setFitSelection] = React.useState<string | null>(null);
-  const [moodSelections, setMoodSelections] = React.useState<Set<string>>(
-    () => new Set(),
-  );
   const [imageStyleSelections, setImageStyleSelections] = React.useState<Set<string>>(
     () => new Set(),
   );
@@ -62,6 +62,12 @@ export default function FashionFlowPage() {
   const [purposeText, setPurposeText] = React.useState("");
   const [purposeImages, setPurposeImages] = React.useState<OutfitImage[]>([]);
 
+  const reservationIdRaw =
+    searchParams.get("reservationId") ??
+    searchParams.get("reservation_id") ??
+    (location.state as { reservationId?: number } | null)?.reservationId;
+  const reservationId = reservationIdRaw ? Number(reservationIdRaw) : null;
+
   const frontInputRef = React.useRef<HTMLInputElement | null>(null);
   const leftInputRef = React.useRef<HTMLInputElement | null>(null);
   const rightInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -70,7 +76,7 @@ export default function FashionFlowPage() {
 
   React.useEffect(() => {
     const stepParam = Number(searchParams.get("step"));
-    if (!Number.isNaN(stepParam) && stepParam >= 1 && stepParam <= 9) {
+    if (!Number.isNaN(stepParam) && stepParam >= 1 && stepParam <= 6) {
       setStep(stepParam);
       setIntroStage(1);
     }
@@ -182,42 +188,137 @@ export default function FashionFlowPage() {
   };
 
   const canProceed = () => {
-    if (step === 1) return introStage === 1 ? true : Boolean(frontImage);
-    if (step === 2) return Boolean(leftImage && rightImage);
-    if (step === 3) return outfits.length >= 2;
-    if (step === 4) {
+    if (step === 1) {
+      return introStage === 1
+        ? true
+        : Boolean(frontImage && leftImage && rightImage && outfits.length >= 2);
+    }
+    if (step === 2) {
       const hasHeight = Boolean(formatNumeric(heightValue));
       const hasWeight = Boolean(formatNumeric(weightValue));
       return hasHeight && hasWeight && Boolean(topSize) && Boolean(bottomSize);
     }
-    if (step === 5) return imageStyleSelections.size > 0;
-    if (step === 6) {
-      return colorSelections.size > 0 && Boolean(fitSelection) && moodSelections.size > 0;
+    if (step === 3) return bodySelections.size > 0;
+    if (step === 4) {
+      return (
+        colorSelections.size > 0 && Boolean(fitSelection) && imageStyleSelections.size > 0
+      );
     }
-    if (step === 7) return bodySelections.size > 0;
-    if (step === 8) return true;
-    if (step === 9) return purposeText.trim().length > 0;
+    if (step === 5) return itemSelections.size > 0;
+    if (step === 6) return purposeText.trim().length > 0;
     return false;
   };
 
-  const handleNext = () => {
+  const mapBodyType = (value: string) => {
+    const map: Record<string, string> = {
+      "좁은 어깨": "좁은어깨",
+      "얇은 다리": "얇은다리",
+      "얇은 팔": "얇은팔",
+      "볼록한 배": "볼록한배",
+      "굵은 다리": "굵은다리",
+      "큰 몸통": "큰몸통",
+      "얄상한 몸": "얄상한몸",
+      "상하체 비율": "상하체비율",
+      "머리 크기": "머리크기",
+    };
+    return map[value] ?? value;
+  };
+
+  const uploadFashionImage = async (file: File, imageType: string) => {
+    const { key } = await uploadImageViaPresignV2({
+      file,
+      resourceType: "consultation",
+      imageType,
+    });
+    return key;
+  };
+
+  const submitFashionConcern = async () => {
+    if (!reservationId) {
+      window.alert("예약 ID가 없습니다. 다시 시도해주세요.");
+      return false;
+    }
+    if (!frontImage || !leftImage || !rightImage) return false;
+
+    setIsSubmitting(true);
+
+    try {
+      const [frontKey, leftKey, rightKey] = await Promise.all([
+        uploadFashionImage(frontImage.file, "frontFullBody"),
+        uploadFashionImage(leftImage.file, "leftFullBody"),
+        uploadFashionImage(rightImage.file, "rightFullBody"),
+      ]);
+
+      const favoriteKeys = await Promise.all(
+        outfits.map((item) => uploadFashionImage(item.file, "favoriteOutfit")),
+      );
+
+      const consultationKeys = await Promise.all(
+        purposeImages.map((item) =>
+          uploadFashionImage(item.file, "consultationPurpose"),
+        ),
+      );
+
+      const bodyTypeDisadvantages = Array.from(bodySelections).map(mapBodyType);
+      const styleColors = Array.from(colorSelections);
+      const styleImages = Array.from(imageStyleSelections);
+
+      await reservationService.updateFashionConcern(reservationId, {
+        fashion: {
+          height: Number(formatNumeric(heightValue)),
+          weight: Number(formatNumeric(weightValue)),
+          topSize: topSize ?? "M",
+          bottomSize: bottomSize ?? "M",
+          bodyTypeDisadvantages,
+          bodyTypeEtcText: bodyEtc.trim() ? bodyEtc : undefined,
+          styleColors,
+          styleFits: fitSelection ? [fitSelection] : [],
+          styleImages,
+          styleEtcText: imageStyleEtc.trim() ? imageStyleEtc : undefined,
+          outfitItems: Array.from(itemSelections),
+          outfitPriceRange: {
+            minPrice: priceMin * 10000,
+            maxPrice: priceMax * 10000,
+          },
+          images: {
+            frontFullBody: [frontKey],
+            leftFullBody: [leftKey],
+            rightFullBody: [rightKey],
+            favoriteOutfit: favoriteKeys,
+            consultationPurpose: consultationKeys.length ? consultationKeys : undefined,
+          },
+        },
+      });
+      return true;
+    } catch (error) {
+      console.error(error);
+      window.alert("고민지 저장에 실패했어요. 다시 시도해주세요.");
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleNext = async () => {
     if (!canProceed()) return;
     if (step === 1 && introStage === 1) {
       setIntroStage(2);
       return;
     }
-    if (step < 9) {
+    if (step < 6) {
       setStep((prev) => prev + 1);
       if (step === 1) {
         setIntroStage(1);
       }
       return;
     }
+    const submitted = await submitFashionConcern();
+    if (!submitted) return;
     navigate("/payment/order", {
       state: {
         from: `${location.pathname}${location.search}`,
         category: "패션",
-        step: 9,
+        step: 6,
       },
     });
   };
@@ -227,14 +328,14 @@ export default function FashionFlowPage() {
       setIntroStage(2);
       return;
     }
-    if (step < 9) {
+    if (step < 6) {
       setStep((prev) => prev + 1);
       if (step === 1) {
         setIntroStage(1);
       }
       return;
     }
-    navigate("/payment/order", { state: { category: "패션", step: 9 } });
+    navigate("/payment/order", { state: { category: "패션", step: 6 } });
   };
 
   const handleBack = () => {
@@ -263,35 +364,37 @@ export default function FashionFlowPage() {
 
       <main className="hide-scrollbar flex-1 overflow-y-auto px-[16px] pb-[160px]">
         {step === 1 && (
-          <Step1Guide
-            introStage={introStage}
-            frontImage={frontImage}
-            frontInputRef={frontInputRef}
-            onRemoveFront={() => removeSingleImage(setFrontImage)}
-            onUploadFront={(files) => handleSingleUpload(files, setFrontImage)}
-          />
+          <>
+            <Step1Guide
+              introStage={introStage}
+              frontImage={frontImage}
+              frontInputRef={frontInputRef}
+              onRemoveFront={() => removeSingleImage(setFrontImage)}
+              onUploadFront={(files) => handleSingleUpload(files, setFrontImage)}
+            />
+            {introStage === 2 && (
+              <>
+                <Step2SidePhotos
+                  leftImage={leftImage}
+                  rightImage={rightImage}
+                  leftInputRef={leftInputRef}
+                  rightInputRef={rightInputRef}
+                  onRemoveLeft={() => removeSingleImage(setLeftImage)}
+                  onRemoveRight={() => removeSingleImage(setRightImage)}
+                  onUploadLeft={(files) => handleSingleUpload(files, setLeftImage)}
+                  onUploadRight={(files) => handleSingleUpload(files, setRightImage)}
+                />
+                <Step3OutfitPhotos
+                  outfits={outfits}
+                  outfitInputRef={outfitInputRef}
+                  onUploadOutfits={handleOutfitUpload}
+                  onRemoveOutfit={removeOutfit}
+                />
+              </>
+            )}
+          </>
         )}
         {step === 2 && (
-          <Step2SidePhotos
-            leftImage={leftImage}
-            rightImage={rightImage}
-            leftInputRef={leftInputRef}
-            rightInputRef={rightInputRef}
-            onRemoveLeft={() => removeSingleImage(setLeftImage)}
-            onRemoveRight={() => removeSingleImage(setRightImage)}
-            onUploadLeft={(files) => handleSingleUpload(files, setLeftImage)}
-            onUploadRight={(files) => handleSingleUpload(files, setRightImage)}
-          />
-        )}
-        {step === 3 && (
-          <Step3OutfitPhotos
-            outfits={outfits}
-            outfitInputRef={outfitInputRef}
-            onUploadOutfits={handleOutfitUpload}
-            onRemoveOutfit={removeOutfit}
-          />
-        )}
-        {step === 4 && (
           <Step4BodySize
             heightValue={heightValue}
             weightValue={weightValue}
@@ -311,27 +414,7 @@ export default function FashionFlowPage() {
             }
           />
         )}
-        {step === 5 && (
-          <Step5ImageStyle
-            selections={imageStyleSelections}
-            onToggle={(option) => toggleSetValue(option, setImageStyleSelections)}
-            etcValue={imageStyleEtc}
-            onEtcChange={setImageStyleEtc}
-          />
-        )}
-        {step === 6 && (
-          <Step6StylePreference
-            colorSelections={colorSelections}
-            fitSelection={fitSelection}
-            moodSelections={moodSelections}
-            onToggleColor={(option) => toggleSetValue(option, setColorSelections)}
-            onToggleMood={(option) => toggleSetValue(option, setMoodSelections)}
-            onFitChange={(value) =>
-              setFitSelection((prev) => (prev === value ? null : value))
-            }
-          />
-        )}
-        {step === 7 && (
+        {step === 3 && (
           <Step7BodyFlaws
             selections={bodySelections}
             onToggle={(option) => toggleSetValue(option, setBodySelections)}
@@ -339,7 +422,23 @@ export default function FashionFlowPage() {
             onEtcChange={setBodyEtc}
           />
         )}
-        {step === 8 && (
+        {step === 4 && (
+          <Step6StylePreference
+            colorSelections={colorSelections}
+            fitSelection={fitSelection}
+            imageStyleSelections={imageStyleSelections}
+            imageStyleEtc={imageStyleEtc}
+            onToggleColor={(option) => toggleSetValue(option, setColorSelections)}
+            onFitChange={(value) =>
+              setFitSelection((prev) => (prev === value ? null : value))
+            }
+            onToggleImageStyle={(option) =>
+              toggleSetValue(option, setImageStyleSelections)
+            }
+            onImageStyleEtcChange={setImageStyleEtc}
+          />
+        )}
+        {step === 5 && (
           <Step8ItemBudget
             selections={itemSelections}
             onToggle={(option) => toggleSetValue(option, setItemSelections)}
@@ -356,7 +455,7 @@ export default function FashionFlowPage() {
             formatPriceRange={formatPriceRange}
           />
         )}
-        {step === 9 && (
+        {step === 6 && (
           <Step9Purpose
             purposeText={purposeText}
             purposeImages={purposeImages}
@@ -368,7 +467,11 @@ export default function FashionFlowPage() {
         )}
       </main>
 
-      <Footer disabled={!canProceed()} onNext={handleNext} onPreviewNext={handlePreviewNext} />
+      <Footer
+        disabled={!canProceed() || isSubmitting}
+        onNext={handleNext}
+        onPreviewNext={handlePreviewNext}
+      />
     </div>
   );
 }

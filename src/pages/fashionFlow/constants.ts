@@ -10,17 +10,13 @@ export const IMAGE_STYLE_OPTIONS = [
   "단정함",
   "귀여움",
   "남자다움",
-  "신뢰를 주는",
   "화려한",
   "자연스러움",
-  "꾸안꾸",
-  "따뜻한",
-  "차가운",
   "힙한",
   "기타",
 ];
 
-export const COLOR_OPTIONS = ["무채색", "컬러풀", "파스텔톤", "잘 모르겠음"];
+export const COLOR_OPTIONS = ["무채색", "컬러풀"];
 
 export const BODY_FLAW_OPTIONS = [
   "좁은 어깨",

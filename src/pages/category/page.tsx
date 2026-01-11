@@ -9,6 +9,7 @@ import { expertService } from '../../services/expert.service';
 import { reviewService } from '../../services/review.service';
 import ConsultationMethodSheet from '../resevationFlow/reservationSheet/typeReservation';
 import DateTimeBottomSheet from '../resevationFlow/reservationSheet/calendar';
+import { reservationService } from '../../services/reservation.service';
 import {
   getApiCategoryFromRoute,
   getLabelFromApiCategory,
@@ -67,7 +68,7 @@ type ImmediateCard = {
   avatar?: string;
 };
 
-type ConsultType = 'MESSAGE' | 'LIVE';
+type ConsultType = 'MESSAGE' | 'VIDEO';
 
 const CategoryLandingPage = () => {
   const navigate = useNavigate();
@@ -83,6 +84,10 @@ const CategoryLandingPage = () => {
   const [selectedConsultType, setSelectedConsultType] =
     useState<ConsultType>('MESSAGE');
   const [noticeMessage, setNoticeMessage] = useState<string | null>(null);
+  // 예약 시작 시 선택한 전문가 저장
+  const [selectedReservationExpertId, setSelectedReservationExpertId] = useState<number | null>(
+    null,
+  );
 
   const categoryLabel = useMemo(() => {
     const map: Record<string, string> = {
@@ -125,6 +130,53 @@ const CategoryLandingPage = () => {
       return '/reservation/fashion';
     }
     return '/hair/setup';
+  };
+
+  // timeId를 예약 날짜/시간 ISO로 변환
+  const buildScheduledDateTime = (date: Date, timeId: string) => {
+    const parsed = /^t-(\d{2})(\d{2})$/.exec(timeId);
+    const hour24 = parsed ? Number(parsed[1]) : 0;
+    const minute = parsed ? Number(parsed[2]) : 0;
+    const value = new Date(date);
+    value.setHours(hour24, minute, 0, 0);
+    return value.toISOString();
+  };
+
+  // 패션 예약 임시 생성 후 reservationId 전달
+  const handleTempReservation = async (date: Date, timeId: string) => {
+    if (categoryKey !== 'fashion' && categoryKey !== 'hair') return null;
+    if (!selectedReservationExpertId) {
+      window.alert('전문가 정보가 없습니다. 다시 시도해주세요.');
+      return null;
+    }
+
+    const consultationType = selectedConsultType;
+    const schedulesResponse = await expertService.getExpertSchedules(
+      selectedReservationExpertId,
+    );
+    const schedules = Array.isArray(schedulesResponse.data) ? schedulesResponse.data : [];
+    const matched = schedules.find(
+      (schedule) => schedule.consultationType === consultationType,
+    );
+    if (!matched) {
+      window.alert('상담 가격 정보를 찾을 수 없습니다. 다시 시도해주세요.');
+      return null;
+    }
+    const price = matched.price;
+    // 카테고리별 임시 예약 생성
+    const category = categoryKey === 'fashion' ? 'FASHION' : 'HAIR';
+
+    const response = await reservationService.createTempReservation({
+      expertId: selectedReservationExpertId,
+      category,
+      consultationType,
+      // MESSAGE는 scheduledDateTime을 null로 전송
+      scheduledDateTime:
+        consultationType === 'VIDEO' ? buildScheduledDateTime(date, timeId) : null,
+      price,
+    });
+
+    return response.data.reservationId;
   };
 
   const formatScheduleLabel = (date: Date, timeId: string) => {
@@ -196,7 +248,8 @@ const CategoryLandingPage = () => {
         if (!isActive) {
           return;
         }
-        const mapped = response.data.map((review) => ({
+        const reviewsData = Array.isArray(response.data) ? response.data : [];
+        const mapped = reviewsData.map((review) => ({
           id: review.reviewId,
           name: '익명',
           expertName: review.expertNickname,
@@ -377,7 +430,8 @@ const CategoryLandingPage = () => {
       </header>
 
       <main className="flex-1 overflow-y-auto pb-6 scrollbar-hide">
-        <section className="pt-[4px]">
+        <div className="sticky top-0 z-40 bg-white">
+          <section className="pt-[4px]">
           <div className="flex items-center justify-between px-4 text-[16px] font-semibold">
             {categoryTabs.map((tab) => (
               <button
@@ -404,7 +458,8 @@ const CategoryLandingPage = () => {
           <div className="relative mt-[12px] h-px bg-[#e1e2e4]">
             <span className="absolute top-0 h-px w-[41px] bg-[#0f0f10]" style={{ left: underlineLeft }} />
           </div>
-        </section>
+          </section>
+        </div>
 
         {noticeMessage && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
@@ -741,6 +796,8 @@ const CategoryLandingPage = () => {
                       className="h-[36px] w-[95px] rounded-[4px] bg-[#171719] text-[14px] font-medium text-white"
                       onClick={(event) => {
                         event.stopPropagation();
+                        // 선택한 전문가 ID 저장
+                        setSelectedReservationExpertId(expert.id ?? null);
                         handleReservationSchedule();
                       }}
                     >
@@ -771,9 +828,17 @@ const CategoryLandingPage = () => {
       <DateTimeBottomSheet
         open={openCalendarSheet}
         onClose={() => setOpenCalendarSheet(false)}
-        onNext={({ date, timeId }) => {
+        onNext={async ({ date, timeId }) => {
           sessionStorage.setItem('consult_schedule_label', formatScheduleLabel(date, timeId));
           setOpenCalendarSheet(false);
+          // 패션 예약 임시 생성 후 reservationId 전달
+          if (categoryKey === 'fashion' || categoryKey === 'hair') {
+            const reservationId = await handleTempReservation(date, timeId);
+            if (reservationId) {
+              navigate(`${getReservationRoute()}?reservationId=${reservationId}`);
+              return;
+            }
+          }
           navigate(getReservationRoute());
         }}
       />

@@ -22,19 +22,23 @@ const StepArrow = () => (
 export function PaymentOrderPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const state = location.state as { consultType?: "MESSAGE" | "LIVE"; from?: string; step?: number } | null;
+  const state = location.state as { consultType?: "MESSAGE" | "VIDEO"; from?: string; step?: number } | null;
   const scheduleLabel =
     sessionStorage.getItem("consult_schedule_label") ?? "2025년 10월 28일 오전 11:30";
+  const consultTypeFromState = state?.consultType;
+  const consultTypeFromStorage = state?.from === "/hair/setup"
+    ? sessionStorage.getItem("consult_type")
+    : null;
   const consultType =
-    state?.consultType ??
-    (state?.from === "/hair/setup"
-      ? (sessionStorage.getItem("consult_type") as "MESSAGE" | "LIVE" | null)
-      : null) ??
-    "MESSAGE";
-  const consultLabel = consultType === "LIVE" ? "실시간 화상 상담" : "메세지 상담";
-  const consultPriceMap: Record<"MESSAGE" | "LIVE", number> = {
+    consultTypeFromState === "MESSAGE" || consultTypeFromState === "VIDEO"
+      ? consultTypeFromState
+      : consultTypeFromStorage === "MESSAGE" || consultTypeFromStorage === "VIDEO"
+        ? consultTypeFromStorage
+        : "MESSAGE";
+  const consultLabel = consultType === "VIDEO" ? "실시간 화상 상담" : "메세지 상담";
+  const consultPriceMap: Record<"MESSAGE" | "VIDEO", number> = {
     MESSAGE: 24000,
-    LIVE: 40000,
+    VIDEO: 40000,
   };
   const [agreements, setAgreements] = useState({
     order: false,
