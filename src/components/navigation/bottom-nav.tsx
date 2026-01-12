@@ -30,7 +30,7 @@ export default function BottomNav() {
     {
       key: "community",
       label: "커뮤니티",
-      onClick: () => {},
+      onClick: () => navigate("/service-ready"),
     },
     {
       key: "mypage",

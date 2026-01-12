@@ -10,7 +10,7 @@ import { InterestSelectionPage } from "../pages/auth/interest-selection/page";
 import { TermsAgreementPage } from "../pages/auth/terms-agreement/page";
 import FaceStep from "@/pages/profileSetting/page";
 import { Chat } from "@/pages/chat/page";
-import { ChatList } from "@/pages/chat/components/ChatList";
+import ChatListPage from "@/pages/chat/chat-list-page";
 import { ChatRoom } from "@/pages/chat/components/ChatRoom";
 import EditorPage from "@/pages/solution/writeSolution";
 import MyPage from "@/pages/myPage/page";
@@ -30,6 +30,7 @@ import FashionReservationFlowPage from "@/pages/fashionFlow/page";
 import { HairSetup } from "@/pages/hairFlow/page";
 import ServiceReadyPage from "@/pages/service-ready/page";
 import CategoryBestReviewsPage from "@/pages/category/reviews/page";
+import CategoryExpertListPage from "@/pages/category/experts/page";
 
 export const router = createBrowserRouter([
   {
@@ -79,7 +80,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/chatList",
-    element: <ChatList />,
+    element: <ChatListPage />,
   },
   {
     path: "/chatRoom",
@@ -115,6 +116,10 @@ export const router = createBrowserRouter([
   {
     path: "/category/:category/reviews",
     element: <CategoryBestReviewsPage />,
+  },
+  {
+    path: "/category/:category/experts",
+    element: <CategoryExpertListPage />,
   },
   {
     path: "/reviews",

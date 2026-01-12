@@ -786,25 +786,41 @@ const HomePage = () => {
 
     const fetchReviews = async () => {
       try {
-        const response = await reviewService.getRecentReviews({
-          page: 0,
-          size: 5,
-        });
+        const category = getApiCategoryFromLabel(selectedHomeTab);
+        const responses = category
+          ? [await reviewService.getRecentReviews({ category, page: 0, size: 5 })]
+          : (
+              await Promise.allSettled(
+                ["HAIR", "FASHION", "MAKEUP", "SKIN"].map((categoryItem) =>
+                  reviewService.getRecentReviews({ category: categoryItem, page: 0, size: 5 }),
+                ),
+              )
+            )
+              .filter((result) => result.status === "fulfilled")
+              .map((result) => result.value);
         if (!isActive) {
           return;
         }
-        const reviewsData = Array.isArray(response.data) ? response.data : [];
-        const mapped = reviewsData.map((review) => ({
-          id: review.reviewId,
-          name: "익명",
-          rating: review.rating,
-          date: formatDate(review.createdAt),
-          content: review.content,
-          category: getLabelFromApiCategory(review.category),
-          concern: "후기",
-          images: parseMediaUrls(review.mediaUrls).slice(0, 2),
-        }));
-        setReviews(mapped);
+        const reviewsData = responses
+          .flatMap((response) => (Array.isArray(response.data) ? response.data : []))
+          .map((review) => ({
+            id: review.reviewId,
+            author: "익명",
+            rating: review.rating,
+            date: formatDate(review.createdAt),
+            content: review.content,
+            category: getLabelFromApiCategory(review.category),
+            concern: "후기",
+            images: parseMediaUrls(review.mediaUrls).slice(0, 2),
+            expertName: review.expertNickname ?? "전문가",
+            expertRating: review.expertRatingAverage ?? review.rating,
+            expertAvatar: review.expertProfileImage,
+            createdAt: review.createdAt,
+          }))
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .slice(0, 5)
+          .map(({ createdAt, ...review }) => review);
+        setReviews(reviewsData);
       } catch (error) {
         console.error("Failed to fetch reviews:", error);
       }
@@ -815,7 +831,7 @@ const HomePage = () => {
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [selectedHomeTab]);
 
   const homeTabs: TabItem[] = useMemo(
     () => [
@@ -926,14 +942,7 @@ const HomePage = () => {
   };
 
   const getReviewRoute = () => {
-    if (selectedHomeTab === "전체") {
-      return "/reviews";
-    }
-    const tab = homeTabs.find((item) => item.label === selectedHomeTab);
-    if (tab?.route) {
-      return `${tab.route}/reviews`;
-    }
-    return "/category/hair/reviews";
+    return "/reviews";
   };
 
   return (
@@ -1155,42 +1164,48 @@ const HomePage = () => {
                 <div className="flex items-center justify-between px-4 pt-[14px]">
                   <div className="flex items-center gap-[10px]">
                     <div className="h-[36px] w-[36px] shrink-0 overflow-hidden rounded-full bg-[#e1e2e4]">
-                      {review.avatar && (
-                        <img src={review.avatar} alt="" className="h-full w-full object-cover" />
+                      {review.expertAvatar && (
+                        <img
+                          src={review.expertAvatar}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
                       )}
                     </div>
                     <div className="flex flex-col gap-[4px]">
                       <div className="flex items-center gap-[2px]">
                         <span className="text-[14px] font-semibold text-[#0f0f10]">
-                          {review.name}
+                          {review.expertName}
                         </span>
                         <ChevronRight className="h-4 w-4 text-[#0f0f10]" />
                       </div>
-                      <div className="flex items-center gap-[8px] text-[13px] text-[#989ba2]">
-                        <div className="flex items-center gap-1 text-[#ffb800]">★★★★★</div>
-                        <span>{review.rating}</span>
+                      <div className="flex items-center gap-[4px] text-[13px] text-[#989ba2]">
+                        <img src={starIcon} alt="" className="h-[16px] w-[16px]" />
+                        <span>{review.expertRating.toFixed(1)}</span>
                       </div>
                     </div>
                   </div>
-                  <button className="text-[14px] text-[#70737c]">프로필 보기</button>
                 </div>
 
                 <div className="px-4 pt-[14px]">
                   <div className="flex gap-[8px]">
-                    {review.images.map((image, idx) => (
-                      <div
-                        key={`${review.id}-image-${idx}`}
-                        className="h-[130px] w-[130px] overflow-hidden rounded-[4px] bg-[#e1e2e4]"
-                      >
-                        {image && <img src={image} alt="" className="h-full w-full object-cover" />}
-                      </div>
-                    ))}
+                    {Array.from({ length: 2 }).map((_, idx) => {
+                      const image = review.images[idx];
+                      return (
+                        <div
+                          key={`${review.id}-image-${idx}`}
+                          className="h-[130px] w-[130px] overflow-hidden rounded-[4px] bg-[#e1e2e4]"
+                        >
+                          {image && <img src={image} alt="" className="h-full w-full object-cover" />}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
                 <div className="px-4 pt-3">
                   <div className="flex items-center gap-[12px] text-[13px] text-[#989ba2]">
-                    <span className="font-semibold text-[#878a93]">박덕호</span>
+                    <span className="font-semibold text-[#878a93]">{review.author}</span>
                     <span>{review.date}</span>
                   </div>
                   <p className="mt-2 text-[13px] leading-[1.4] text-[#505158]">{review.content}</p>

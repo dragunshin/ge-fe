@@ -559,7 +559,6 @@ export function ChatList() {
           </div>
         </header>
 
-        {/* ScrollArea는 flex-1만 주고, padding은 안쪽 ul에서 처리 */}
         <ScrollArea className="flex-1">
           {loading && (
             <div className="px-5 py-10 text-center text-sm text-slate-400">불러오는 중...</div>

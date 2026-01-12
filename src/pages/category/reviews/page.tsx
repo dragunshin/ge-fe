@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronLeft, MoreHorizontal } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
 import starIcon from '../../../images/reviews/star.svg';
 import { reviewService } from '../../../services/review.service';
 import {
@@ -11,12 +11,18 @@ import {
 type ReviewItem = {
   id: number;
   author: string;
+  expertName: string;
+  expertProfileImage?: string;
+  expertRatingAverage: number;
   rating: number;
   date: string;
   content: string;
   tags: string[];
   images: string[];
+  createdAt: string;
 };
+
+const ALL_CATEGORIES = ['HAIR', 'FASHION', 'MAKEUP', 'SKIN'] as const;
 
 const CategoryBestReviewsPage = () => {
   const navigate = useNavigate();
@@ -27,6 +33,8 @@ const CategoryBestReviewsPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const isFetchingRef = useRef(false);
+  const requestIdRef = useRef(0);
 
   const formatDate = (value?: string) => {
     if (!value) {
@@ -76,40 +84,91 @@ const CategoryBestReviewsPage = () => {
   }, [apiCategory]);
 
   useEffect(() => {
-    let isActive = true;
-
     const fetchReviews = async () => {
-      if (!hasMore || isLoading) {
+      if (!hasMore || isFetchingRef.current) {
         return;
       }
+      if (!apiCategory && page > 0) {
+        setHasMore(false);
+        return;
+      }
+      isFetchingRef.current = true;
       setIsLoading(true);
+      const requestId = (requestIdRef.current += 1);
       try {
-        const response = await reviewService.getRecentReviews({
-          category: apiCategory,
-          page,
-          size: 5,
-        });
-        if (!isActive) {
+        const responses = apiCategory
+          ? [await reviewService.getRecentReviews({ category: apiCategory, page, size: 5 })]
+          : (
+              await Promise.allSettled(
+                ALL_CATEGORIES.map((category) =>
+                  reviewService.getRecentReviews({ category, page, size: 5 }),
+                ),
+              )
+            )
+              .filter((result) => result.status === 'fulfilled')
+              .map((result) => result.value);
+        if (requestId !== requestIdRef.current) {
           return;
         }
-        const mapped = response.data.map((review) => ({
-          id: review.reviewId,
-          author: '익명',
-          rating: review.rating,
-          date: formatDate(review.createdAt),
-          content: review.content,
-          tags: review.category
-            ? [getLabelFromApiCategory(review.category)]
-            : [],
-          images: parseMediaUrls(review.mediaUrls),
-        }));
+        const mapped = responses
+          .flatMap((response) => (Array.isArray(response.data) ? response.data : []))
+          .map((review) => ({
+            id: review.reviewId,
+            author: '익명',
+            expertName: review.expertNickname ?? '전문가',
+            expertProfileImage: review.expertProfileImage,
+            expertRatingAverage: review.expertRatingAverage ?? review.rating,
+            rating: review.rating,
+            date: formatDate(review.createdAt),
+            content: review.content,
+            tags: review.category
+              ? [getLabelFromApiCategory(review.category)]
+              : [],
+            images: parseMediaUrls(review.mediaUrls),
+            createdAt: review.createdAt,
+          }))
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        if (!apiCategory && mapped.length === 0) {
+          const fallback = await reviewService.getRecentReviews({ page, size: 5 });
+          if (requestId !== requestIdRef.current) {
+            return;
+          }
+          const fallbackMapped = (Array.isArray(fallback.data) ? fallback.data : [])
+            .map((review) => ({
+              id: review.reviewId,
+              author: '익명',
+              expertName: review.expertNickname ?? '전문가',
+              expertProfileImage: review.expertProfileImage,
+              expertRatingAverage: review.expertRatingAverage ?? review.rating,
+              rating: review.rating,
+              date: formatDate(review.createdAt),
+              content: review.content,
+              tags: review.category
+                ? [getLabelFromApiCategory(review.category)]
+                : [],
+              images: parseMediaUrls(review.mediaUrls),
+              createdAt: review.createdAt,
+            }))
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          setReviews((prev) => (page === 0 ? fallbackMapped : [...prev, ...fallbackMapped]));
+          setHasMore(fallbackMapped.length === 5);
+          return;
+        }
         setReviews((prev) => (page === 0 ? mapped : [...prev, ...mapped]));
-        setHasMore(mapped.length === 5);
+        if (apiCategory) {
+          const hasMoreNext = responses.some(
+            (response) => Array.isArray(response.data) && response.data.length === 5,
+          );
+          setHasMore(hasMoreNext);
+        } else {
+          setHasMore(false);
+        }
       } catch (error) {
         console.error('Failed to fetch reviews:', error);
       } finally {
-        if (isActive) {
+        if (requestId === requestIdRef.current) {
           setIsLoading(false);
+          isFetchingRef.current = false;
         }
       }
     };
@@ -117,11 +176,14 @@ const CategoryBestReviewsPage = () => {
     fetchReviews();
 
     return () => {
-      isActive = false;
+      isFetchingRef.current = false;
     };
-  }, [apiCategory, page, hasMore, isLoading]);
+  }, [apiCategory, page, hasMore]);
 
   useEffect(() => {
+    if (!apiCategory) {
+      return;
+    }
     if (!sentinelRef.current) {
       return;
     }
@@ -160,53 +222,79 @@ const CategoryBestReviewsPage = () => {
         <section className="space-y-[24px] px-4 pt-[24px]">
           {reviews.map((review, index) => (
             <div key={review.id}>
-              <article className="space-y-[8px]">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-[14px] font-semibold text-[#878a93]">{review.author}</p>
-                    <div className="mt-[4px] flex items-center gap-[12px] text-[13px] text-[#989ba2]">
-                      <div className="flex items-center gap-[2px]">
-                        {Array.from({ length: 5 }).map((_, starIndex) => (
-                          <img
-                            key={`star-${review.id}-${starIndex}`}
-                            src={starIcon}
-                            alt=""
-                            className="h-[16px] w-[16px]"
-                          />
-                        ))}
-                      </div>
-                      <div className="h-[14px] w-px bg-[#e1e2e4]" />
-                      <span>{review.date}</span>
-                    </div>
-                  </div>
-                  <button className="rounded-full p-1 text-[#aeb0b6] hover:bg-gray-50">
-                    <MoreHorizontal className="h-6 w-6 rotate-90" />
-                  </button>
-                </div>
-
-                <div className="flex gap-[6px]">
-                  {review.images.map((image, imageIndex) => (
-                    <div
-                      key={`${review.id}-image-${imageIndex}`}
-                      className="h-[130px] w-[130px] overflow-hidden rounded-[4px] bg-[#e1e2e4]"
-                    >
-                      {image && (
-                        <img src={image} alt="" className="h-full w-full object-cover" />
+              <article className="overflow-hidden rounded-[8px] border border-[#f4f4f5] bg-white">
+                <div className="border-b border-[#f4f4f5] px-4 py-[14px]">
+                  <div className="flex items-center gap-[10px]">
+                    <div className="h-[36px] w-[36px] overflow-hidden rounded-full bg-[#f4f4f5]">
+                      {review.expertProfileImage && (
+                        <img
+                          src={review.expertProfileImage}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
                       )}
                     </div>
-                  ))}
+                    <div className="flex flex-col gap-[4px]">
+                      <div className="flex items-center gap-[2px]">
+                        <span className="text-[14px] font-semibold text-[#0f0f10]">
+                          {review.expertName}
+                        </span>
+                        <ChevronRight className="h-4 w-4 text-[#0f0f10]" />
+                      </div>
+                      <div className="flex items-center gap-[4px] text-[13px] text-[#989ba2]">
+                        <img src={starIcon} alt="" className="h-[16px] w-[16px]" />
+                        <span>{review.expertRatingAverage.toFixed(1)}</span>
+                      </div>
+                    </div>
+                    <button className="ml-auto rounded-full p-1 text-[#aeb0b6] hover:bg-gray-50">
+                      <MoreHorizontal className="h-6 w-6 rotate-90" />
+                    </button>
+                  </div>
                 </div>
 
-                <p className="text-[14px] leading-[1.5] text-[#505158]">
-                  {review.content}
-                </p>
+                <div className="px-4 pt-[16px]">
+                  <div className="flex gap-[8px]">
+                    {review.images.slice(0, 2).map((image, imageIndex) => (
+                      <div
+                        key={`${review.id}-image-${imageIndex}`}
+                        className="h-[130px] w-[130px] overflow-hidden rounded-[4px] bg-[#e1e2e4]"
+                      >
+                        {image && (
+                          <img src={image} alt="" className="h-full w-full object-cover" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-                <div className="flex flex-wrap gap-[8px]">
-                  {review.tags.map((tag) => (
+                <div className="px-4 pt-[12px]">
+                  <div className="flex items-center gap-[12px] text-[13px] text-[#989ba2]">
+                    <span className="font-semibold text-[#878a93]">{review.author}</span>
+                    <div className="h-[14px] w-px bg-[#e1e2e4]" />
+                    <div className="flex items-center gap-[2px]">
+                      {Array.from({ length: 5 }).map((_, starIndex) => (
+                        <img
+                          key={`star-${review.id}-${starIndex}`}
+                          src={starIcon}
+                          alt=""
+                          className={`h-[16px] w-[16px] ${starIndex < review.rating ? '' : 'opacity-30'}`}
+                        />
+                      ))}
+                    </div>
+                    <div className="h-[14px] w-px bg-[#e1e2e4]" />
+                    <span>{review.date}</span>
+                  </div>
+                  <p className="mt-[8px] text-[13px] leading-[1.4] text-[#505158]">
+                    {review.content}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-[6px] px-4 pb-[16px] pt-[10px]">
+                  {review.tags.map((tag, tagIndex) => (
                     <span
-                      key={`${review.id}-${tag}`}
+                      key={`${review.id}-${tag}-${tagIndex}`}
                       className={
-                        tag === '헤어'
+                        tagIndex === 0
                           ? 'rounded-[2px] bg-[#e5f4ff] px-[8px] py-[4px] text-[12px] text-[#008bff]'
                           : 'rounded-[2px] bg-[#f4f4f5] px-[8px] py-[4px] text-[12px] text-[#46474c]'
                       }
@@ -214,6 +302,11 @@ const CategoryBestReviewsPage = () => {
                       {tag}
                     </span>
                   ))}
+                  {review.tags.length === 1 && (
+                    <span className="rounded-[2px] bg-[#f4f4f5] px-[8px] py-[4px] text-[12px] text-[#46474c]">
+                      후기
+                    </span>
+                  )}
                 </div>
               </article>
               {index < reviews.length - 1 && (

@@ -478,7 +478,7 @@ const CategoryLandingPage = () => {
           </div>
         </section>
 
-        <section className="mt-[16px] px-4">
+        {/* <section className="mt-[16px] px-4">
           <div className="flex gap-[6px] overflow-x-auto pb-[2px] scrollbar-hide">
             {quickTopics.map((topic) => (
               <div
@@ -492,7 +492,7 @@ const CategoryLandingPage = () => {
               </div>
             ))}
           </div>
-        </section>
+        </section> */}
 
         {false && (
         <section className="px-4 pt-[32px]">
@@ -707,7 +707,7 @@ const CategoryLandingPage = () => {
               {categoryLabel} 전문가
             </h2>
             <button
-              onClick={() => navigate(`/explore?category=${categoryKey}`)}
+              onClick={() => navigate(`/category/${categoryKey}/experts`)}
               className="flex items-center gap-[2px] text-[14px] text-[#70737c]"
             >
               전체보기
