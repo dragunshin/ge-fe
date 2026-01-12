@@ -331,13 +331,6 @@ const CategoryLandingPage = () => {
     [],
   );
 
-  const quickTopics = [
-    { label: '펌으로 이미지 변신' },
-    { label: '탈모 콤플렉스' },
-    { label: '헤어라인 정리' },
-    { label: '데일리 헤어 손질법' },
-  ];
-
   const styleFilters = ['전체', '컷', '펌', '염색', '클리닉', '스타일링', '탈모'];
 
   const styleCards: StyleCard[] = [
