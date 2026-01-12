@@ -618,14 +618,16 @@ type TopExpert = {
 
 type ReviewCard = {
   id: number;
-  name: string;
+  author: string;
   rating: number;
   date: string;
   content: string;
   category: string;
   concern: string;
-  avatar?: string;
   images: string[];
+  expertName: string;
+  expertRating: number;
+  expertAvatar?: string;
 };
 
 type ExpertListCard = {
@@ -657,7 +659,6 @@ const HomePage = () => {
   const [openTypeSheet, setOpenTypeSheet] = useState(false);
   const [openCalendarSheet, setOpenCalendarSheet] = useState(false);
   const [selectedConsultType, setSelectedConsultType] = useState<ConsultType>("MESSAGE");
-  const [noticeMessage, setNoticeMessage] = useState<string | null>(null);
 
   const formatDate = (value?: string) => {
     if (!value) {
@@ -727,13 +728,6 @@ const HomePage = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, [selectedHomeTab]);
 
-  useEffect(() => {
-    if (!noticeMessage) {
-      return;
-    }
-    const timer = window.setTimeout(() => setNoticeMessage(null), 2000);
-    return () => window.clearTimeout(timer);
-  }, [noticeMessage]);
 
   useEffect(() => {
     initializeAuth();
@@ -792,9 +786,7 @@ const HomePage = () => {
 
     const fetchReviews = async () => {
       try {
-        const category = getApiCategoryFromLabel(selectedHomeTab);
         const response = await reviewService.getRecentReviews({
-          category,
           page: 0,
           size: 5,
         });
@@ -823,14 +815,14 @@ const HomePage = () => {
     return () => {
       isActive = false;
     };
-  }, [selectedHomeTab]);
+  }, []);
 
   const homeTabs: TabItem[] = useMemo(
     () => [
       { id: "all", label: "전체", route: "/" },
       { id: "hair", label: "헤어", route: "/category/hair" },
-      { id: "makeup", label: "메이크업", route: "/category/makeup" },
       { id: "fashion", label: "패션", route: "/category/fashion" },
+      { id: "makeup", label: "메이크업", route: "/category/makeup" },
       { id: "skin", label: "스킨", route: "/category/skin" },
     ],
     [],
@@ -935,7 +927,7 @@ const HomePage = () => {
 
   const getReviewRoute = () => {
     if (selectedHomeTab === "전체") {
-      return "/category/hair/reviews";
+      return "/reviews";
     }
     const tab = homeTabs.find((item) => item.label === selectedHomeTab);
     if (tab?.route) {
@@ -969,7 +961,7 @@ const HomePage = () => {
                 }}
                 onClick={() => {
                   if (tab.id === "makeup" || tab.id === "skin") {
-                    setNoticeMessage("준비중입니다.");
+                    navigate("/service-ready");
                     return;
                   }
                   setSelectedHomeTab(tab.label);
@@ -990,14 +982,6 @@ const HomePage = () => {
             />
           </div>
         </section>
-
-        {noticeMessage && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-            <div className="rounded-[999px] bg-[#171719] px-[16px] py-[10px] text-[13px] font-medium text-white shadow-[0px_6px_20px_rgba(0,0,0,0.2)]">
-              {noticeMessage}
-            </div>
-          </div>
-        )}
 
         <section className="px-4 pt-5">
           <div className="flex gap-[4px] overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">

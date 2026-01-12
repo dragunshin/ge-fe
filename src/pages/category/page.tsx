@@ -83,7 +83,6 @@ const CategoryLandingPage = () => {
   const [openCalendarSheet, setOpenCalendarSheet] = useState(false);
   const [selectedConsultType, setSelectedConsultType] =
     useState<ConsultType>('MESSAGE');
-  const [noticeMessage, setNoticeMessage] = useState<string | null>(null);
   // 예약 시작 시 선택한 전문가 저장
   const [selectedReservationExpertId, setSelectedReservationExpertId] = useState<number | null>(
     null,
@@ -122,7 +121,7 @@ const CategoryLandingPage = () => {
       setOpenTypeSheet(true);
       return;
     }
-    setNoticeMessage('해당 카테고리는 상담 예약이 준비 중입니다.');
+    navigate('/service-ready');
   };
 
   const getReservationRoute = () => {
@@ -325,8 +324,8 @@ const CategoryLandingPage = () => {
     () => [
       { id: 'all', label: '전체', route: '/', underlineLeft: 16 },
       { id: 'hair', label: '헤어', route: '/category/hair', underlineLeft: 85 },
-      { id: 'makeup', label: '메이크업', route: '/category/makeup', underlineLeft: 153 },
-      { id: 'fashion', label: '패션', route: '/category/fashion', underlineLeft: 249 },
+      { id: 'fashion', label: '패션', route: '/category/fashion', underlineLeft: 153 },
+      { id: 'makeup', label: '메이크업', route: '/category/makeup', underlineLeft: 249 },
       { id: 'skin', label: '스킨', route: '/category/skin', underlineLeft: 317 },
     ],
     [],
@@ -413,14 +412,6 @@ const CategoryLandingPage = () => {
     scrollToSection(query.get('section'));
   }, [location.search]);
 
-  useEffect(() => {
-    if (!noticeMessage) {
-      return;
-    }
-    const timer = window.setTimeout(() => setNoticeMessage(null), 2000);
-    return () => window.clearTimeout(timer);
-  }, [noticeMessage]);
-
   return (
     <div className="flex h-full flex-col bg-white">
       <header className="flex h-[56px] items-center justify-between px-4">
@@ -444,7 +435,7 @@ const CategoryLandingPage = () => {
                 key={tab.id}
                 onClick={() => {
                   if (tab.id === 'makeup' || tab.id === 'skin') {
-                    setNoticeMessage('준비중입니다.');
+                    navigate('/service-ready');
                     return;
                   }
                   if (tab.route) {
@@ -466,14 +457,6 @@ const CategoryLandingPage = () => {
           </div>
           </section>
         </div>
-
-        {noticeMessage && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-            <div className="rounded-[999px] bg-[#171719] px-[16px] py-[10px] text-[13px] font-medium text-white shadow-[0px_6px_20px_rgba(0,0,0,0.2)]">
-              {noticeMessage}
-            </div>
-          </div>
-        )}
 
         <section className="relative mt-[20px] h-[246px] w-full overflow-hidden">
           <div className="absolute left-[-25px] top-[-8px] h-[262px] w-[400px] rounded-[12px] bg-[#d2d4d8]" />

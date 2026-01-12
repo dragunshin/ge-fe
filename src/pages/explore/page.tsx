@@ -17,8 +17,8 @@ import {
 
 const CATEGORY_TABS = [
   { key: 'hair', label: '헤어' },
-  { key: 'makeup', label: '메이크업' },
   { key: 'fashion', label: '패션' },
+  { key: 'makeup', label: '메이크업' },
   { key: 'skin', label: '스킨' },
 ];
 
@@ -366,7 +366,7 @@ const CategoryLandingPage = () => {
                 key={tab.key}
                 onClick={() => {
                   if (tab.key === 'makeup' || tab.key === 'skin') {
-                    setNoticeMessage('준비중입니다.');
+                    navigate('/service-ready');
                     return;
                   }
                   navigate(`/explore?category=${tab.key}`);

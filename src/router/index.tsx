@@ -21,7 +21,6 @@ import PointPage from "@/pages/myPage/point/page";
 // import WriteReviewPage from "@/pages/myPage/review/writeReview";
 import ConsultationSheetTestPage from "@/pages/resevationFlow/page";
 import CategoryLandingPage from "@/pages/category/page";
-import CategoryBestReviewsPage from "@/pages/category/reviews/page";
 import ExpertInfoPage from "@/pages/category/expert/page";
 import PortfolioLandingPage from "@/pages/category/portfolio/page";
 import ExplorePage from "@/pages/explore/page";
@@ -29,6 +28,8 @@ import { PaymentOrderPage } from "@/pages/payment/order/page";
 import { PaymentCompletePage } from "@/pages/payment/complete/page";
 import FashionReservationFlowPage from "@/pages/fashionFlow/page";
 import { HairSetup } from "@/pages/hairFlow/page";
+import ServiceReadyPage from "@/pages/service-ready/page";
+import CategoryBestReviewsPage from "@/pages/category/reviews/page";
 
 export const router = createBrowserRouter([
   {
@@ -116,6 +117,10 @@ export const router = createBrowserRouter([
     element: <CategoryBestReviewsPage />,
   },
   {
+    path: "/reviews",
+    element: <CategoryBestReviewsPage />,
+  },
+  {
     path: "/experts/:expertId",
     element: <ExpertInfoPage />,
   },
@@ -138,5 +143,9 @@ export const router = createBrowserRouter([
   {
     path: "/hair/setup",
     element: <HairSetup />,
+  },
+  {
+    path: "/service-ready",
+    element: <ServiceReadyPage />,
   },
 ]);
