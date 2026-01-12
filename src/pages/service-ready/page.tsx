@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
-
-const serviceReadyImage = "http://localhost:3845/assets/a124dd9f5fe9e7971a92695a78ff9d952d9c7fc0.png";
+import serviceReadyImage from "@/images/service-ready.svg";
 
 export default function ServiceReadyPage() {
   const navigate = useNavigate();
