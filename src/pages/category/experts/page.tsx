@@ -214,6 +214,9 @@ export default function CategoryExpertListPage() {
     if (categoryKey === "fashion") {
       return "/reservation/fashion";
     }
+    if (categoryKey !== "hair") {
+      return "/service-ready";
+    }
     return "/hair/setup";
   };
 

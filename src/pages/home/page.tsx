@@ -653,7 +653,7 @@ const HomePage = () => {
   const [topExperts, setTopExperts] = useState<TopExpert[]>([]);
   const [reviews, setReviews] = useState<ReviewCard[]>([]);
   const homeTabTrackRef = useRef<HTMLDivElement | null>(null);
-  const homeTabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const homeTabRefs = useRef<Record<string, HTMLSpanElement | null>>({});
   const [homeUnderlineStyle, setHomeUnderlineStyle] = useState({ left: 0, width: 0 });
 
   // ✅ 추가: bottom sheet 제어 + 선택값 저장(원하면 다음 페이지로 넘길 수 있음)
@@ -967,11 +967,8 @@ const HomePage = () => {
             {homeTabs.map((tab) => (
               <button
                 key={tab.id}
-                ref={(element) => {
-                  homeTabRefs.current[tab.label] = element;
-                }}
                 onClick={() => {
-                  if (tab.id === "makeup" || tab.id === "skin") {
+                  if (tab.id === "makeup") {
                     navigate("/service-ready");
                     return;
                   }
@@ -980,9 +977,18 @@ const HomePage = () => {
                     navigate(tab.route, { state: { fromHomeTab: true } });
                   }
                 }}
-                className={tab.label === selectedHomeTab ? "text-[#0f0f10]" : "text-[#989ba2]"}
+                className={`border-0 bg-transparent p-0 ${
+                  tab.label === selectedHomeTab ? "text-[#0f0f10]" : "text-[#989ba2]"
+                }`}
               >
-                {tab.label}
+                <span
+                  ref={(element) => {
+                    homeTabRefs.current[tab.label] = element;
+                  }}
+                  className="inline-block"
+                >
+                  {tab.label}
+                </span>
               </button>
             ))}
           </div>

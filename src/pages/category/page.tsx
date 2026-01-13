@@ -128,6 +128,9 @@ const CategoryLandingPage = () => {
     if (categoryKey === 'fashion') {
       return '/reservation/fashion';
     }
+    if (categoryKey !== 'hair') {
+      return '/service-ready';
+    }
     return '/hair/setup';
   };
 
@@ -427,7 +430,7 @@ const CategoryLandingPage = () => {
               <button
                 key={tab.id}
                 onClick={() => {
-                  if (tab.id === 'makeup' || tab.id === 'skin') {
+                  if (tab.id === 'makeup') {
                     navigate('/service-ready');
                     return;
                   }

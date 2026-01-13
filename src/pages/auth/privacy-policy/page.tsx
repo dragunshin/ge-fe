@@ -61,7 +61,7 @@ export function PrivacyPolicyPage() {
             </h2>
             <div className="text-[#70737C] text-sm font-normal leading-[150%] space-y-2">
               <p>회사는 원칙적으로 회원의 개인정보를 외부에 제공하지 않습니다.</p>
-              <p>다만, 다음의 경우 예외적으로 제공할 수 있습니다.</p>
+              <p>다만, 다음의 경우 예외적으로 제공될 수 있습니다.</p>
               <ul className="list-disc pl-5 space-y-1 mt-2">
                 <li>이용자가 사전에 동의한 경우</li>
                 <li>법령에 따라 수사기관의 요구가 있는 경우</li>
@@ -76,9 +76,13 @@ export function PrivacyPolicyPage() {
             <p className="text-[#70737C] text-sm font-normal leading-[150%]">
               회사는 서비스 운영을 위해 아래와 같이 개인정보 처리를 위탁할 수 있습니다.
             </p>
-            <p className="text-[#70737C] text-sm font-normal leading-[150%] mt-2">
-              수탁업체위탁업무 내용카카오, 구글소셜 로그인 인증AWS데이터 서버 운영 및 보관(미정)마케팅 메시지 발송 서비스
-            </p>
+            <div className="text-[#70737C] text-sm font-normal leading-[150%] mt-2">
+              <ul className="list-disc pl-5 space-y-1">
+                <li>카카오, 구글: 소셜 로그인 인증</li>
+                <li>AWS: 데이터 서버 운영 및 보관</li>
+                <li>(미정): 마케팅 메시지 발송 서비스</li>
+              </ul>
+            </div>
           </section>
 
           <section>
@@ -87,7 +91,7 @@ export function PrivacyPolicyPage() {
             </h2>
             <div className="text-[#70737C] text-sm font-normal leading-[150%] space-y-2">
               <p>회원은 언제든지 본인의 개인정보를 열람, 수정, 삭제 요청할 수 있으며,</p>
-              <p>회원 탈퇴 시 즉시 모든 개인정보가 삭제됩니다(법령 보존 항목 제외).</p>
+              <p>회원 탈퇴 시 즉시 모든 개인정보가 삭제됩니다(법정 보존 항목 제외).</p>
             </div>
           </section>
 

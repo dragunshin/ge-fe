@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Check, ChevronDown, Search, X } from 'lucide-react';
 import heartIcon from '../../images/mypage/heart.svg';
@@ -154,10 +154,40 @@ const CategoryLandingPage = () => {
   const [openCalendarSheet, setOpenCalendarSheet] = useState(false);
   const [selectedConsultType, setSelectedConsultType] =
     useState<ConsultType>('MESSAGE');
+  const tabTrackRef = useRef<HTMLDivElement | null>(null);
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [tabUnderlineStyle, setTabUnderlineStyle] = useState({ left: 0, width: 0 });
   // 예약 시작 시 선택한 전문가 저장
   const [selectedReservationExpertId, setSelectedReservationExpertId] = useState<number | null>(
     null,
   );
+
+  const updateTabUnderline = () => {
+    const track = tabTrackRef.current;
+    const active = tabRefs.current[categoryKey];
+    if (!track || !active) {
+      return;
+    }
+    const trackRect = track.getBoundingClientRect();
+    const activeRect = active.getBoundingClientRect();
+    setTabUnderlineStyle({
+      left: activeRect.left - trackRect.left,
+      width: activeRect.width,
+    });
+  };
+
+  useLayoutEffect(() => {
+    updateTabUnderline();
+  }, [categoryKey]);
+
+  useEffect(() => {
+    const handleResize = () => updateTabUnderline();
+    window.addEventListener('resize', handleResize);
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(updateTabUnderline).catch(() => {});
+    }
+    return () => window.removeEventListener('resize', handleResize);
+  }, [categoryKey]);
 
   useEffect(() => {
     let isActive = true;
@@ -244,6 +274,9 @@ const CategoryLandingPage = () => {
   const getReservationRoute = () => {
     if (categoryKey === 'fashion') {
       return '/reservation/fashion';
+    }
+    if (categoryKey !== 'hair') {
+      return '/service-ready';
     }
     return '/hair/setup';
   };
@@ -364,8 +397,11 @@ const CategoryLandingPage = () => {
             {CATEGORY_TABS.map((tab) => (
               <button
                 key={tab.key}
+                ref={(element) => {
+                  tabRefs.current[tab.key] = element;
+                }}
                 onClick={() => {
-                  if (tab.key === 'makeup' || tab.key === 'skin') {
+                  if (tab.key === 'makeup') {
                     navigate('/service-ready');
                     return;
                   }
@@ -379,15 +415,10 @@ const CategoryLandingPage = () => {
               </button>
             ))}
           </div>
-          <div className="relative h-px bg-[#e1e2e4]">
+          <div ref={tabTrackRef} className="relative h-px bg-[#e1e2e4]">
             <span
-              className="absolute bottom-0 h-[2px] w-[24px] bg-[#0f0f10]"
-              style={{
-                left: `${Math.max(
-                  0,
-                  CATEGORY_TABS.findIndex((tab) => tab.key === categoryKey),
-                ) * 88}px`,
-              }}
+              className="absolute bottom-0 h-[2px] bg-[#0f0f10]"
+              style={{ left: tabUnderlineStyle.left, width: tabUnderlineStyle.width }}
             />
           </div>
         </section>
