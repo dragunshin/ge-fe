@@ -1157,21 +1157,22 @@ const HomePage = () => {
                   className="flex h-6 w-6 items-center justify-center"
                   onClick={async (event) => {
                     event.stopPropagation();
-                    if (!expert.expertId) {
+                    const expertId = expert.expertId;
+                    if (!expertId) {
                       return;
                     }
                     try {
-                      if (likedExpertIds.has(expert.expertId)) {
-                        await expertService.unlikeExpert(expert.expertId);
+                      if (likedExpertIds.has(expertId)) {
+                        await expertService.unlikeExpert(expertId);
                         setLikedExpertIds((prev) => {
                           const next = new Set(prev);
-                          next.delete(expert.expertId);
+                          next.delete(expertId);
                           return next;
                         });
                         return;
                       }
-                      await expertService.likeExpert(expert.expertId);
-                      setLikedExpertIds((prev) => new Set(prev).add(expert.expertId));
+                      await expertService.likeExpert(expertId);
+                      setLikedExpertIds((prev) => new Set(prev).add(expertId));
                     } catch (error) {
                       const status = (error as { response?: { status?: number } })?.response
                         ?.status;
