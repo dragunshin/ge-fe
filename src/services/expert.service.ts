@@ -2,6 +2,7 @@ import { api } from '../lib/api/client';
 import type {
   ApiResponse,
   ExpertInfoResponse,
+  ExpertPortfolioResponse,
   ExpertScheduleResponse,
   ExpertSummaryResponse,
   PopularExpertsResponse,
@@ -26,6 +27,15 @@ export const expertService = {
   ): Promise<ApiResponse<ExpertScheduleResponse[]>> {
     return await api.get<ApiResponse<ExpertScheduleResponse[]>>(
       `/expert/${userId}/schedules`,
+    );
+  },
+  async getExpertPortfolios(
+    userId: number,
+    params?: { page?: number; size?: number },
+  ): Promise<ApiResponse<ExpertPortfolioResponse[]>> {
+    return await api.get<ApiResponse<ExpertPortfolioResponse[]>>(
+      `/expert/${userId}/portfolios`,
+      { params },
     );
   },
 

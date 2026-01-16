@@ -99,6 +99,17 @@ export interface ExpertScheduleResponse {
   isActive: boolean;
 }
 
+export interface ExpertPortfolioResponse {
+  id: number;
+  title: string;
+  concern: string;
+  solution: string;
+  isRepresentative: boolean;
+  beforeImage?: string;
+  afterImage?: string;
+  hashtags?: string[];
+}
+
 export interface ReviewSummaryResponse {
   reviewId: number;
   expertNickname?: string;

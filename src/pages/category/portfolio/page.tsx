@@ -1,24 +1,100 @@
-import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ChevronDown, ChevronLeft } from 'lucide-react';
-import { portfolioItems } from '../expert/portfolio-data';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ChevronLeft } from 'lucide-react';
+import { portfolioItems, type PortfolioItem } from '../expert/portfolio-data';
+import { expertService } from '../../../services/expert.service';
+import type { ExpertPortfolioResponse } from '../../../lib/api/types';
+
+const mapPortfolioResponse = (portfolio: ExpertPortfolioResponse): PortfolioItem => ({
+  id: portfolio.id,
+  title: portfolio.title,
+  tags: portfolio.hashtags ?? [],
+  concern: portfolio.concern,
+  solution: portfolio.solution,
+  beforeImage: portfolio.beforeImage,
+  afterImage: portfolio.afterImage,
+});
 
 const PortfolioLandingPage = () => {
   const navigate = useNavigate();
+  const { expertId } = useParams();
+  const expertIdNumber = useMemo(() => (expertId ? Number(expertId) : undefined), [expertId]);
+  const [items, setItems] = useState<PortfolioItem[]>([]);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [expandedText, setExpandedText] = useState<
     Record<number, { concern: boolean; solution: boolean }>
   >({});
   const [showMore, setShowMore] = useState<
     Record<number, { concern: boolean; solution: boolean }>
   >({});
-  const [showAll, setShowAll] = useState(false);
   const concernRefs = useRef<Record<number, HTMLParagraphElement | null>>({});
   const solutionRefs = useRef<Record<number, HTMLParagraphElement | null>>({});
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const isFetchingRef = useRef(false);
+
+  useEffect(() => {
+    if (!expertIdNumber) {
+      setItems(portfolioItems);
+      setHasMore(false);
+      return;
+    }
+
+    setItems([]);
+    setPage(0);
+    setHasMore(true);
+  }, [expertIdNumber]);
+
+  useEffect(() => {
+    if (!expertIdNumber || !hasMore || isFetchingRef.current) {
+      return;
+    }
+
+    let isActive = true;
+
+    const fetchPortfolios = async () => {
+      try {
+        isFetchingRef.current = true;
+        setIsLoading(true);
+        const response = await expertService.getExpertPortfolios(expertIdNumber, {
+          page,
+          size: 5,
+        });
+        if (!isActive) {
+          return;
+        }
+        const mapped = response.data.map(mapPortfolioResponse);
+        setItems((prev) => (page === 0 ? mapped : [...prev, ...mapped]));
+        setHasMore(mapped.length === 5);
+      } catch (error) {
+        console.error('Failed to fetch expert portfolios:', error);
+        if (!isActive) {
+          return;
+        }
+        if (page === 0) {
+          setItems(portfolioItems);
+        }
+        setHasMore(false);
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+          isFetchingRef.current = false;
+        }
+      }
+    };
+
+    fetchPortfolios();
+
+    return () => {
+      isActive = false;
+    };
+  }, [expertIdNumber, hasMore, page]);
 
   useEffect(() => {
     const raf = window.requestAnimationFrame(() => {
       const next: Record<number, { concern: boolean; solution: boolean }> = {};
-      portfolioItems.forEach((item) => {
+      items.forEach((item) => {
         const concernEl = concernRefs.current[item.id];
         const solutionEl = solutionRefs.current[item.id];
         const concernOverflow =
@@ -33,9 +109,26 @@ const PortfolioLandingPage = () => {
       setShowMore(next);
     });
     return () => window.cancelAnimationFrame(raf);
-  }, []);
+  }, [items]);
 
-  const visibleItems = showAll ? portfolioItems : portfolioItems.slice(0, 3);
+  const visibleItems = items;
+
+  useEffect(() => {
+    if (!sentinelRef.current || !hasMore) {
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const firstEntry = entries[0];
+        if (firstEntry?.isIntersecting && hasMore && !isLoading && !isFetchingRef.current) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      { rootMargin: '200px' },
+    );
+    observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, isLoading]);
 
   return (
     <div className="flex h-full flex-col bg-white">
@@ -73,11 +166,25 @@ const PortfolioLandingPage = () => {
                 </div>
                 <div className="flex h-[164px] items-center gap-[8px]">
                   <div className="relative h-[164px] w-[167.5px] overflow-hidden rounded-[12px] bg-[#d2d4d8]">
+                    {item.beforeImage && (
+                      <img
+                        src={item.beforeImage}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    )}
                     <span className="absolute bottom-[8px] left-[8px] rounded-[4px] bg-black/40 px-[6px] py-[2px] text-[14px] text-white">
                       전
                     </span>
                   </div>
                   <div className="relative h-[164px] w-[167.5px] overflow-hidden rounded-[12px] bg-[#d2d4d8]">
+                    {item.afterImage && (
+                      <img
+                        src={item.afterImage}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    )}
                     <span className="absolute bottom-[8px] right-[8px] rounded-[4px] bg-black/40 px-[6px] py-[2px] text-[14px] text-white">
                       후
                     </span>
@@ -148,16 +255,7 @@ const PortfolioLandingPage = () => {
             </section>
           );
           })}
-          {!showAll && portfolioItems.length > 3 && (
-            <button
-              type="button"
-              onClick={() => setShowAll(true)}
-              className="mx-auto mt-[28px] flex h-[40px] w-[151px] items-center justify-center gap-[8px] rounded-[12px] border border-[#f4f4f5]"
-            >
-              <span className="text-[12px] font-medium text-[#666]">펼쳐서 더보기</span>
-              <ChevronDown className="h-[24px] w-[24px] text-[#666]" />
-            </button>
-          )}
+          {hasMore && <div ref={sentinelRef} className="mx-auto mt-[28px] h-[24px] w-full" />}
         </div>
       </main>
     </div>

@@ -4,6 +4,7 @@ import LoginPage from "../pages/auth/login/page";
 import SignUpPage from "../pages/auth/signup/page";
 import SocialSignUpPage from "../pages/auth/social-signup/page";
 import KakaoCallbackPage from "../pages/auth/kakao-callback/page";
+import AuthGuard from "@/components/auth/auth-guard";
 import { TermsOfServicePage } from "../pages/auth/terms-of-service/page";
 import { PrivacyPolicyPage } from "../pages/auth/privacy-policy/page";
 import { InterestSelectionPage } from "../pages/auth/interest-selection/page";
@@ -75,15 +76,27 @@ export const router = createBrowserRouter([
 
   {
     path: "/profile",
-    element: <FaceStep />,
+    element: (
+      <AuthGuard>
+        <FaceStep />
+      </AuthGuard>
+    ),
   },
   {
     path: "/chatList/:chatroomId",
-    element: <Chat />,
+    element: (
+      <AuthGuard>
+        <Chat />
+      </AuthGuard>
+    ),
   },
   {
     path: "/chatList",
-    element: <ChatListPage />,
+    element: (
+      <AuthGuard>
+        <ChatListPage />
+      </AuthGuard>
+    ),
   },
   // {
   //   path: "/chatRoom",
@@ -91,23 +104,43 @@ export const router = createBrowserRouter([
   // },
   {
     path: "/write",
-    element: <EditorPage />,
+    element: (
+      <AuthGuard>
+        <EditorPage />
+      </AuthGuard>
+    ),
   },
   {
     path: "/mypage",
-    element: <MyPage />,
+    element: (
+      <AuthGuard>
+        <MyPage />
+      </AuthGuard>
+    ),
   },
   {
     path: "/reservationhistory",
-    element: <ReservationHistoryView />,
+    element: (
+      <AuthGuard>
+        <ReservationHistoryView />
+      </AuthGuard>
+    ),
   },
   {
     path: "/LikedList",
-    element: <LikedListPage />,
+    element: (
+      <AuthGuard>
+        <LikedListPage />
+      </AuthGuard>
+    ),
   },
   {
     path: "/PointPage",
-    element: <PointPage />,
+    element: (
+      <AuthGuard>
+        <PointPage />
+      </AuthGuard>
+    ),
   },
 
   {
@@ -138,27 +171,51 @@ export const router = createBrowserRouter([
   },
   {
     path: "/payment/order",
-    element: <PaymentOrderPage />,
+    element: (
+      <AuthGuard>
+        <PaymentOrderPage />
+      </AuthGuard>
+    ),
   },
   {
     path: "/payment/complete",
-    element: <PaymentCompletePage />,
+    element: (
+      <AuthGuard>
+        <PaymentCompletePage />
+      </AuthGuard>
+    ),
   },
   {
     path: "/reservation/fashion",
-    element: <FashionReservationFlowPage />,
+    element: (
+      <AuthGuard>
+        <FashionReservationFlowPage />
+      </AuthGuard>
+    ),
   },
   {
     path: "/hair/setup",
-    element: <HairSetup />,
+    element: (
+      <AuthGuard>
+        <HairSetup />
+      </AuthGuard>
+    ),
   },
   {
     path: "/reviewWrite/:consultationId",
-    element: <ReviewWritePage />,
+    element: (
+      <AuthGuard>
+        <ReviewWritePage />
+      </AuthGuard>
+    ),
   },
   {
     path: "/myReview",
-    element: <MyReviewPage />,
+    element: (
+      <AuthGuard>
+        <MyReviewPage />
+      </AuthGuard>
+    ),
   },
   {
     path: "/service-ready",
@@ -166,6 +223,10 @@ export const router = createBrowserRouter([
   },
   {
     path: "/concern/:consultationId",
-    element: <ConcernView />,
+    element: (
+      <AuthGuard>
+        <ConcernView />
+      </AuthGuard>
+    ),
   },
 ]);

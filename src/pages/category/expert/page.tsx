@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   CheckCircle2,
@@ -12,10 +12,14 @@ import {
 import type { AxiosError } from 'axios';
 import heartIcon from '../../../images/mypage/heart.svg';
 import redHeartIcon from '../../../images/redHeart.svg';
-import { portfolioItems } from './portfolio-data';
+import { portfolioItems, type PortfolioItem } from './portfolio-data';
 import { expertService } from '../../../services/expert.service';
 import { reviewService } from '../../../services/review.service';
-import type { ExpertInfoResponse, ExpertScheduleResponse } from '../../../lib/api/types';
+import type {
+  ExpertInfoResponse,
+  ExpertPortfolioResponse,
+  ExpertScheduleResponse,
+} from '../../../lib/api/types';
 import {
   getLabelFromApiCategory,
   getRouteCategoryFromApi,
@@ -35,6 +39,16 @@ type RelatedExpert = {
   summary: string;
 };
 
+const mapPortfolioResponse = (portfolio: ExpertPortfolioResponse): PortfolioItem => ({
+  id: portfolio.id,
+  title: portfolio.title,
+  tags: portfolio.hashtags ?? [],
+  concern: portfolio.concern,
+  solution: portfolio.solution,
+  beforeImage: portfolio.beforeImage,
+  afterImage: portfolio.afterImage,
+});
+
 const ExpertInfoPage = () => {
   const navigate = useNavigate();
   const { expertId } = useParams();
@@ -46,8 +60,13 @@ const ExpertInfoPage = () => {
   const [reviewCards, setReviewCards] = useState<ReviewCard[]>([]);
   const [reviewAverage, setReviewAverage] = useState(0);
   const [expertSchedules, setExpertSchedules] = useState<ExpertScheduleResponse[]>([]);
-
-  const portfolioCards = portfolioItems;
+  const [portfolioCards, setPortfolioCards] = useState<PortfolioItem[]>([]);
+  const [portfolioPage, setPortfolioPage] = useState(0);
+  const [portfolioHasMore, setPortfolioHasMore] = useState(true);
+  const [portfolioLoading, setPortfolioLoading] = useState(false);
+  const portfolioListRef = useRef<HTMLDivElement | null>(null);
+  const portfolioSentinelRef = useRef<HTMLDivElement | null>(null);
+  const portfolioFetchingRef = useRef(false);
 
   const relatedExperts: RelatedExpert[] = [
     {
@@ -73,6 +92,10 @@ const ExpertInfoPage = () => {
     if (!expertIdNumber) {
       return;
     }
+
+    setPortfolioCards([]);
+    setPortfolioPage(0);
+    setPortfolioHasMore(true);
 
     let isActive = true;
 
@@ -122,6 +145,71 @@ const ExpertInfoPage = () => {
       isActive = false;
     };
   }, [expertIdNumber]);
+
+  useEffect(() => {
+    if (!expertIdNumber || !portfolioHasMore || portfolioFetchingRef.current) {
+      return;
+    }
+
+    let isActive = true;
+    const fetchExpertPortfolios = async () => {
+      try {
+        portfolioFetchingRef.current = true;
+        setPortfolioLoading(true);
+        const response = await expertService.getExpertPortfolios(expertIdNumber, {
+          page: portfolioPage,
+          size: 3,
+        });
+        if (!isActive) {
+          return;
+        }
+        const mapped = response.data.map(mapPortfolioResponse);
+        setPortfolioCards((prev) => (portfolioPage === 0 ? mapped : [...prev, ...mapped]));
+        setPortfolioHasMore(mapped.length === 3);
+      } catch (error) {
+        console.error('Failed to fetch expert portfolios:', error);
+        if (!isActive) {
+          return;
+        }
+        if (portfolioPage === 0) {
+          setPortfolioCards(portfolioItems);
+        }
+        setPortfolioHasMore(false);
+      } finally {
+        if (isActive) {
+          setPortfolioLoading(false);
+          portfolioFetchingRef.current = false;
+        }
+      }
+    };
+
+    fetchExpertPortfolios();
+
+    return () => {
+      isActive = false;
+    };
+  }, [expertIdNumber, portfolioHasMore, portfolioPage]);
+
+  useEffect(() => {
+    const container = portfolioListRef.current;
+    const sentinel = portfolioSentinelRef.current;
+    if (!container || !sentinel || !portfolioHasMore) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const firstEntry = entries[0];
+        if (firstEntry?.isIntersecting && !portfolioLoading && portfolioHasMore) {
+          setPortfolioPage((prev) => prev + 1);
+        }
+      },
+      { root: container, rootMargin: '100px' },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [portfolioHasMore, portfolioLoading]);
 
   useEffect(() => {
     if (!expertInfo?.category) {
@@ -404,7 +492,10 @@ const ExpertInfoPage = () => {
                 <ChevronRight className="h-[24px] w-[24px]" />
               </button>
             </div>
-            <div className="absolute left-[16px] top-[86px] flex w-[343px] gap-[12px] overflow-x-auto scrollbar-hide">
+            <div
+              ref={portfolioListRef}
+              className="absolute left-[16px] top-[86px] flex w-[343px] gap-[12px] overflow-x-auto scrollbar-hide"
+            >
               {portfolioCards.map((card) => (
                 <article
                   key={card.id}
@@ -415,11 +506,25 @@ const ExpertInfoPage = () => {
                   </p>
                   <div className="mt-[12px] flex gap-[8px]">
                     <div className="relative h-[130px] w-[130px] overflow-hidden rounded-[12px] bg-[#e1e2e4]">
+                      {card.beforeImage && (
+                        <img
+                          src={card.beforeImage}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      )}
                       <span className="absolute bottom-[8px] left-[8px] rounded-[4px] bg-black/40 px-[6px] py-[2px] text-[14px] text-white">
                         전
                       </span>
                     </div>
                     <div className="relative h-[130px] w-[130px] overflow-hidden rounded-[12px] bg-[#e1e2e4]">
+                      {card.afterImage && (
+                        <img
+                          src={card.afterImage}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      )}
                       <span className="absolute bottom-[8px] right-[8px] rounded-[4px] bg-black/40 px-[6px] py-[2px] text-[14px] text-white">
                         후
                       </span>
@@ -449,6 +554,12 @@ const ExpertInfoPage = () => {
                   </div>
                 </article>
               ))}
+              {portfolioHasMore && (
+                <div
+                  ref={portfolioSentinelRef}
+                  className="h-[1px] w-[1px] shrink-0"
+                />
+              )}
             </div>
             <div className="absolute left-1/2 top-[551px] h-[3px] w-[55px] -translate-x-1/2 bg-[#e1e2e4]">
               <div className="h-[3px] w-[18px] bg-[#429ff0]" />

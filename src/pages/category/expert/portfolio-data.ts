@@ -4,6 +4,8 @@ export type PortfolioItem = {
   tags: string[];
   concern: string;
   solution: string;
+  beforeImage?: string;
+  afterImage?: string;
 };
 
 export const portfolioItems: PortfolioItem[] = [
