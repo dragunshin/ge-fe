@@ -1,4 +1,4 @@
-export type ChatroomType = "MESSAGE" | "VIDEO" | "NOTICE";
+export type ChatroomType = "MESSAGE" | "VIDEO" | "NOTICE" | "ADMIN";
 
 export interface ExpertSummary {
   userId: number;
@@ -39,7 +39,15 @@ export interface ApiResponse<T> {
   data: T;
 }
 
-export type MessageType = "TEXT" | "IMAGE" | "QUESTION" | "SOLUTION" | "SYSTEM";
+export type MessageType =
+  | "TEXT"
+  | "IMAGE"
+  | "QUESTION"
+  | "CONCERN"
+  | "SOLUTION"
+  | "SYSTEM"
+  | "MESSAGE"
+  | "ADMIN";
 export type SenderRole = "MEMBER" | "MENUAL" | "EXPERT";
 
 export type ChatMessage = {
@@ -59,7 +67,16 @@ export type SocketResponse<T> = {
   payload: T;
 };
 
-export type LastMessageType = "TEXT" | "IMAGE" | "MIXED" | "QUESTION" | "SOLUTION" | "SYSTEM";
+export type LastMessageType =
+  | "TEXT"
+  | "IMAGE"
+  | "MIXED"
+  | "QUESTION"
+  | "CONCERN"
+  | "SOLUTION"
+  | "SYSTEM"
+  | "MESSAGE"
+  | "ADMIN";
 
 export type ChatRoomListItem = {
   chatroomId: number;
@@ -74,4 +91,13 @@ export type ChatRoomListItem = {
   createdAt: string;
   unreadCount?: number;
   lastMessageType?: LastMessageType; // 명세서에 있다고 했으니 optional
+};
+
+// ✅ STOMP SUBSCRIBE로 오는 래퍼 이벤트
+export type SocketEventType = "MESSAGE"; // 필요하면 "ENTER" "LEAVE" 같은거 추가
+
+export type SocketEvent<TPayload = ChatMessage> = {
+  eventType: SocketEventType;
+  chatroomId: number;
+  payload: TPayload;
 };

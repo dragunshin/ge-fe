@@ -75,20 +75,20 @@ export type CreateChatroomResponse = {
   createdAt: string;
 };
 
-export async function createChatroom(consultationId: number, chatroomType: ChatroomType) {
-  const res = await fetch(`${API_BASE}/chat/room`, {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
-    //body: JSON.stringify({ chatroomType }),
-    body: JSON.stringify({ consultationId, chatroomType }),
-  });
+// export async function createChatroom(consultationId: number, chatroomType: ChatroomType) {
+//   const res = await fetch(`${API_BASE}/chat/room`, {
+//     method: "POST",
+//     credentials: "include",
+//     headers: { "Content-Type": "application/json", Accept: "application/json" },
+//     //body: JSON.stringify({ chatroomType }),
+//     body: JSON.stringify({ consultationId, chatroomType }),
+//   });
 
-  const json = (await res.json().catch(() => null)) as ApiResponse<CreateChatroomResponse> | null;
+//   const json = (await res.json().catch(() => null)) as ApiResponse<CreateChatroomResponse> | null;
 
-  if (!res.ok || !json) throw new Error(json?.message ?? "Failed to create chatroom");
-  return json.data;
-}
+//   if (!res.ok || !json) throw new Error(json?.message ?? "Failed to create chatroom");
+//   return json.data;
+// }
 
 export async function fetchChatRooms(): Promise<ChatRoomListItem[]> {
   const res = await fetch(`${API_BASE}/chat/room`, {

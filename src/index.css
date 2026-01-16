@@ -248,6 +248,12 @@ input {
   .pre_subtitle_semi_14 {
     @apply text-[14px] leading-[140%] font-semibold;
   }
+  .pre_subtitle_med_16 {
+    @apply text-[16px] leading-[140%] font-medium;
+  }
+  .pre_subtitle_med_14 {
+    @apply text-[14px] leading-[140%] font-medium;
+  }
 
   /* Body */
   .pre_body_bold_16 {

@@ -50,7 +50,7 @@
 
 //     setIsUploading(false);
 //     clearLocalPreview();
-//     onRemove(); // ✅ zustand에서 key 제거
+//     onRemove(); // zustand에서 key 제거
 //   };
 
 //   useEffect(() => {
@@ -65,11 +65,11 @@
 //   const onChange = async (file?: File | null) => {
 //     if (!file) return;
 
-//     // 이전 업로드/프리뷰 정리
-//     handleRemove(); // key까지 지우기 싫으면 아래 3줄로 대체 가능
-//     // seqRef.current += 1;
-//     // abortRef.current?.abort();
-//     // clearLocalPreview();
+//     // 같은 파일을 다시 선택해도 onChange가 다시 뜨도록 리셋
+//     if (inputRef.current) inputRef.current.value = "";
+
+//     // 이전 업로드/프리뷰 정리 (기존 동작 유지: key까지 제거)
+//     handleRemove();
 
 //     // 새 프리뷰 생성(로컬)
 //     const localUrl = URL.createObjectURL(file);
@@ -83,6 +83,7 @@
 
 //     try {
 //       setIsUploading(true);
+
 //       const { key } = await uploadImageViaPresign({
 //         file,
 //         prefix,
@@ -92,54 +93,63 @@
 //       // X로 제거하거나 새로운 업로드가 시작된 경우 무시
 //       if (seqRef.current !== mySeq) return;
 
-//       onUploadedKey(key); // ✅ 업로드 성공 → zustand에 key 저장
+//       onUploadedKey(key); // 업로드 성공, zustand에 key 저장
 //     } catch (e) {
 //       if (controller.signal.aborted) return;
-//       clearLocalPreview();
-//       alert("업로드에 실패했어요. 다시 시도해주세요.");
+//       // 업로드 실패해도 프리뷰 유지 (기존 너 의도 유지)
 //     } finally {
 //       if (seqRef.current === mySeq) setIsUploading(false);
 //     }
 //   };
 
 //   return (
-//     <section className="mt-8 px-5">
+//     <section className="mt-9 px-5">
 //       <h3 className="pre_title_semi_20 text-[#000000]">{title}</h3>
 //       <p className="mt-2 pre_cap_reg_13 leading-relaxed text-[#70737c]">{helper}</p>
 
-//       <div className="mt-8">
-//         <div className="w-[168px] h-[168px]">
-//           <div className="relative overflow-hidden rounded-[8px] bg-neutral-100">
-//             <div className="aspect-[4/3] w-full">
-//               {previewUrl ? (
-//                 <img src={previewUrl} alt="" className="h-full w-full object-cover" />
-//               ) : (
-//                 <div className="flex h-full w-full items-center justify-center text-[12px] text-neutral-500">
-//                   {valueKey ? "업로드 완료" : "사진"}
+//       <div className="mt-6">
+//         {/* ✅ 디폴트 회색 네모 제거:
+//             - previewUrl 있을 때만 168x168 프리뷰 박스를 렌더링
+//             - valueKey만 있는 경우엔 회색 네모 없이 상태 텍스트 + X만 표시(선택) */}
+//         {previewUrl ? (
+//           <div className="h-[168px] w-[168px]">
+//             <div className="relative h-full w-full overflow-hidden rounded-[8px] bg-neutral-100">
+//               <img src={previewUrl} alt="" className="h-full w-full object-cover" />
+
+//               {showRemove && (
+//                 <button
+//                   type="button"
+//                   onClick={handleRemove}
+//                   className="absolute right-2 top-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#292a2d]"
+//                   aria-label="삭제"
+//                 >
+//                   <X className="h-3 w-3 text-white" />
+//                 </button>
+//               )}
+
+//               {isUploading && (
+//                 <div className="absolute inset-0 flex items-center justify-center bg-black/30 text-[12px] font-semibold text-white">
+//                   업로드 중...
 //                 </div>
 //               )}
 //             </div>
-
-//             {showRemove && (
-//               <button
-//                 type="button"
-//                 onClick={handleRemove}
-//                 className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/60"
-//                 aria-label="삭제"
-//               >
-//                 <X className="h-4 w-4 text-white" />
-//               </button>
-//             )}
-
-//             {isUploading && (
-//               <div className="absolute inset-0 flex items-center justify-center bg-black/30 text-[12px] font-semibold text-white">
-//                 업로드 중...
-//               </div>
-//             )}
 //           </div>
-//         </div>
+//         ) : valueKey ? (
+//           // ✅ (선택) 이미 업로드된 key가 있는 상태에서도 회색 네모 없이 제거 가능
+//           <div className="inline-flex items-center gap-2">
+//             <span className="pre_cap_reg_13 text-[#70737c]">업로드 완료</span>
+//             <button
+//               type="button"
+//               onClick={handleRemove}
+//               className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#292a2d]"
+//               aria-label="삭제"
+//             >
+//               <X className="h-3 w-3 text-white" />
+//             </button>
+//           </div>
+//         ) : null}
 
-//         <div className="mt-0 flex justify-center">
+//         <div className="!mt-5 flex justify-center">
 //           <button
 //             type="button"
 //             onClick={pick}
@@ -167,7 +177,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
-import { uploadImageViaPresign } from "@/lib/s3Upload";
+import { uploadImageViaPresign } from "@/api/s3forFlow";
 import { cn } from "@/lib/utils";
 import Camera from "@/images/reservationFlow/camera.svg?react";
 
@@ -177,14 +187,19 @@ export function SinglePhotoField({
   valueKey,
   onUploadedKey,
   onRemove,
-  prefix,
+  resourceType,
+  resourceId,
+  imageType,
 }: {
   title: string;
   helper: string;
   valueKey?: string;
   onUploadedKey: (key: string) => void;
   onRemove: () => void;
-  prefix: string;
+
+  resourceType: string;
+  resourceId: number | string;
+  imageType: string;
 }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -253,62 +268,67 @@ export function SinglePhotoField({
 
       const { key } = await uploadImageViaPresign({
         file,
-        prefix,
+        resourceType,
+        resourceId,
+        imageType,
         signal: controller.signal,
       });
 
       // X로 제거하거나 새로운 업로드가 시작된 경우 무시
       if (seqRef.current !== mySeq) return;
 
-      onUploadedKey(key); // 업로드 성공, zustand에 key 저장
+      onUploadedKey(key);
     } catch (e) {
-      // 중단이면 종료
       if (controller.signal.aborted) return;
-
-      // 여기서 프리뷰를 지우지 않음: 업로드 실패해도 프리뷰 유지
-      //alert("업로드에 실패했어요. 다시 시도해주세요.");
+      // 업로드 실패해도 프리뷰 유지 (기존 의도 유지)
+      console.error(e);
     } finally {
       if (seqRef.current === mySeq) setIsUploading(false);
     }
   };
 
   return (
-    <section className="mt-8 px-5">
+    <section className="mt-9 px-5">
       <h3 className="pre_title_semi_20 text-[#000000]">{title}</h3>
       <p className="mt-2 pre_cap_reg_13 leading-relaxed text-[#70737c]">{helper}</p>
 
       <div className="mt-6">
-        <div className="w-[168px] h-[168px]">
-          <div className="relative overflow-hidden rounded-[8px] bg-neutral-100">
-            <div className="w-[168px] h-[168px]">
-              {previewUrl ? (
-                <img src={previewUrl} alt="" className="w-[168px] h-[168px] object-cover" />
-              ) : (
-                <div className="flex w-[168px] h-[168px] items-center justify-center text-[12px] text-neutral-500">
-                  {/* {valueKey ? "업로드 완료" : "사진"} */}
-                  {valueKey ? "업로드 완료" : ""}
+        {previewUrl ? (
+          <div className="h-[168px] w-[168px]">
+            <div className="relative h-full w-full overflow-hidden rounded-[8px] bg-neutral-100">
+              <img src={previewUrl} alt="" className="h-full w-full object-cover" />
+
+              {showRemove && (
+                <button
+                  type="button"
+                  onClick={handleRemove}
+                  className="absolute right-2 top-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#292a2d]"
+                  aria-label="삭제"
+                >
+                  <X className="h-3 w-3 text-white" />
+                </button>
+              )}
+
+              {isUploading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30 text-[12px] font-semibold text-white">
+                  업로드 중...
                 </div>
               )}
             </div>
-
-            {showRemove && (
-              <button
-                type="button"
-                onClick={handleRemove}
-                className="absolute right-2 top-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#292a2d]"
-                aria-label="삭제"
-              >
-                <X className="h-3 w-3 text-white" />
-              </button>
-            )}
-
-            {isUploading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/30 text-[12px] font-semibold text-white">
-                업로드 중...
-              </div>
-            )}
           </div>
-        </div>
+        ) : valueKey ? (
+          <div className="inline-flex items-center gap-2">
+            <span className="pre_cap_reg_13 text-[#70737c]">업로드 완료</span>
+            <button
+              type="button"
+              onClick={handleRemove}
+              className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#292a2d]"
+              aria-label="삭제"
+            >
+              <X className="h-3 w-3 text-white" />
+            </button>
+          </div>
+        ) : null}
 
         <div className="!mt-5 flex justify-center">
           <button

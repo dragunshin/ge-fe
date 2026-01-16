@@ -14,10 +14,9 @@ const TAGS: DesiredTag[] = [
   "신뢰를 주는",
   "화려한",
   "자연스러움",
-  "기타",
 ];
 
-export function Step2DesiredImage({ onNext, onBack }: { onNext: () => void; onBack?: () => void }) {
+export function Step3DesiredImage({ onNext, onBack }: { onNext: () => void; onBack?: () => void }) {
   const { desiredTags, toggleDesiredTag, desiredOtherText, setDesiredOtherText } =
     useStyleSetupStore();
 
@@ -36,8 +35,8 @@ export function Step2DesiredImage({ onNext, onBack }: { onNext: () => void; onBa
     <div className="mx-auto min-h-[100dvh] w-full max-w-[420px] bg-white pb-28">
       <TopNav onBack={onBack} />
 
-      <div className="px-5">
-        <p className="pre_body_med_16 text-[#008bff]">2/3</p>
+      <div className="px-4">
+        <p className="pre_body_med_16 text-[#008bff]">6/7</p>
         <p className="mt-2 pre_title_semi_20 text-[#0f0f10]">
           <span className="text-[#429ff0]">추구하는 이미지</span>를 선택해주세요.
         </p>
