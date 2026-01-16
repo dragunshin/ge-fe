@@ -11,7 +11,7 @@ import { TermsAgreementPage } from "../pages/auth/terms-agreement/page";
 import FaceStep from "@/pages/profileSetting/page";
 import { Chat } from "@/pages/chat/page";
 import ChatListPage from "@/pages/chat/chat-list-page";
-import { ChatRoom } from "@/pages/chat/components/ChatRoom";
+// import { ChatRoom } from "@/pages/chat/components/ChatRoom";
 import EditorPage from "@/pages/solution/writeSolution";
 import MyPage from "@/pages/myPage/page";
 import ReservationHistoryView from "@/pages/myPage/reservation/page";
@@ -85,10 +85,10 @@ export const router = createBrowserRouter([
     path: "/chatList",
     element: <ChatListPage />,
   },
-  {
-    path: "/chatRoom",
-    element: <ChatRoom />,
-  },
+  // {
+  //   path: "/chatRoom",
+  //   element: <ChatRoom />,
+  // },
   {
     path: "/write",
     element: <EditorPage />,
