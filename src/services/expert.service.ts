@@ -43,4 +43,14 @@ export const expertService = {
   async unlikeExpert(userId: number): Promise<ApiResponse<Record<string, unknown>>> {
     return await api.delete<ApiResponse<Record<string, unknown>>>(`/expert/${userId}/like`);
   },
+
+  async getLikedExperts(params?: {
+    category?: ApiCategory;
+    page?: number;
+    size?: number;
+  }): Promise<ApiResponse<ExpertSummaryResponse[]>> {
+    return await api.get<ApiResponse<ExpertSummaryResponse[]>>('/expert/likes', {
+      params,
+    });
+  },
 };

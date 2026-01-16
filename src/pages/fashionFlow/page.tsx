@@ -40,6 +40,7 @@ export default function FashionFlowPage() {
   const [leftImage, setLeftImage] = React.useState<OutfitImage | null>(null);
   const [rightImage, setRightImage] = React.useState<OutfitImage | null>(null);
   const [outfits, setOutfits] = React.useState<OutfitImage[]>([]);
+  const [purposeImages, setPurposeImages] = React.useState<OutfitImage[]>([]);
   const [heightValue, setHeightValue] = React.useState("");
   const [weightValue, setWeightValue] = React.useState("");
   const [topSize, setTopSize] = React.useState<SizeOption | null>(null);
@@ -62,7 +63,6 @@ export default function FashionFlowPage() {
   const [priceMin, setPriceMin] = React.useState(0);
   const [priceMax, setPriceMax] = React.useState(40);
   const [purposeText, setPurposeText] = React.useState("");
-  const [purposeImages, setPurposeImages] = React.useState<OutfitImage[]>([]);
 
   const reservationIdRaw =
     searchParams.get("reservationId") ??
@@ -140,18 +140,6 @@ export default function FashionFlowPage() {
     const numeric = formatNumeric(value);
     if (!numeric) return "";
     return unit === "cm" ? `${numeric} cm` : `${numeric}kg`;
-  };
-
-  const toggleSetValue = (value: string, setter: React.Dispatch<React.SetStateAction<Set<string>>>) => {
-    setter((prev) => {
-      const next = new Set(prev);
-      if (next.has(value)) {
-        next.delete(value);
-      } else {
-        next.add(value);
-      }
-      return next;
-    });
   };
 
   const formatPrice = (value: number) => {
@@ -477,3 +465,17 @@ export default function FashionFlowPage() {
     </div>
   );
 }
+  const toggleSetValue = (
+    value: string,
+    setter: React.Dispatch<React.SetStateAction<Set<string>>>,
+  ) => {
+    setter((prev) => {
+      const next = new Set(prev);
+      if (next.has(value)) {
+        next.delete(value);
+      } else {
+        next.add(value);
+      }
+      return next;
+    });
+  };

@@ -1,66 +1,67 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Heart from "@/images/mypage/heart.svg?react";
+import Heart from "@/images/redHeart.svg?react";
 import Back from "@/images/login/back.svg?react";
 import Star from "@/images/mypage/star.svg?react";
 import BottomNav from "@/components/navigation/bottom-nav";
+import { expertService } from "@/services/expert.service";
+import { getApiCategoryFromLabel, getLabelFromApiCategory } from "@/lib/utils/category";
+import type { ExpertSummaryResponse } from "@/lib/api/types";
 
-type Category = "전체" | "헤어" | "스킨케어" | "패션" | "메이크업";
-
-type Expert = {
-  id: string;
-  name: string;
-  category: Exclude<Category, "전체">; // ✅ 전체는 데이터에 없음
-  rating: string;
-  reviews: string;
-  description: string;
-  availableNow?: boolean;
-};
-
-// (샘플) 카테고리 테스트가 되게 몇 개는 다르게 줌 — 실제 데이터 쓰면 이 부분은 그대로 교체하면 됨
-const sampleData: Expert[] = [
-  {
-    id: "0",
-    name: "김푸힝",
-    category: "헤어",
-    rating: "4.7",
-    reviews: "(1,130)",
-    description: "전문가가 작성한 자신의 강점 한줄 쓱싹문가가 작성한 자신의 강점 한줄 쓱싹",
-    availableNow: true,
-  },
-  {
-    id: "1",
-    name: "김푸힝",
-    category: "스킨케어",
-    rating: "4.7",
-    reviews: "(1,130)",
-    description: "전문가가 작성한 자신의 강점 한줄 쓱싹문가가 작성한 자신의 강점 한줄 쓱싹",
-    availableNow: true,
-  },
-  {
-    id: "2",
-    name: "김푸힝",
-    category: "패션",
-    rating: "4.7",
-    reviews: "(1,130)",
-    description: "전문가가 작성한 자신의 강점 한줄 쓱싹문가가 작성한 자신의 강점 한줄 쓱싹",
-    availableNow: true,
-  },
-];
+type Category = "전체" | "헤어" | "스킨" | "패션" | "메이크업";
 
 export default function LikedListPage() {
   const navigate = useNavigate();
 
-  const chips: Category[] = ["전체", "헤어", "스킨케어", "패션", "메이크업"];
+  const chips: Category[] = ["전체", "헤어", "스킨", "패션", "메이크업"];
 
   // ✅ 선택 상태
-  const [activeChip, setActiveChip] = useState<Category>("스킨케어");
+  const [activeChip, setActiveChip] = useState<Category>("스킨");
+  const [likedExperts, setLikedExperts] = useState<ExpertSummaryResponse[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchLikedExperts = async () => {
+      setIsLoading(true);
+      try {
+        const response = await expertService.getLikedExperts({
+          category: getApiCategoryFromLabel(activeChip),
+          page: 0,
+          size: 50,
+        });
+        if (!isActive) {
+          return;
+        }
+        setLikedExperts(response.data ?? []);
+      } catch (error) {
+        console.error("Failed to fetch liked experts:", error);
+        if (isActive) {
+          setLikedExperts([]);
+        }
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchLikedExperts();
+
+    return () => {
+      isActive = false;
+    };
+  }, [activeChip]);
 
   // ✅ 선택 카테고리에 맞게 필터링
   const filteredData = useMemo(() => {
-    if (activeChip === "전체") return sampleData;
-    return sampleData.filter((x) => x.category === activeChip);
-  }, [activeChip]);
+    const source = likedExperts ?? [];
+    if (activeChip === "전체") return source;
+    return source.filter(
+      (item) => getLabelFromApiCategory(item.category) === activeChip,
+    );
+  }, [activeChip, likedExperts]);
 
   return (
     <div className="flex h-full flex-col bg-white">
@@ -98,7 +99,7 @@ export default function LikedListPage() {
         <div className="mt-6 space-y-4">
           {filteredData.map((item) => (
             <article
-              key={item.id}
+              key={item.expertId}
               className="relative rounded-lg border border-neutral-200 bg-white p-4"
             >
               {/* heart */}
@@ -113,24 +114,39 @@ export default function LikedListPage() {
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="h-14 w-14 shrink-0 rounded-full bg-neutral-200" />
+                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-neutral-200">
+                  {item.profileImage && (
+                    <img
+                      src={item.profileImage}
+                      alt={`${item.nickname} 프로필`}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  )}
+                </div>
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-3">
-                    <h2 className="pre_subtitle_semi_16 text-[#292a2d] truncate">{item.name}</h2>
+                    <h2 className="pre_subtitle_semi_16 text-[#292a2d] truncate">
+                      {item.nickname}
+                    </h2>
                     <span className="inline-flex items-center px-2 py-0.5 pre_cap_reg_12 bg-[#e5f4ff] text-[#008bff]">
-                      {item.category}
+                      {getLabelFromApiCategory(item.category)}
                     </span>
                   </div>
 
                   <div className="mt-2 flex items-center gap-1">
                     <Star className="h-4 w-4 stroke-none" />
-                    <span className="pre_cap_semi_13 text-[#989ba2]">{item.rating}</span>
-                    <span className="pre_body_reg_13 text-[#878a93]">{item.reviews}</span>
+                    <span className="pre_cap_semi_13 text-[#989ba2]">
+                      {item.ratingAverage ? item.ratingAverage.toFixed(1) : "0.0"}
+                    </span>
+                    <span className="pre_body_reg_13 text-[#878a93]">
+                      ({item.reviewCount.toLocaleString()})
+                    </span>
                   </div>
 
                   <p className="mt-3 pre_body_reg_13 text-[#878a93] line-clamp-2">
-                    {item.description}
+                    {item.introduction}
                   </p>
 
                   <div className="mt-4 flex items-center w-full">
@@ -151,9 +167,14 @@ export default function LikedListPage() {
           ))}
 
           {/* (선택) 필터 결과가 없을 때 메시지 — 디자인 크게 안 바꿈 */}
-          {filteredData.length === 0 && (
+          {!isLoading && filteredData.length === 0 && (
             <div className="py-10 text-center text-[13px] text-neutral-400">
               해당 카테고리의 찜이 없어요.
+            </div>
+          )}
+          {isLoading && (
+            <div className="py-10 text-center text-[13px] text-neutral-400">
+              찜 목록을 불러오는 중이에요.
             </div>
           )}
         </div>

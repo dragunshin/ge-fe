@@ -151,13 +151,17 @@ export function PaymentCompletePage() {
       <div className="px-4 pt-[24px]">
         <div className="flex gap-[12px]">
           <button
-            onClick={() => navigate("/chatlist")}
+            onClick={() => {
+              navigate("/chatlist");
+            }}
             className="flex h-[44px] flex-1 items-center justify-center rounded-[4px] border border-[#dbdcdf] text-[14px] leading-[1.4] text-[#171719]"
           >
             채팅으로 이동
           </button>
           <button
-            onClick={() => navigate("/")}
+            onClick={() => {
+              navigate("/");
+            }}
             className="flex h-[44px] flex-1 items-center justify-center rounded-[4px] bg-[#181818] text-[14px] font-medium leading-[1.4] text-white"
           >
             홈으로

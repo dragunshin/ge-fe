@@ -565,11 +565,12 @@
 
 // export default HomePage;
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronRight, Search } from "lucide-react";
 import { useAuthStore } from "../../stores/useAuthStore";
 import heartIcon from "../../images/mypage/heart.svg";
+import redHeartIcon from "../../images/redHeart.svg";
 import BottomNav from "@/components/navigation/bottom-nav";
 import Logo from "@/components/ui/logo";
 import starIcon from "../../images/reviews/star.svg";
@@ -652,6 +653,7 @@ const HomePage = () => {
   const [selectedHomeTab, setSelectedHomeTab] = useState("전체");
   const [topExperts, setTopExperts] = useState<TopExpert[]>([]);
   const [reviews, setReviews] = useState<ReviewCard[]>([]);
+  const [likedExpertIds, setLikedExpertIds] = useState<Set<number>>(new Set());
   const homeTabTrackRef = useRef<HTMLDivElement | null>(null);
   const homeTabRefs = useRef<Record<string, HTMLSpanElement | null>>({});
   const [homeUnderlineStyle, setHomeUnderlineStyle] = useState({ left: 0, width: 0 });
@@ -660,6 +662,15 @@ const HomePage = () => {
   const [openTypeSheet, setOpenTypeSheet] = useState(false);
   const [openCalendarSheet, setOpenCalendarSheet] = useState(false);
   const [selectedConsultType, setSelectedConsultType] = useState<ConsultType>("MESSAGE");
+
+  const refreshLikedExperts = useCallback(async () => {
+    try {
+      const response = await expertService.getLikedExperts({ page: 0, size: 100 });
+      setLikedExpertIds(new Set(response.data.map((expert) => expert.expertId)));
+    } catch (error) {
+      console.error("Failed to fetch liked experts:", error);
+    }
+  }, []);
 
   const formatDate = (value?: string) => {
     if (!value) {
@@ -733,6 +744,10 @@ const HomePage = () => {
   useEffect(() => {
     initializeAuth();
   }, [initializeAuth]);
+
+  useEffect(() => {
+    refreshLikedExperts();
+  }, [refreshLikedExperts]);
 
   useEffect(() => {
     const state = location.state as { openCalendarSheet?: boolean } | null;
@@ -955,7 +970,10 @@ const HomePage = () => {
           <button className="flex h-6 w-6 items-center justify-center">
             <Search className="h-6 w-6 text-[#0f0f10]" />
           </button>
-          <button className="flex h-6 w-6 items-center justify-center">
+          <button
+            className="flex h-6 w-6 items-center justify-center"
+            onClick={() => navigate("/LikedList")}
+          >
             <img src={heartIcon} alt="찜" className="h-6 w-6" />
           </button>
         </div>
@@ -1137,12 +1155,44 @@ const HomePage = () => {
                 </div>
                 <button
                   className="flex h-6 w-6 items-center justify-center"
-                  onClick={(event) => {
+                  onClick={async (event) => {
                     event.stopPropagation();
+                    if (!expert.expertId) {
+                      return;
+                    }
+                    try {
+                      if (likedExpertIds.has(expert.expertId)) {
+                        await expertService.unlikeExpert(expert.expertId);
+                        setLikedExpertIds((prev) => {
+                          const next = new Set(prev);
+                          next.delete(expert.expertId);
+                          return next;
+                        });
+                        return;
+                      }
+                      await expertService.likeExpert(expert.expertId);
+                      setLikedExpertIds((prev) => new Set(prev).add(expert.expertId));
+                    } catch (error) {
+                      const status = (error as { response?: { status?: number } })?.response
+                        ?.status;
+                      if (status === 409) {
+                        await refreshLikedExperts();
+                        return;
+                      }
+                      console.error("Failed to toggle like:", error);
+                    }
                   }}
                   type="button"
                 >
-                  <img src={heartIcon} alt="찜" className="h-6 w-6" />
+                  <img
+                    src={
+                      expert.expertId && likedExpertIds.has(expert.expertId)
+                        ? redHeartIcon
+                        : heartIcon
+                    }
+                    alt="찜"
+                    className="h-6 w-6"
+                  />
                 </button>
               </div>
             ))}

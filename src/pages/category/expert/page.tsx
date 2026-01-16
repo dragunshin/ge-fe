@@ -9,7 +9,9 @@ import {
   Instagram,
   Star,
 } from 'lucide-react';
+import type { AxiosError } from 'axios';
 import heartIcon from '../../../images/mypage/heart.svg';
+import redHeartIcon from '../../../images/redHeart.svg';
 import { portfolioItems } from './portfolio-data';
 import { expertService } from '../../../services/expert.service';
 import { reviewService } from '../../../services/review.service';
@@ -87,6 +89,19 @@ const ExpertInfoPage = () => {
       }
     };
 
+    const fetchLikeStatus = async () => {
+      try {
+        const response = await expertService.getLikedExperts({ page: 0, size: 100 });
+        if (!isActive) {
+          return;
+        }
+        const matched = response.data.some((expert) => expert.expertId === expertIdNumber);
+        setIsLiked(matched);
+      } catch (error) {
+        console.error('Failed to fetch liked experts:', error);
+      }
+    };
+
     const fetchExpertSchedules = async () => {
       try {
         const response = await expertService.getExpertSchedules(expertIdNumber);
@@ -100,6 +115,7 @@ const ExpertInfoPage = () => {
     };
 
     fetchExpertInfo();
+    fetchLikeStatus();
     fetchExpertSchedules();
 
     return () => {
@@ -164,6 +180,23 @@ const ExpertInfoPage = () => {
       setLikesCount((prev) => prev + 1);
       setIsLiked(true);
     } catch (error) {
+      const status = (error as AxiosError)?.response?.status;
+      if (status === 409) {
+        try {
+          const [likedResponse, infoResponse] = await Promise.all([
+            expertService.getLikedExperts({ page: 0, size: 100 }),
+            expertService.getExpertInfo(expertIdNumber),
+          ]);
+          const matched = likedResponse.data.some(
+            (expert) => expert.expertId === expertIdNumber,
+          );
+          setIsLiked(matched);
+          setLikesCount(infoResponse.data.likes ?? 0);
+        } catch (innerError) {
+          console.error('Failed to refresh like status:', innerError);
+        }
+        return;
+      }
       console.error('Failed to toggle like:', error);
     }
   };
@@ -240,7 +273,11 @@ const ExpertInfoPage = () => {
                 onClick={handleToggleLike}
                 className="flex flex-col items-center gap-[2px]"
               >
-                <img src={heartIcon} alt="찜" className="h-[24px] w-[24px]" />
+                <img
+                  src={isLiked ? redHeartIcon : heartIcon}
+                  alt="찜"
+                  className="h-[24px] w-[24px]"
+                />
                 <span className="text-[13px] text-[#878a93]">{likesCount}</span>
               </button>
             </div>

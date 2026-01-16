@@ -21,8 +21,8 @@ apiClient.interceptors.response.use(
     return response;
   },
   async (error: AxiosError) => {
-    // 401 Unauthorized - 토큰 만료 처리
-    if (error.response?.status === 401) {
+    // 401/403 - 인증/인가 실패 처리
+    if (error.response?.status === 401 || error.response?.status === 403) {
       // Zustand에서 로그아웃 처리 (localStorage 정리)
       const { logout } = useAuthStore.getState();
       logout();
