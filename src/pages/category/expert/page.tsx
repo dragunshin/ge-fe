@@ -298,12 +298,15 @@ const ExpertInfoPage = () => {
   const hasReviews = reviewCards.length > 0;
   const reviewSectionHeight = hasReviews ? 216 : 72;
   const reviewSectionOffset = hasReviews ? 0 : -(216 - reviewSectionHeight);
+  const hasPortfolios = portfolioCards.length > 0;
+  const portfolioSectionHeight = hasPortfolios ? 610 : 72;
+  const portfolioSectionOffset = hasPortfolios ? 0 : -(610 - portfolioSectionHeight);
   const layoutTops = {
     reviewDivider: 771,
     reviewSection: 779,
     portfolioDivider: 1003 + reviewSectionOffset,
     portfolioSection: 1011 + reviewSectionOffset,
-    consultationSection: 1621 + reviewSectionOffset,
+    consultationSection: 1621 + reviewSectionOffset + portfolioSectionOffset,
   };
   const consultationCopy = {
     VIDEO: {
@@ -479,8 +482,8 @@ const ExpertInfoPage = () => {
           />
 
           <div
-            className="absolute left-0 h-[610px] w-[375px] bg-white"
-            style={{ top: layoutTops.portfolioSection }}
+            className="absolute left-0 w-[375px] bg-white"
+            style={{ top: layoutTops.portfolioSection, height: portfolioSectionHeight }}
           >
             <div className="absolute left-[15px] top-[40px] flex w-[343px] items-center justify-between">
               <h2 className="text-[18px] font-semibold text-[#0f0f10]">포트폴리오</h2>
@@ -492,78 +495,82 @@ const ExpertInfoPage = () => {
                 <ChevronRight className="h-[24px] w-[24px]" />
               </button>
             </div>
-            <div
-              ref={portfolioListRef}
-              className="absolute left-[16px] top-[86px] flex w-[343px] gap-[12px] overflow-x-auto scrollbar-hide"
-            >
-              {portfolioCards.map((card) => (
-                <article
-                  key={card.id}
-                  className="h-[439px] w-[322px] shrink-0 rounded-[12px] border border-[#e1e2e4] bg-white p-[20px]"
-                >
-                  <p className="text-[16px] font-semibold leading-[1.4] text-[#292a2d]">
-                    {card.title}
-                  </p>
-                  <div className="mt-[12px] flex gap-[8px]">
-                    <div className="relative h-[130px] w-[130px] overflow-hidden rounded-[12px] bg-[#e1e2e4]">
-                      {card.beforeImage && (
-                        <img
-                          src={card.beforeImage}
-                          alt=""
-                          className="h-full w-full object-cover"
-                        />
-                      )}
-                      <span className="absolute bottom-[8px] left-[8px] rounded-[4px] bg-black/40 px-[6px] py-[2px] text-[14px] text-white">
-                        전
-                      </span>
-                    </div>
-                    <div className="relative h-[130px] w-[130px] overflow-hidden rounded-[12px] bg-[#e1e2e4]">
-                      {card.afterImage && (
-                        <img
-                          src={card.afterImage}
-                          alt=""
-                          className="h-full w-full object-cover"
-                        />
-                      )}
-                      <span className="absolute bottom-[8px] right-[8px] rounded-[4px] bg-black/40 px-[6px] py-[2px] text-[14px] text-white">
-                        후
-                      </span>
-                    </div>
-                  </div>
-                  <div className="mt-[17px] flex gap-[8px] overflow-hidden">
-                    {card.tags.map((tag, index) => (
-                      <span
-                        key={`${card.id}-${tag}-${index}`}
-                        className="rounded-[2px] bg-[#f4f4f5] px-[6px] py-[4px] text-[12px] text-[#46474c]"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="mt-[16px] space-y-[6px]">
-                    <p className="text-[14px] font-semibold text-[#292a2d]">고객의 고민</p>
-                    <p className="line-clamp-3 text-[13px] leading-[1.4] text-[#505158]">
-                      {card.concern}
-                    </p>
-                  </div>
-                  <div className="mt-[16px] space-y-[6px]">
-                    <p className="text-[14px] font-semibold text-[#292a2d]">솔루션</p>
-                    <p className="line-clamp-3 text-[13px] leading-[1.4] text-[#505158]">
-                      {card.solution}
-                    </p>
-                  </div>
-                </article>
-              ))}
-              {portfolioHasMore && (
+            {hasPortfolios && (
+              <>
                 <div
-                  ref={portfolioSentinelRef}
-                  className="h-[1px] w-[1px] shrink-0"
-                />
-              )}
-            </div>
-            <div className="absolute left-1/2 top-[551px] h-[3px] w-[55px] -translate-x-1/2 bg-[#e1e2e4]">
-              <div className="h-[3px] w-[18px] bg-[#429ff0]" />
-            </div>
+                  ref={portfolioListRef}
+                  className="absolute left-[16px] top-[86px] flex w-[343px] gap-[12px] overflow-x-auto scrollbar-hide"
+                >
+                  {portfolioCards.map((card) => (
+                    <article
+                      key={card.id}
+                      className="h-[439px] w-[322px] shrink-0 rounded-[12px] border border-[#e1e2e4] bg-white p-[20px]"
+                    >
+                      <p className="text-[16px] font-semibold leading-[1.4] text-[#292a2d]">
+                        {card.title}
+                      </p>
+                      <div className="mt-[12px] flex gap-[8px]">
+                        <div className="relative h-[130px] w-[130px] overflow-hidden rounded-[12px] bg-[#e1e2e4]">
+                          {card.beforeImage && (
+                            <img
+                              src={card.beforeImage}
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
+                          )}
+                          <span className="absolute bottom-[8px] left-[8px] rounded-[4px] bg-black/40 px-[6px] py-[2px] text-[14px] text-white">
+                            전
+                          </span>
+                        </div>
+                        <div className="relative h-[130px] w-[130px] overflow-hidden rounded-[12px] bg-[#e1e2e4]">
+                          {card.afterImage && (
+                            <img
+                              src={card.afterImage}
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
+                          )}
+                          <span className="absolute bottom-[8px] right-[8px] rounded-[4px] bg-black/40 px-[6px] py-[2px] text-[14px] text-white">
+                            후
+                          </span>
+                        </div>
+                      </div>
+                      <div className="mt-[17px] flex gap-[8px] overflow-hidden">
+                        {card.tags.map((tag, index) => (
+                          <span
+                            key={`${card.id}-${tag}-${index}`}
+                            className="rounded-[2px] bg-[#f4f4f5] px-[6px] py-[4px] text-[12px] text-[#46474c]"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="mt-[16px] space-y-[6px]">
+                        <p className="text-[14px] font-semibold text-[#292a2d]">고객의 고민</p>
+                        <p className="line-clamp-3 text-[13px] leading-[1.4] text-[#505158]">
+                          {card.concern}
+                        </p>
+                      </div>
+                      <div className="mt-[16px] space-y-[6px]">
+                        <p className="text-[14px] font-semibold text-[#292a2d]">솔루션</p>
+                        <p className="line-clamp-3 text-[13px] leading-[1.4] text-[#505158]">
+                          {card.solution}
+                        </p>
+                      </div>
+                    </article>
+                  ))}
+                  {portfolioHasMore && (
+                    <div
+                      ref={portfolioSentinelRef}
+                      className="h-[1px] w-[1px] shrink-0"
+                    />
+                  )}
+                </div>
+                <div className="absolute left-1/2 top-[551px] h-[3px] w-[55px] -translate-x-1/2 bg-[#e1e2e4]">
+                  <div className="h-[3px] w-[18px] bg-[#429ff0]" />
+                </div>
+              </>
+            )}
           </div>
 
           <div className="absolute left-0 w-[375px]" style={{ top: layoutTops.consultationSection }}>
