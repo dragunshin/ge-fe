@@ -14,7 +14,7 @@ export function Step5ImageStyle({
 }) {
   return (
     <section className="pt-[8px]">
-      <p className="text-[16px] font-medium text-[#008bff]">5/9</p>
+      <p className="text-[16px] font-medium text-[#008bff]">4/6</p>
       <h1 className="mt-[6px] text-[20px] font-semibold leading-[1.4] text-black">
         <span className="text-[#429ff0]">추구하는 이미지</span>를 선택해주세요.
       </h1>

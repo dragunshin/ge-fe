@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ChevronLeft } from "lucide-react";
+import { Check, ChevronLeft } from "lucide-react";
 
 const StepArrow = () => (
   <svg
@@ -22,9 +22,19 @@ const StepArrow = () => (
 export function PaymentOrderPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const state = location.state as { consultType?: "MESSAGE" | "VIDEO"; from?: string; step?: number } | null;
+  const state = location.state as {
+    consultType?: "MESSAGE" | "VIDEO";
+    from?: string;
+    step?: number;
+    expertName?: string;
+    categoryLabel?: string;
+    scheduleLabel?: string;
+    price?: number;
+  } | null;
   const scheduleLabel =
-    sessionStorage.getItem("consult_schedule_label") ?? "2025년 10월 28일 오전 11:30";
+    state?.scheduleLabel ??
+    sessionStorage.getItem("consult_schedule_label") ??
+    "2025년 10월 28일 오전 11:30";
   const consultTypeFromState = state?.consultType;
   const consultTypeFromStorage = state?.from === "/hair/setup"
     ? sessionStorage.getItem("consult_type")
@@ -36,17 +46,22 @@ export function PaymentOrderPage() {
         ? consultTypeFromStorage
         : "MESSAGE";
   const consultLabel = consultType === "VIDEO" ? "실시간 화상 상담" : "메세지 상담";
+  const storedPrice = Number(sessionStorage.getItem("consult_price"));
+  const orderPriceFromState = typeof state?.price === "number" ? state.price : null;
   const consultPriceMap: Record<"MESSAGE" | "VIDEO", number> = {
     MESSAGE: 24000,
     VIDEO: 40000,
   };
+  const orderPrice =
+    orderPriceFromState ??
+    (Number.isFinite(storedPrice) && storedPrice > 0 ? storedPrice : null) ??
+    consultPriceMap[consultType];
   const [agreements, setAgreements] = useState({
     order: false,
     privacy: false,
     thirdParty: false,
   });
   const canPay = agreements.order && agreements.privacy && agreements.thirdParty;
-  const orderPrice = consultPriceMap[consultType];
   const feePrice = 0;
   const couponDiscount = 0;
   const pointUsed = 0;
@@ -90,6 +105,11 @@ export function PaymentOrderPage() {
     navigate(-1);
   };
 
+  const expertName =
+    state?.expertName ?? sessionStorage.getItem("consult_expert_name") ?? "전문가";
+  const categoryLabel =
+    state?.categoryLabel ?? sessionStorage.getItem("consult_category_label") ?? "헤어";
+
   return (
     <div className="flex min-h-full flex-col bg-white text-[#0f0f10]">
       <header className="app-header flex h-[44px] items-center gap-[15px] px-4">
@@ -127,8 +147,8 @@ export function PaymentOrderPage() {
           <p className="text-[16px] font-semibold leading-[1.4] text-[#0f0f10]">주문 내용</p>
           <div className="mt-[16px] rounded-[4px] border border-[#e1e2e4] px-[16px] py-[14px]">
             <div className="flex items-center gap-[8px] text-[14px] leading-[1.4]">
-              <span className="font-semibold text-[#171719]">전문가 이름</span>
-              <span className="text-[#aeb0b6]">헤어</span>
+              <span className="font-semibold text-[#171719]">{expertName}</span>
+              <span className="text-[#aeb0b6]">{categoryLabel}</span>
             </div>
             <div className="mt-[10px] rounded-[4px] border border-[#e1e2e4] bg-[#fafafa] px-[16px] py-[12px]">
               <div className="flex items-start justify-between text-[14px] font-semibold leading-[1.4] text-[#171719]">
@@ -250,8 +270,16 @@ export function PaymentOrderPage() {
                 type="checkbox"
                 checked={agreements.order}
                 onChange={(e) => handleOrderAgreementChange(e.target.checked)}
-                className="h-[14px] w-[14px] rounded border-[#c2c4c8]"
+                className="sr-only"
               />
+              <span
+                className={`flex h-[12px] w-[12px] items-center justify-center rounded-[2px] border ${
+                  agreements.order ? "border-[#0f0f10] bg-[#0f0f10]" : "border-[#dbdcdf] bg-white"
+                }`}
+                aria-hidden="true"
+              >
+                {agreements.order && <Check className="h-[10px] w-[10px] text-white" />}
+              </span>
               주문 내용 확인 및 결제 동의
             </label>
             <div className="h-px w-full bg-[#f4f4f5]" />
@@ -264,8 +292,18 @@ export function PaymentOrderPage() {
                     onChange={(e) =>
                       handleRequiredAgreementChange('privacy', e.target.checked)
                     }
-                    className="h-[14px] w-[14px] rounded border-[#c2c4c8]"
+                    className="sr-only"
                   />
+                  <span
+                    className={`flex h-[12px] w-[12px] items-center justify-center rounded-[2px] border ${
+                      agreements.privacy
+                        ? "border-[#0f0f10] bg-[#0f0f10]"
+                        : "border-[#dbdcdf] bg-white"
+                    }`}
+                    aria-hidden="true"
+                  >
+                    {agreements.privacy && <Check className="h-[10px] w-[10px] text-white" />}
+                  </span>
                   개인정보 수집 및 이용 동의<span className="text-[#429ff0]">(필수)</span>
                 </label>
                 <button className="border-b border-[#70737c] text-[#70737c]">자세히</button>
@@ -278,8 +316,18 @@ export function PaymentOrderPage() {
                     onChange={(e) =>
                       handleRequiredAgreementChange('thirdParty', e.target.checked)
                     }
-                    className="h-[14px] w-[14px] rounded border-[#c2c4c8]"
+                    className="sr-only"
                   />
+                  <span
+                    className={`flex h-[12px] w-[12px] items-center justify-center rounded-[2px] border ${
+                      agreements.thirdParty
+                        ? "border-[#0f0f10] bg-[#0f0f10]"
+                        : "border-[#dbdcdf] bg-white"
+                    }`}
+                    aria-hidden="true"
+                  >
+                    {agreements.thirdParty && <Check className="h-[10px] w-[10px] text-white" />}
+                  </span>
                   개인정보 제3자 정보 제공 동의<span className="text-[#429ff0]">(필수)</span>
                 </label>
                 <button className="border-b border-[#70737c] text-[#70737c]">자세히</button>

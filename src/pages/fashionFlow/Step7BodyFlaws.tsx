@@ -14,7 +14,7 @@ export function Step7BodyFlaws({
 }) {
   return (
     <section className="pt-[8px]">
-      <p className="text-[16px] font-medium text-[#008bff]">7/9</p>
+      <p className="text-[16px] font-medium text-[#008bff]">3/6</p>
       <h1 className="mt-[6px] text-[20px] font-semibold leading-[1.4] text-black">
         본인의 <span className="text-[#429ff0]">체형적 결점</span>으로 생각하는 부분을
         선택해주세요.

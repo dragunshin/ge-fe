@@ -22,7 +22,7 @@ export function Step6StylePreference({
 }) {
   return (
     <section className="pt-[8px]">
-      <p className="text-[16px] font-medium text-[#008bff]">6/9</p>
+      <p className="text-[16px] font-medium text-[#008bff]">4/6</p>
       <h1 className="mt-[6px] text-[20px] font-semibold leading-[1.4] text-black">
         선호하는 스타일을 알려주세요.
       </h1>

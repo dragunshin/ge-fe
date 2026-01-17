@@ -252,6 +252,11 @@ export default function CategoryExpertListPage() {
     }
     const price = matched.price;
     const category = categoryKey === "fashion" ? "FASHION" : "HAIR";
+    const selectedExpert = experts.find((expert) => expert.id === selectedReservationExpertId);
+    sessionStorage.setItem("consult_expert_name", selectedExpert?.name ?? "전문가");
+    sessionStorage.setItem("consult_category_label", categoryLabel);
+    sessionStorage.setItem("consult_price", String(price));
+    sessionStorage.setItem("consult_expert_id", String(selectedReservationExpertId));
 
     const response = await reservationService.createTempReservation({
       expertId: selectedReservationExpertId,

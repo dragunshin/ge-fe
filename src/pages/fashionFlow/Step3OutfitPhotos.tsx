@@ -15,7 +15,6 @@ export function Step3OutfitPhotos({
 }) {
   return (
     <section className="pt-[8px]">
-      <p className="text-[16px] font-medium text-[#008bff]">3/9</p>
       <h1 className="mt-[6px] text-[20px] font-semibold leading-[1.4] text-black">
         본인 사진 중 <span className="text-[#429ff0]">가장 마음에 들었던 착장</span>을
         올려주세요.

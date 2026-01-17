@@ -26,7 +26,7 @@ export function Step8ItemBudget({
 }) {
   return (
     <section className="pt-[8px]">
-      <p className="text-[16px] font-medium text-[#008bff]">8/9</p>
+      <p className="text-[16px] font-medium text-[#008bff]">5/6</p>
       <h1 className="mt-[6px] text-[20px] font-semibold leading-[1.4] text-black">
         <span>원하시는 </span>
         <span className="text-[#008bff]">착장 1세트의 구성</span>

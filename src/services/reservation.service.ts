@@ -7,11 +7,11 @@ export type OutfitPriceRange = {
 };
 
 export type FashionImageList = {
-  frontFullBody: string[];
-  leftFullBody: string[];
-  rightFullBody: string[];
-  favoriteOutfit: string[];
-  consultationPurpose?: string[];
+  front: string[];
+  left: string[];
+  right: string[];
+  favorite: string[];
+  purpose?: string[];
 };
 
 export type FashionConcern = {

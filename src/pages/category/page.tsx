@@ -173,6 +173,13 @@ const CategoryLandingPage = () => {
     const price = matched.price;
     // 카테고리별 임시 예약 생성
     const category = categoryKey === 'fashion' ? 'FASHION' : 'HAIR';
+    const selectedExpert = expertCards.find(
+      (expert) => expert.id === selectedReservationExpertId,
+    );
+    sessionStorage.setItem('consult_expert_name', selectedExpert?.name ?? '전문가');
+    sessionStorage.setItem('consult_category_label', categoryLabel);
+    sessionStorage.setItem('consult_price', String(price));
+    sessionStorage.setItem('consult_expert_id', String(selectedReservationExpertId));
 
     const response = await reservationService.createTempReservation({
       expertId: selectedReservationExpertId,

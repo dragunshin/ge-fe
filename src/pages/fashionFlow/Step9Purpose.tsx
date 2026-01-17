@@ -19,7 +19,7 @@ export function Step9Purpose({
 }) {
   return (
     <section className="pt-[8px]">
-      <p className="text-[16px] font-medium text-[#008bff]">9/9</p>
+      <p className="text-[16px] font-medium text-[#008bff]">6/6</p>
       <h1 className="mt-[6px] text-[20px] font-semibold leading-[1.4] text-black">
         전문가 상담 목적을 알려주세요.
       </h1>

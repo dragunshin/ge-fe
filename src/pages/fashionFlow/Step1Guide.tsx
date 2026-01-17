@@ -19,7 +19,7 @@ export function Step1Guide({
   if (introStage === 1) {
     return (
       <section className="pt-[8px]">
-        <p className="text-[16px] font-medium text-[#008bff]">1/9</p>
+        <p className="text-[16px] font-medium text-[#008bff]">1/6</p>
         <h1 className="mt-[6px] text-[20px] font-semibold leading-[1.4] text-black">
           맨유얼에서 정확한 컨설팅을
           <br />
@@ -45,7 +45,7 @@ export function Step1Guide({
 
   return (
     <section className="pt-[8px]">
-      <p className="text-[16px] font-medium text-[#008bff]">1/9</p>
+      <p className="text-[16px] font-medium text-[#008bff]">1/6</p>
       <h1 className="mt-[6px] text-[20px] font-semibold leading-[1.4] text-black">
         <span className="text-[#429ff0]">전신 정면 사진 </span>
         먼저 올려주세요.
@@ -95,7 +95,7 @@ export function Step1Guide({
           onClick={() => frontInputRef.current?.click()}
         >
           <Camera className="h-[20px] w-[20px]" />
-          사진 업로드
+          {frontImage ? "다시 업로드하기" : "사진 업로드"}
         </button>
       </div>
     </section>
