@@ -133,3 +133,10 @@ export interface ExpertSummaryResponse {
   reviewCount: number;
   representativeReviewImages: string[];
 }
+
+export interface PointApplicationResponse {
+  originalPrice: number;
+  pointsUsed: number;
+  finalPrice: number;
+  remainingPoints: number;
+}

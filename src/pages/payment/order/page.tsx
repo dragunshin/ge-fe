@@ -1,6 +1,9 @@
-import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import type { KeyboardEvent } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Check, ChevronLeft } from "lucide-react";
+import { getUserMe } from '@/api/mypage';
+import { reservationService } from '@/services/reservation.service';
 
 const StepArrow = () => (
   <svg
@@ -22,6 +25,7 @@ const StepArrow = () => (
 export function PaymentOrderPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const state = location.state as {
     consultType?: "MESSAGE" | "VIDEO";
     from?: string;
@@ -30,6 +34,7 @@ export function PaymentOrderPage() {
     categoryLabel?: string;
     scheduleLabel?: string;
     price?: number;
+    reservationId?: number;
   } | null;
   const scheduleLabel =
     state?.scheduleLabel ??
@@ -64,10 +69,19 @@ export function PaymentOrderPage() {
   const canPay = agreements.order && agreements.privacy && agreements.thirdParty;
   const feePrice = 0;
   const couponDiscount = 0;
-  const pointUsed = 0;
-  const totalPrice = orderPrice + feePrice - couponDiscount - pointUsed;
-  const availablePoints = 0;
-  const totalPoints = 0;
+  const reservationIdParam =
+    searchParams.get("reservationId") ??
+    searchParams.get("reservation_id") ??
+    (state?.reservationId ? String(state.reservationId) : null);
+  const reservationId = reservationIdParam ? Number(reservationIdParam) : Number.NaN;
+  const hasReservationId = Number.isFinite(reservationId);
+  const [pointInput, setPointInput] = useState("0");
+  const [pointUsed, setPointUsed] = useState(0);
+  const [pointBalance, setPointBalance] = useState(0);
+  const [isApplyingPoints, setIsApplyingPoints] = useState(false);
+  const availablePoints = Math.min(pointBalance, orderPrice);
+  const totalPoints = pointBalance;
+  const totalPrice = Math.max(orderPrice + feePrice - couponDiscount - pointUsed, 0);
   const formatCurrency = (value: number) => `${value.toLocaleString('ko-KR')}원`;
   const formatPoint = (value: number) => `${value.toLocaleString('ko-KR')}P`;
   const appendStep = (path: string, step?: number) => {
@@ -103,6 +117,66 @@ export function PaymentOrderPage() {
       return;
     }
     navigate(-1);
+  };
+
+  useEffect(() => {
+    const ac = new AbortController();
+    (async () => {
+      try {
+        const me = await getUserMe({ signal: ac.signal });
+        setPointBalance(me.points ?? 0);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        console.error(error);
+      }
+    })();
+    return () => ac.abort();
+  }, []);
+
+  const clampPoints = (value: number) => Math.min(Math.max(value, 0), availablePoints);
+
+  const applyPoints = async (points: number) => {
+    if (!hasReservationId) {
+      window.alert("예약 ID가 없습니다. 다시 시도해주세요.");
+      return;
+    }
+    const clamped = clampPoints(points);
+    setIsApplyingPoints(true);
+    try {
+      const response = await reservationService.applyPoints(reservationId, {
+        pointsToUse: clamped,
+      });
+      const data = response.data;
+      setPointUsed(data.pointsUsed);
+      setPointInput(String(data.pointsUsed));
+      if (typeof data.remainingPoints === "number") {
+        setPointBalance(data.remainingPoints + data.pointsUsed);
+      }
+    } catch (error) {
+      console.error(error);
+      window.alert("포인트 적용에 실패했어요. 다시 시도해주세요.");
+    } finally {
+      setIsApplyingPoints(false);
+    }
+  };
+
+  const handlePointInputChange = (value: string) => {
+    const numeric = value.replace(/\D/g, "");
+    const parsed = numeric ? Number(numeric) : 0;
+    const clamped = clampPoints(parsed);
+    setPointInput(String(clamped));
+    setPointUsed(clamped);
+  };
+
+  const handlePointInputBlur = () => {
+    void applyPoints(pointUsed);
+  };
+
+  const handlePointInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      void applyPoints(pointUsed);
+    }
   };
 
   const expertName =
@@ -177,10 +251,25 @@ export function PaymentOrderPage() {
             <div className="flex w-full items-center gap-[16px]">
               <span className="text-[14px] leading-[1.4] text-[#878a93]">포인트</span>
               <div className="flex flex-1 items-center gap-[8px]">
-                <div className="flex flex-1 items-center justify-end rounded-[4px] border border-[#e1e2e4] px-[16px] py-[10px] text-[14px] font-semibold leading-[1.4]">
-                  {formatPoint(pointUsed)}
-                </div>
-                <button className="h-[40px] rounded-[4px] border border-[#dbdcdf] px-[16px] text-[14px] leading-[1.4] text-[#171719]">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={pointInput}
+                  onChange={(e) => handlePointInputChange(e.target.value)}
+                  onBlur={handlePointInputBlur}
+                  onKeyDown={handlePointInputKeyDown}
+                  disabled={isApplyingPoints || !hasReservationId}
+                  className="flex h-[40px] flex-1 items-center justify-end rounded-[4px] border border-[#e1e2e4] px-[16px] text-right text-[14px] font-semibold leading-[1.4] text-[#0f0f10] disabled:bg-[#f4f4f5]"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    handlePointInputChange(String(availablePoints));
+                    void applyPoints(availablePoints);
+                  }}
+                  disabled={availablePoints <= 0 || isApplyingPoints || !hasReservationId}
+                  className="h-[40px] rounded-[4px] border border-[#dbdcdf] px-[16px] text-[14px] leading-[1.4] text-[#171719] disabled:text-[#b5b7bd]"
+                >
                   전액사용
                 </button>
               </div>
@@ -349,9 +438,9 @@ export function PaymentOrderPage() {
               },
             })
           }
-          disabled={!canPay}
+          disabled={!canPay || isApplyingPoints}
           className={`w-full rounded-[4px] border py-[12px] text-center text-[16px] font-semibold leading-[1.4] ${
-            canPay
+            canPay && !isApplyingPoints
               ? 'border-[#dadada] bg-[#0f0f10] text-white'
               : 'border-[#e1e2e4] bg-[#f4f4f5] text-[#aeb0b6]'
           }`}

@@ -69,6 +69,9 @@ export default function FashionFlowPage() {
     searchParams.get("reservation_id") ??
     (location.state as { reservationId?: number } | null)?.reservationId;
   const reservationId = reservationIdRaw ? Number(reservationIdRaw) : null;
+  const paymentOrderPath = reservationId
+    ? `/payment/order?reservationId=${reservationId}`
+    : "/payment/order";
 
   const frontInputRef = React.useRef<HTMLInputElement | null>(null);
   const leftInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -397,7 +400,7 @@ export default function FashionFlowPage() {
     }
     const submitted = await submitFashionConcern();
     if (!submitted) return;
-    navigate("/payment/order", {
+    navigate(paymentOrderPath, {
       state: {
         from: `${location.pathname}${location.search}`,
         category: "패션",
@@ -418,7 +421,7 @@ export default function FashionFlowPage() {
       }
       return;
     }
-    navigate("/payment/order", { state: { category: "패션", step: 6 } });
+    navigate(paymentOrderPath, { state: { category: "패션", step: 6 } });
   };
 
   const handleBack = () => {

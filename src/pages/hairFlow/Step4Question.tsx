@@ -156,8 +156,10 @@ export function Step4Question({
 
       // 저장 후 초기화: 결제에서 뒤로 돌아올 수 있다면 유지하는 것도 방법
       // s.resetAll();
-
-      nav("/payment/order", { state: { from: "/hair/setup", step: 3 } });
+      //reservationId 추가
+      nav(`/payment/order?reservationId=${reservationId}`, {
+        state: { from: "/hair/setup", step: 3 },
+      });
     } catch (e) {
       console.error(e);
       alert("제출에 실패했어요. 다시 시도해주세요.");
