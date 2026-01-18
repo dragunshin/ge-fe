@@ -10,6 +10,7 @@ import { reviewService } from '../../services/review.service';
 import ConsultationMethodSheet from '../resevationFlow/reservationSheet/typeReservation';
 import DateTimeBottomSheet from '../resevationFlow/reservationSheet/calendar';
 import { reservationService } from '../../services/reservation.service';
+import { useAuthStore } from '@/stores/useAuthStore';
 import {
   getApiCategoryFromRoute,
   getLabelFromApiCategory,
@@ -83,6 +84,7 @@ const CategoryLandingPage = () => {
   const [openCalendarSheet, setOpenCalendarSheet] = useState(false);
   const [selectedConsultType, setSelectedConsultType] =
     useState<ConsultType>('MESSAGE');
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   // 예약 시작 시 선택한 전문가 저장
   const [selectedReservationExpertId, setSelectedReservationExpertId] = useState<number | null>(
     null,
@@ -113,15 +115,15 @@ const CategoryLandingPage = () => {
   };
 
   const handleReservationSchedule = () => {
-    if (categoryKey === 'hair') {
-      setOpenTypeSheet(true);
+    if (categoryKey !== 'hair' && categoryKey !== 'fashion') {
+      navigate('/service-ready');
       return;
     }
-    if (categoryKey === 'fashion') {
-      setOpenTypeSheet(true);
+    if (!isAuthenticated) {
+      navigate('/auth/login');
       return;
     }
-    navigate('/service-ready');
+    setOpenTypeSheet(true);
   };
 
   const getReservationRoute = () => {
@@ -191,6 +193,7 @@ const CategoryLandingPage = () => {
       price,
     });
 
+    sessionStorage.setItem('consult_reservation_id', String(response.data.reservationId));
     return response.data.reservationId;
   };
 
@@ -414,6 +417,14 @@ const CategoryLandingPage = () => {
     const query = new URLSearchParams(location.search);
     scrollToSection(query.get('section'));
   }, [location.search]);
+
+  useEffect(() => {
+    const state = location.state as { openCalendarSheet?: boolean } | null;
+    if (state?.openCalendarSheet) {
+      setOpenCalendarSheet(true);
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location.pathname, location.state, navigate]);
 
   return (
     <div className="flex h-full flex-col bg-white">
@@ -823,6 +834,7 @@ const CategoryLandingPage = () => {
         onNext={async ({ date, timeId }) => {
           sessionStorage.setItem('consult_schedule_label', formatScheduleLabel(date, timeId));
           setOpenCalendarSheet(false);
+          sessionStorage.setItem('consult_return_path', `${location.pathname}${location.search}`);
           // 패션 예약 임시 생성 후 reservationId 전달
           if (categoryKey === 'fashion' || categoryKey === 'hair') {
             const reservationId = await handleTempReservation(date, timeId);

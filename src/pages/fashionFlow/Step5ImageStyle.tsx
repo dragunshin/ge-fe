@@ -14,9 +14,9 @@ export function Step5ImageStyle({
 }) {
   return (
     <section className="pt-[8px]">
-      <p className="text-[16px] font-medium text-[#008bff]">4/6</p>
+      <p className="text-[16px] font-medium text-[#008bff]">6/8</p>
       <h1 className="mt-[6px] text-[20px] font-semibold leading-[1.4] text-black">
-        <span className="text-[#429ff0]">추구하는 이미지</span>를 선택해주세요.
+        <span className="text-[#008bff]">추구하는 이미지</span>를 선택해주세요.
       </h1>
 
       <div className="mt-[16px] grid grid-cols-[165px_166px] gap-[12px]">
@@ -34,12 +34,12 @@ export function Step5ImageStyle({
               onClick={() => onToggle(option)}
             >
               <span>{option}</span>
-              <span
-                className={`flex h-[18px] w-[18px] items-center justify-center rounded-full ${
-                  selected ? "opacity-100" : "opacity-0"
-                }`}
-              >
-                <Check className="h-[12px] w-[12px] text-[#008bff]" />
+              <span className="flex h-[18px] w-[18px] items-center justify-center">
+                <Check
+                  className={`h-[12px] w-[12px] ${
+                    selected ? "text-[#008bff]" : "text-[#c4c7ce]"
+                  }`}
+                />
               </span>
             </button>
           );

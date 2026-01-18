@@ -158,7 +158,7 @@ export function Step4Question({
       // s.resetAll();
       //reservationId 추가
       nav(`/payment/order?reservationId=${reservationId}`, {
-        state: { from: "/hair/setup", step: 3 },
+        state: { from: `/hair/setup?reservationId=${reservationId}`, step: 3 },
       });
     } catch (e) {
       console.error(e);

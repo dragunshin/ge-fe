@@ -14,9 +14,9 @@ export function Step7BodyFlaws({
 }) {
   return (
     <section className="pt-[8px]">
-      <p className="text-[16px] font-medium text-[#008bff]">3/6</p>
+      <p className="text-[16px] font-medium text-[#008bff]">5/8</p>
       <h1 className="mt-[6px] text-[20px] font-semibold leading-[1.4] text-black">
-        본인의 <span className="text-[#429ff0]">체형적 결점</span>으로 생각하는 부분을
+        본인의 <span className="text-[#008bff]">체형적 결점</span>으로 생각하는 부분을
         선택해주세요.
       </h1>
 
@@ -35,12 +35,12 @@ export function Step7BodyFlaws({
               onClick={() => onToggle(option)}
             >
               <span>{option}</span>
-              <span
-                className={`flex h-[18px] w-[18px] items-center justify-center rounded-full ${
-                  selected ? "opacity-100" : "opacity-0"
-                }`}
-              >
-                <Check className="h-[12px] w-[12px] text-[#008bff]" />
+              <span className="flex h-[18px] w-[18px] items-center justify-center">
+                <Check
+                  className={`h-[12px] w-[12px] ${
+                    selected ? "text-[#008bff]" : "text-[#c4c7ce]"
+                  }`}
+                />
               </span>
             </button>
           );

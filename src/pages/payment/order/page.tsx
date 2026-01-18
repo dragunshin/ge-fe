@@ -8,7 +8,7 @@ import { reservationService } from '@/services/reservation.service';
 const StepArrow = () => (
   <svg
     aria-hidden="true"
-    className="h-[18px] w-[18px] rotate-180"
+    className="h-[18px] w-[18px]"
     viewBox="0 0 18 18"
     fill="none"
   >
@@ -113,7 +113,11 @@ export function PaymentOrderPage() {
 
   const handleBack = () => {
     if (state?.from) {
-      navigate(appendStep(state.from, state.step), { state });
+      const withReservationId =
+        hasReservationId && !state.from.includes("reservationId=")
+          ? appendStep(`${state.from}${state.from.includes("?") ? "&" : "?"}reservationId=${reservationId}`, state.step)
+          : appendStep(state.from, state.step);
+      navigate(withReservationId, { state });
       return;
     }
     navigate(-1);
@@ -186,7 +190,7 @@ export function PaymentOrderPage() {
 
   return (
     <div className="flex min-h-full flex-col bg-white text-[#0f0f10]">
-      <header className="app-header flex h-[44px] items-center gap-[15px] px-4">
+      <header className="app-header sticky top-0 z-20 flex h-[44px] items-center gap-[15px] bg-white px-4">
         <button onClick={handleBack} aria-label="뒤로가기">
           <ChevronLeft className="h-[24px] w-[24px]" />
         </button>
@@ -393,7 +397,7 @@ export function PaymentOrderPage() {
                   >
                     {agreements.privacy && <Check className="h-[10px] w-[10px] text-white" />}
                   </span>
-                  개인정보 수집 및 이용 동의<span className="text-[#429ff0]">(필수)</span>
+                  개인정보 수집 및 이용 동의<span className="text-[#008bff]">(필수)</span>
                 </label>
                 <button className="border-b border-[#70737c] text-[#70737c]">자세히</button>
               </div>
@@ -417,7 +421,7 @@ export function PaymentOrderPage() {
                   >
                     {agreements.thirdParty && <Check className="h-[10px] w-[10px] text-white" />}
                   </span>
-                  개인정보 제3자 정보 제공 동의<span className="text-[#429ff0]">(필수)</span>
+                  개인정보 제3자 정보 제공 동의<span className="text-[#008bff]">(필수)</span>
                 </label>
                 <button className="border-b border-[#70737c] text-[#70737c]">자세히</button>
               </div>

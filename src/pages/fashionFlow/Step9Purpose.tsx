@@ -19,7 +19,7 @@ export function Step9Purpose({
 }) {
   return (
     <section className="pt-[8px]">
-      <p className="text-[16px] font-medium text-[#008bff]">6/6</p>
+      <p className="text-[16px] font-medium text-[#008bff]">8/8</p>
       <h1 className="mt-[6px] text-[20px] font-semibold leading-[1.4] text-black">
         전문가 상담 목적을 알려주세요.
       </h1>
@@ -45,7 +45,7 @@ export function Step9Purpose({
         </span>
       </div>
 
-      <div className="mt-[12px] flex gap-[8px]">
+      <div className="mt-[16px] flex gap-[8px]">
         <input
           ref={purposeInputRef}
           type="file"
@@ -62,7 +62,7 @@ export function Step9Purpose({
           className="flex h-[108px] w-[108px] flex-col items-center justify-center rounded-[8px] border border-[#e1e2e4] bg-[#fafafa] text-[14px] text-[#656870]"
           onClick={() => purposeInputRef.current?.click()}
         >
-          <Camera className="h-[24px] w-[24px]" />
+          <Camera className="h-[24px] w-[24px] text-[#656870]" />
           <span className="mt-[6px]">{purposeImages.length}/3</span>
         </button>
         {purposeImages.map((image) => (

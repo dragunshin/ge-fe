@@ -32,9 +32,9 @@ export function Step4BodySize({
 }) {
   return (
     <section className="pt-[8px]">
-      <p className="text-[16px] font-medium text-[#008bff]">2/6</p>
+      <p className="text-[16px] font-medium text-[#008bff]">4/8</p>
       <h1 className="mt-[6px] text-[20px] font-semibold leading-[1.4] text-black">
-        <span className="text-[#429ff0]">키/몸무게, 상•하의 사이즈</span>를 알려주세요.
+        <span className="text-[#008bff]">키/몸무게, 상•하의 사이즈</span>를 알려주세요.
       </h1>
 
       <div className="mt-[24px] space-y-[16px]">
@@ -79,12 +79,12 @@ export function Step4BodySize({
                 }`}
               >
                 <span>{option}</span>
-                <span
-                  className={`flex h-[18px] w-[18px] items-center justify-center rounded-full ${
-                    selected ? "opacity-100" : "opacity-0"
-                  }`}
-                >
-                  <Check className="h-[12px] w-[12px] text-[#008bff]" />
+                <span className="flex h-[18px] w-[18px] items-center justify-center">
+                  <Check
+                    className={`h-[12px] w-[12px] ${
+                      selected ? "text-[#008bff]" : "text-[#c4c7ce]"
+                    }`}
+                  />
                 </span>
               </button>
             );
@@ -109,12 +109,12 @@ export function Step4BodySize({
                 }`}
               >
                 <span>{option}</span>
-                <span
-                  className={`flex h-[18px] w-[18px] items-center justify-center rounded-full ${
-                    selected ? "opacity-100" : "opacity-0"
-                  }`}
-                >
-                  <Check className="h-[12px] w-[12px] text-[#008bff]" />
+                <span className="flex h-[18px] w-[18px] items-center justify-center">
+                  <Check
+                    className={`h-[12px] w-[12px] ${
+                      selected ? "text-[#008bff]" : "text-[#c4c7ce]"
+                    }`}
+                  />
                 </span>
               </button>
             );

@@ -35,7 +35,7 @@ export default function FashionFlowPage() {
   const [searchParams] = useSearchParams();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [step, setStep] = React.useState(1);
-  const [introStage, setIntroStage] = React.useState<1 | 2>(1);
+  const [introStage] = React.useState<1 | 2>(2);
   const [frontImage, setFrontImage] = React.useState<OutfitImage | null>(null);
   const [leftImage, setLeftImage] = React.useState<OutfitImage | null>(null);
   const [rightImage, setRightImage] = React.useState<OutfitImage | null>(null);
@@ -67,7 +67,8 @@ export default function FashionFlowPage() {
   const reservationIdRaw =
     searchParams.get("reservationId") ??
     searchParams.get("reservation_id") ??
-    (location.state as { reservationId?: number } | null)?.reservationId;
+    (location.state as { reservationId?: number } | null)?.reservationId ??
+    sessionStorage.getItem("consult_reservation_id");
   const reservationId = reservationIdRaw ? Number(reservationIdRaw) : null;
   const paymentOrderPath = reservationId
     ? `/payment/order?reservationId=${reservationId}`
@@ -83,7 +84,6 @@ export default function FashionFlowPage() {
     const stepParam = Number(searchParams.get("step"));
     if (!Number.isNaN(stepParam) && stepParam >= 1 && stepParam <= 6) {
       setStep(stepParam);
-      setIntroStage(1);
     }
   }, [searchParams]);
 
@@ -278,7 +278,7 @@ export default function FashionFlowPage() {
         Boolean(leftImage?.key) &&
         Boolean(rightImage?.key) &&
         outfits.every((item) => item.key);
-      return introStage === 1 ? true : hasMinimumOutfits && hasRequiredKeys;
+      return hasMinimumOutfits && hasRequiredKeys;
     }
     if (step === 2) {
       const hasHeight = Boolean(formatNumeric(heightValue));
@@ -387,15 +387,8 @@ export default function FashionFlowPage() {
       }
       return;
     }
-    if (step === 1 && introStage === 1) {
-      setIntroStage(2);
-      return;
-    }
     if (step < 6) {
       setStep((prev) => prev + 1);
-      if (step === 1) {
-        setIntroStage(1);
-      }
       return;
     }
     const submitted = await submitFashionConcern();
@@ -410,32 +403,31 @@ export default function FashionFlowPage() {
   };
 
   const handlePreviewNext = () => {
-    if (step === 1 && introStage === 1) {
-      setIntroStage(2);
-      return;
-    }
     if (step < 6) {
       setStep((prev) => prev + 1);
-      if (step === 1) {
-        setIntroStage(1);
-      }
       return;
     }
-    navigate(paymentOrderPath, { state: { category: "패션", step: 6 } });
+    navigate(paymentOrderPath, {
+      state: {
+        from: `${location.pathname}${location.search}`,
+        category: "패션",
+        step: 6,
+      },
+    });
   };
 
   const handleBack = () => {
     if (step === 1) {
-      if (introStage === 2) {
-        setIntroStage(1);
-        return;
+      const returnPath = sessionStorage.getItem("consult_return_path");
+      if (returnPath) {
+        navigate(returnPath, { state: { openCalendarSheet: true } });
+      } else {
+        navigate("/", { state: { openCalendarSheet: true } });
       }
-      navigate(-1);
       return;
     }
     if (step === 2) {
       setStep(1);
-      setIntroStage(2);
       return;
     }
     setStep((prev) => prev - 1);

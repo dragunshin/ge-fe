@@ -14,6 +14,7 @@ import {
   getLabelFromApiCategory,
   type ApiCategory,
 } from '../../lib/utils/category';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 const CATEGORY_TABS = [
   { key: 'hair', label: '헤어' },
@@ -139,6 +140,7 @@ const CategoryLandingPage = () => {
   }, [location.search]);
   const apiCategory = getApiCategoryFromRoute(categoryKey);
   const categoryLabel = getLabelFromApiCategory(apiCategory);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const [experts, setExperts] = useState<ExpertListCard[]>([]);
   const [noticeMessage, setNoticeMessage] = useState<string | null>(null);
@@ -188,6 +190,14 @@ const CategoryLandingPage = () => {
     }
     return () => window.removeEventListener('resize', handleResize);
   }, [categoryKey]);
+
+  useEffect(() => {
+    const state = location.state as { openCalendarSheet?: boolean } | null;
+    if (state?.openCalendarSheet) {
+      setOpenCalendarSheet(true);
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location.pathname, location.state, navigate]);
 
   useEffect(() => {
     let isActive = true;
@@ -336,6 +346,7 @@ const CategoryLandingPage = () => {
       price,
     });
 
+    sessionStorage.setItem('consult_reservation_id', String(response.data.reservationId));
     return response.data.reservationId;
   };
 
@@ -548,6 +559,10 @@ const CategoryLandingPage = () => {
                           setNoticeMessage('해당 카테고리는 상담 예약이 준비 중입니다.');
                           return;
                         }
+                        if (!isAuthenticated) {
+                          navigate('/auth/login');
+                          return;
+                        }
                         // 선택한 전문가 ID 저장
                         setSelectedReservationExpertId(expert.id);
                         setOpenTypeSheet(true);
@@ -749,6 +764,7 @@ const CategoryLandingPage = () => {
         onNext={async ({ date, timeId }) => {
           sessionStorage.setItem('consult_schedule_label', formatScheduleLabel(date, timeId));
           setOpenCalendarSheet(false);
+          sessionStorage.setItem('consult_return_path', `${location.pathname}${location.search}`);
           // 패션 예약 임시 생성 후 reservationId 전달
           if (categoryKey === 'fashion' || categoryKey === 'hair') {
             const reservationId = await handleTempReservation(date, timeId);

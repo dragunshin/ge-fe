@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 
 const StepArrow = () => (
-  <svg aria-hidden="true" className="h-[18px] w-[18px] rotate-180" viewBox="0 0 18 18" fill="none">
+  <svg aria-hidden="true" className="h-[18px] w-[18px]" viewBox="0 0 18 18" fill="none">
     <path
       d="M7 4.5L11.5 9L7 13.5"
       stroke="#989BA2"
@@ -57,7 +57,7 @@ export function PaymentCompletePage() {
 
   return (
     <div className="min-h-full bg-white text-[#0f0f10]">
-      <header className="app-header flex h-[44px] items-center gap-[15px] px-4">
+      <header className="app-header sticky top-0 z-20 flex h-[44px] items-center gap-[15px] bg-white px-4">
         <button onClick={handleBack} aria-label="뒤로가기">
           <ChevronLeft className="h-[24px] w-[24px]" />
         </button>

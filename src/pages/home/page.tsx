@@ -647,7 +647,8 @@ type ExpertListCard = {
 const HomePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { initializeAuth } = useAuthStore();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const initializeAuth = useAuthStore((state) => state.initializeAuth);
   const [selectedTopTab, setSelectedTopTab] = useState("헤어");
   const [selectedConsultingTab, setSelectedConsultingTab] = useState("전체");
   const [selectedHomeTab, setSelectedHomeTab] = useState("전체");
@@ -657,6 +658,7 @@ const HomePage = () => {
   const homeTabTrackRef = useRef<HTMLDivElement | null>(null);
   const homeTabRefs = useRef<Record<string, HTMLSpanElement | null>>({});
   const [homeUnderlineStyle, setHomeUnderlineStyle] = useState({ left: 0, width: 0 });
+  const bannerTrackRef = useRef<HTMLDivElement | null>(null);
 
   // ✅ 추가: bottom sheet 제어 + 선택값 저장(원하면 다음 페이지로 넘길 수 있음)
   const [openTypeSheet, setOpenTypeSheet] = useState(false);
@@ -713,6 +715,25 @@ const HomePage = () => {
       .filter(Boolean);
   };
 
+  const banners: Banner[] = [
+    {
+      id: 1,
+      image: banner1,
+    },
+    {
+      id: 2,
+      image: banner2,
+    },
+    {
+      id: 3,
+      image: banner3,
+    },
+  ];
+  const bannerItemWidth = 340;
+  const bannerGap = 8;
+  const bannerSegment = (bannerItemWidth + bannerGap) * banners.length;
+  const loopedBanners = useMemo(() => [...banners, ...banners, ...banners], [banners]);
+
   const updateHomeUnderline = () => {
     const track = homeTabTrackRef.current;
     const active = homeTabRefs.current[selectedHomeTab];
@@ -744,6 +765,12 @@ const HomePage = () => {
   useEffect(() => {
     initializeAuth();
   }, [initializeAuth]);
+
+  useEffect(() => {
+    const track = bannerTrackRef.current;
+    if (!track) return;
+    track.scrollLeft = bannerSegment;
+  }, [bannerSegment]);
 
   useEffect(() => {
     refreshLikedExperts();
@@ -861,21 +888,6 @@ const HomePage = () => {
     [],
   );
 
-  const banners: Banner[] = [
-    {
-      id: 1,
-      image: banner1,
-    },
-    {
-      id: 2,
-      image: banner2,
-    },
-    {
-      id: 3,
-      image: banner3,
-    },
-  ];
-
   const topTabs = [
     { label: "헤어", minWidth: 47 },
     { label: "패션", minWidth: 47 },
@@ -925,6 +937,10 @@ const HomePage = () => {
 
   // ✅ 추가: 예약 플로우 시작
   const openReservationFlow = () => {
+    if (!isAuthenticated) {
+      navigate("/auth/login");
+      return;
+    }
     setOpenCalendarSheet(false);
     setOpenTypeSheet(true);
   };
@@ -1018,9 +1034,21 @@ const HomePage = () => {
           </div>
         </section>
 
-        <section className="px-4 pt-5">
-          <div className="flex gap-[4px] overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
-            {banners.map((banner) => {
+        <section className="pt-5">
+          <div
+            ref={bannerTrackRef}
+            onScroll={() => {
+              const track = bannerTrackRef.current;
+              if (!track) return;
+              if (track.scrollLeft <= bannerSegment * 0.5) {
+                track.scrollLeft += bannerSegment;
+              } else if (track.scrollLeft >= bannerSegment * 1.5) {
+                track.scrollLeft -= bannerSegment;
+              }
+            }}
+            className="flex gap-[8px] overflow-x-auto px-2 pb-2 scrollbar-hide snap-x snap-mandatory"
+          >
+            {loopedBanners.map((banner, index) => {
               const hasText =
                 banner.eyebrow ||
                 banner.title ||
@@ -1029,8 +1057,8 @@ const HomePage = () => {
                 banner.role;
               return (
                 <article
-                  key={banner.id}
-                  className="relative h-[340px] w-[340px] shrink-0 overflow-hidden rounded-[12px] bg-[#c7c9cf] snap-start"
+                  key={`${banner.id}-${index}`}
+                  className="relative h-[340px] w-[340px] shrink-0 overflow-hidden rounded-none bg-[#c7c9cf] snap-center"
                 >
                   {banner.image && (
                     <img

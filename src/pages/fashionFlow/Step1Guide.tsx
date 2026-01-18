@@ -19,7 +19,7 @@ export function Step1Guide({
   if (introStage === 1) {
     return (
       <section className="pt-[8px]">
-        <p className="text-[16px] font-medium text-[#008bff]">1/6</p>
+        <p className="text-[16px] font-medium text-[#008bff]">1/8</p>
         <h1 className="mt-[6px] text-[20px] font-semibold leading-[1.4] text-black">
           맨유얼에서 정확한 컨설팅을
           <br />
@@ -45,14 +45,12 @@ export function Step1Guide({
 
   return (
     <section className="pt-[8px]">
-      <p className="text-[16px] font-medium text-[#008bff]">1/6</p>
+      <p className="text-[16px] font-medium text-[#008bff]">1/8</p>
       <h1 className="mt-[6px] text-[20px] font-semibold leading-[1.4] text-black">
-        <span className="text-[#429ff0]">전신 정면 사진 </span>
-        먼저 올려주세요.
+        <span className="text-[#008bff]">전신 정면 사진</span>을 1장 업로드해 주세요.
       </h1>
       {!frontImage && (
-        <div className="mt-[16px] flex gap-[8px]">
-          <div className="h-[167px] w-[168px] rounded-[8px] bg-[#e1e2e4]" />
+        <div className="mt-[16px]">
           <div className="h-[167px] w-[168px] rounded-[8px] bg-[#e1e2e4]" />
         </div>
       )}

@@ -24,8 +24,10 @@ export function Step2SidePhotos({
 }) {
   return (
     <section className="pt-[8px]">
+      <p className="text-[16px] font-medium text-[#008bff]">2/8</p>
       <h1 className="mt-[6px] text-[20px] font-semibold leading-[1.4] text-black">
-        이제 <span className="text-[#429ff0]">전신 측면 사진</span>을 올려주세요.
+        이제 <span className="text-[#008bff]">전신 측면 사진</span>을 좌우 1장씩
+        업로드해 주세요.
       </h1>
       {!leftImage && !rightImage && (
         <div className="mt-[16px] flex gap-[8px]">
@@ -44,7 +46,7 @@ export function Step2SidePhotos({
 
       <div className="mt-[24px] space-y-[28px]">
         <div>
-          <p className="text-[20px] font-semibold leading-[1.4]">왼쪽 전신을 올려주세요.</p>
+          <p className="text-[20px] font-semibold leading-[1.4]">왼쪽 전신을 1장 업로드해 주세요.</p>
           <p className="mt-[6px] text-[13px] leading-[1.4] text-[#70737c]">
             몸을 왼쪽으로 돌린 촬영본을 올려주세요.
           </p>
@@ -83,7 +85,7 @@ export function Step2SidePhotos({
         </div>
 
         <div>
-          <p className="text-[20px] font-semibold leading-[1.4]">오른쪽 전신을 올려주세요.</p>
+          <p className="text-[20px] font-semibold leading-[1.4]">오른쪽 전신을 1장 업로드해 주세요.</p>
           <p className="mt-[6px] text-[13px] leading-[1.4] text-[#70737c]">
             몸을 오른쪽으로 돌린 촬영본을 올려주세요.
           </p>

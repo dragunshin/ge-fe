@@ -3,7 +3,9 @@ export const IMAGE_GUIDE = [
   "보정 없는 셀프카메라를 사용해주세요.",
 ];
 
-export const SIDE_GUIDE = ["박시하지 않은 반팔, 반바지를 착용을 권장해요."];
+export const SIDE_GUIDE = [
+  "몸의 실루엣이 잘 보이도록 박시하지 않은 반팔, 반바지 착용을 권장해요.",
+];
 
 export const IMAGE_STYLE_OPTIONS = [
   "섹시함",
@@ -31,7 +33,7 @@ export const BODY_FLAW_OPTIONS = [
   "머리 크기",
 ];
 
-export const ITEM_OPTIONS = ["아우터", "상의", "하의", "신발", "악세사리", "가방"];
+export const ITEM_OPTIONS = ["아우터", "상의", "하의", "신발", "악세서리", "가방"];
 
 export const PRICE_PRESETS = [
   { label: "10만원 이하", min: 0, max: 10, paddingX: 14 },
