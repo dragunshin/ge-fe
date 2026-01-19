@@ -1,21 +1,19 @@
-import { Camera, X } from "lucide-react";
-import type { OutfitImage } from "./types";
-import type { RefObject } from "react";
+import { MultiPhotoPicker } from "@/pages/hairFlow/component/MultiPhotoPicker";
 
 export function Step9Purpose({
   purposeText,
-  purposeImages,
-  purposeInputRef,
+  keys,
+  reservationId,
   onPurposeTextChange,
-  onUploadPurpose,
-  onRemovePurpose,
+  onAddKey,
+  onRemoveKey,
 }: {
   purposeText: string;
-  purposeImages: OutfitImage[];
-  purposeInputRef: RefObject<HTMLInputElement | null>;
+  keys: string[];
+  reservationId: number | null;
   onPurposeTextChange: (value: string) => void;
-  onUploadPurpose: (files: FileList | null) => void;
-  onRemovePurpose: (id: string) => void;
+  onAddKey: (key: string) => void;
+  onRemoveKey: (key: string) => void;
 }) {
   return (
     <section className="pt-[8px]">
@@ -45,41 +43,16 @@ export function Step9Purpose({
         </span>
       </div>
 
-      <div className="mt-[16px] flex gap-[8px]">
-        <input
-          ref={purposeInputRef}
-          type="file"
-          accept="image/*"
-          multiple
-          className="hidden"
-          onChange={(event) => {
-            onUploadPurpose(event.target.files);
-            event.currentTarget.value = "";
-          }}
+      <div className="mt-[16px]">
+        <MultiPhotoPicker
+          keys={keys}
+          max={3}
+          resourceType="consultation"
+          resourceId={reservationId ?? 0}
+          imageType="purpose"
+          onAddKey={onAddKey}
+          onRemoveKey={onRemoveKey}
         />
-        <button
-          type="button"
-          className="flex h-[108px] w-[108px] flex-col items-center justify-center rounded-[8px] border border-[#e1e2e4] bg-[#fafafa] text-[14px] text-[#656870]"
-          onClick={() => purposeInputRef.current?.click()}
-        >
-          <Camera className="h-[24px] w-[24px] text-[#656870]" />
-          <span className="mt-[6px]">{purposeImages.length}/3</span>
-        </button>
-        {purposeImages.map((image) => (
-          <div
-            key={image.id}
-            className="relative h-[108px] w-[108px] overflow-hidden rounded-[8px]"
-          >
-            <img src={image.url} alt="추가 이미지" className="h-full w-full object-cover" />
-            <button
-              type="button"
-              className="absolute right-[6px] top-[6px] flex h-[24px] w-[24px] items-center justify-center rounded-full bg-black/80"
-              onClick={() => onRemovePurpose(image.id)}
-            >
-              <X className="h-[14px] w-[14px] text-white" />
-            </button>
-          </div>
-        ))}
       </div>
     </section>
   );

@@ -1,4 +1,6 @@
-import { Camera, X } from "lucide-react";
+import { X } from "lucide-react";
+import Camera from "@/images/reservationFlow/camera.svg?react";
+import thumbnail1 from "@/images/reservationFlow/fashionFlow/thumbnail.svg";
 import { IMAGE_GUIDE, SIDE_GUIDE } from "./constants";
 import type { OutfitImage } from "./types";
 import type { RefObject } from "react";
@@ -51,7 +53,13 @@ export function Step1Guide({
       </h1>
       {!frontImage && (
         <div className="mt-[16px]">
-          <div className="h-[167px] w-[168px] rounded-[8px] bg-[#e1e2e4]" />
+          <div className="h-[167px] w-[168px] overflow-hidden rounded-[8px] bg-[#e1e2e4]">
+            <img
+              src={thumbnail1}
+              alt="전신 정면 예시"
+              className="h-full w-full object-cover"
+            />
+          </div>
         </div>
       )}
 

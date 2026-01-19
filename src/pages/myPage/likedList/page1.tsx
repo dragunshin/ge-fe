@@ -16,7 +16,7 @@ export default function LikedListPage() {
   const chips: Category[] = ["전체", "헤어", "스킨", "패션", "메이크업"];
 
   // ✅ 선택 상태
-  const [activeChip, setActiveChip] = useState<Category>("스킨");
+  const [activeChip, setActiveChip] = useState<Category>("전체");
   const [likedExperts, setLikedExperts] = useState<ExpertSummaryResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 

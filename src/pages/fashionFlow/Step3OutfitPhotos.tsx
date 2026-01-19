@@ -1,17 +1,17 @@
-import { Upload, X } from "lucide-react";
-import type { OutfitImage } from "./types";
-import type { RefObject } from "react";
+import { MultiPhotoPicker } from "@/pages/hairFlow/component/MultiPhotoPicker";
+import thumbnail2 from "@/images/reservationFlow/fashionFlow/thumbnail3.svg";
+import thumbnail3 from "@/images/reservationFlow/fashionFlow/thumbnail3-2.svg";
 
 export function Step3OutfitPhotos({
-  outfits,
-  outfitInputRef,
-  onUploadOutfits,
-  onRemoveOutfit,
+  keys,
+  reservationId,
+  onAddKey,
+  onRemoveKey,
 }: {
-  outfits: OutfitImage[];
-  outfitInputRef: RefObject<HTMLInputElement | null>;
-  onUploadOutfits: (files: FileList | null) => void;
-  onRemoveOutfit: (id: string) => void;
+  keys: string[];
+  reservationId: number | null;
+  onAddKey: (key: string) => void;
+  onRemoveKey: (key: string) => void;
 }) {
   return (
     <section className="pt-[8px]">
@@ -20,10 +20,22 @@ export function Step3OutfitPhotos({
         <span className="text-[#008bff]">가장 좋아하는 본인 사진</span>을 올려주세요.
       </h1>
 
-      {outfits.length === 0 && (
+      {keys.length === 0 && (
         <div className="mt-[16px] flex gap-[8px]">
-          <div className="h-[167px] w-[168px] rounded-[8px] bg-[#e1e2e4]" />
-          <div className="h-[167px] w-[168px] rounded-[8px] bg-[#e1e2e4]" />
+          <div className="h-[167px] w-[168px] overflow-hidden rounded-[8px] bg-[#e1e2e4]">
+            <img
+              src={thumbnail2}
+              alt="착장 예시 1"
+              className="h-full w-full object-cover"
+            />
+          </div>
+          <div className="h-[167px] w-[168px] overflow-hidden rounded-[8px] bg-[#e1e2e4]">
+            <img
+              src={thumbnail3}
+              alt="착장 예시 2"
+              className="h-full w-full object-cover"
+            />
+          </div>
         </div>
       )}
 
@@ -33,44 +45,16 @@ export function Step3OutfitPhotos({
         </ul>
       </div>
 
-      <div className="mt-[16px] flex flex-wrap gap-[8px]">
-        {outfits.map((item) => (
-          <div
-            key={item.id}
-            className="relative h-[167px] w-[168px] overflow-hidden rounded-[8px]"
-          >
-            <img src={item.url} alt="착장 사진" className="h-full w-full object-cover" />
-            <button
-              type="button"
-              className="absolute right-[10px] top-[10px] flex h-[24px] w-[24px] items-center justify-center rounded-full bg-black/70"
-              onClick={() => onRemoveOutfit(item.id)}
-            >
-              <X className="h-[14px] w-[14px] text-white" />
-            </button>
-          </div>
-        ))}
-      </div>
-
-      <input
-        ref={outfitInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        multiple
-        onChange={(event) => {
-          onUploadOutfits(event.target.files);
-          event.currentTarget.value = "";
-        }}
-      />
-      <div className="mt-[16px] flex justify-center">
-        <button
-          type="button"
-          className="flex h-[52px] w-[306px] items-center justify-center gap-[8px] rounded-[12px] border border-[#dbdcdf] text-[16px] font-medium text-[#46474c]"
-          onClick={() => outfitInputRef.current?.click()}
-        >
-          <Upload className="h-[20px] w-[20px]" />
-          사진 업로드
-        </button>
+      <div className="mt-[16px] flex items-center justify-center">
+        <MultiPhotoPicker
+          keys={keys}
+          max={5}
+          resourceType="consultation"
+          resourceId={reservationId ?? 0}
+          imageType="favorite"
+          onAddKey={onAddKey}
+          onRemoveKey={onRemoveKey}
+        />
       </div>
     </section>
   );

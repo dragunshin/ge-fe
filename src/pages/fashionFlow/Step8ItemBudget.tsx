@@ -8,6 +8,8 @@ export function Step8ItemBudget({
   priceMax,
   minPercent,
   maxPercent,
+  selectedPreset,
+  hasPresetSelection,
   onPriceMinChange,
   onPriceMaxChange,
   onPricePreset,
@@ -19,6 +21,8 @@ export function Step8ItemBudget({
   priceMax: number;
   minPercent: number;
   maxPercent: number;
+  selectedPreset: string | null;
+  hasPresetSelection: boolean;
   onPriceMinChange: (value: number) => void;
   onPriceMaxChange: (value: number) => void;
   onPricePreset: (min: number, max: number) => void;
@@ -74,9 +78,9 @@ export function Step8ItemBudget({
         </p>
         <div className="mt-[8px] flex justify-center">
           <div className="relative h-[24px] w-[306px]">
-            <div className="absolute top-1/2 h-[1px] w-full -translate-y-1/2 bg-[#e1e2e4]" />
+            <div className="absolute top-1/2 h-[1px] w-full -translate-y-1/2 rounded-full bg-[#e1e2e4]" />
             <div
-              className="absolute top-1/2 h-[1px] -translate-y-1/2 bg-[#008bff]"
+              className="absolute top-1/2 h-[1px] -translate-y-1/2 rounded-full bg-[#008bff]"
               style={{
                 left: `${minPercent}%`,
                 width: `${maxPercent - minPercent}%`,
@@ -108,17 +112,24 @@ export function Step8ItemBudget({
           </div>
         </div>
         <div className="mt-[16px] flex w-[340px] flex-wrap gap-x-[6px] gap-y-[10px]">
-          {PRICE_PRESETS.map((preset) => (
-            <button
-              key={preset.label}
-              type="button"
-              className="rounded-[4px] border border-[#e1e2e4] py-[10px] text-[13px] text-[#0f0f10]"
-              style={{ paddingLeft: preset.paddingX, paddingRight: preset.paddingX }}
-              onClick={() => onPricePreset(preset.min, preset.max)}
-            >
-              {preset.label}
-            </button>
-          ))}
+          {PRICE_PRESETS.map((preset) => {
+            const selected = hasPresetSelection && selectedPreset === preset.label;
+            return (
+              <button
+                key={preset.label}
+                type="button"
+                className={`rounded-[4px] border py-[10px] text-[13px] text-[#0f0f10] ${
+                  selected
+                    ? "border-[#008bff] bg-[#e5f4ff]"
+                    : "border-[#e1e2e4] bg-white"
+                }`}
+                style={{ paddingLeft: preset.paddingX, paddingRight: preset.paddingX }}
+                onClick={() => onPricePreset(preset.min, preset.max)}
+              >
+                {preset.label}
+              </button>
+            );
+          })}
         </div>
       </div>
     </section>

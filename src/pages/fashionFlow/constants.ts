@@ -36,11 +36,11 @@ export const BODY_FLAW_OPTIONS = [
 export const ITEM_OPTIONS = ["아우터", "상의", "하의", "신발", "악세서리", "가방"];
 
 export const PRICE_PRESETS = [
-  { label: "10만원 이하", min: 0, max: 10, paddingX: 14 },
-  { label: "10만원대", min: 10, max: 19, paddingX: 14 },
-  { label: "20만원대", min: 20, max: 29, paddingX: 14 },
-  { label: "30만원대", min: 30, max: 39, paddingX: 14 },
-  { label: "40만원 이상", min: 40, max: 40, paddingX: 9 },
+  { label: "10만 원 이하", min: 0, max: 10, paddingX: 14 },
+  { label: "10만 원대", min: 10, max: 19, paddingX: 14 },
+  { label: "20만 원대", min: 20, max: 29, paddingX: 14 },
+  { label: "30만 원대", min: 30, max: 39, paddingX: 14 },
+  { label: "40만 원 이상", min: 40, max: 40, paddingX: 9 },
   { label: "상관없음", min: 0, max: 40, paddingX: 9 },
 ];
 
@@ -49,9 +49,9 @@ export const PRICE_MAX = 40;
 export const SIZE_OPTIONS = ["S", "M", "L", "XL", "XXL"] as const;
 
 export const FIT_IMAGE_OPTIONS = [
-  { label: "머슬핏" },
-  { label: "레귤러" },
-  { label: "오버핏" },
+  { label: "머슬핏", imageKey: "muscle" },
+  { label: "레귤러", imageKey: "regular" },
+  { label: "오버핏", imageKey: "over" },
 ];
 
 export const MOOD_IMAGE_OPTIONS = [

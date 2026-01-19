@@ -150,7 +150,7 @@ export function SocialSignUpForm() {
             userType === 'customer' ? 'text-black border-black border-b-2' : 'text-gray-400 border-[#f4f4f5]'
           }`}
         >
-          그루머
+          일반
         </button>
         <button
           onClick={() => setUserType('expert')}

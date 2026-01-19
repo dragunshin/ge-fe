@@ -1,4 +1,7 @@
-import { Camera, X } from "lucide-react";
+import { X } from "lucide-react";
+import Camera from "@/images/reservationFlow/camera.svg?react";
+import thumbnail2 from "@/images/reservationFlow/fashionFlow/thumbnail2.svg";
+import thumbnail3 from "@/images/reservationFlow/fashionFlow/thumbnail2-2.svg";
 import { SIDE_GUIDE } from "./constants";
 import type { OutfitImage } from "./types";
 import type { RefObject } from "react";
@@ -31,8 +34,20 @@ export function Step2SidePhotos({
       </h1>
       {!leftImage && !rightImage && (
         <div className="mt-[16px] flex gap-[8px]">
-          <div className="h-[167px] w-[168px] rounded-[8px] bg-[#e1e2e4]" />
-          <div className="h-[167px] w-[168px] rounded-[8px] bg-[#e1e2e4]" />
+          <div className="h-[167px] w-[168px] overflow-hidden rounded-[8px] bg-[#e1e2e4]">
+            <img
+              src={thumbnail2}
+              alt="왼쪽 전신 예시"
+              className="h-full w-full object-cover"
+            />
+          </div>
+          <div className="h-[167px] w-[168px] overflow-hidden rounded-[8px] bg-[#e1e2e4]">
+            <img
+              src={thumbnail3}
+              alt="오른쪽 전신 예시"
+              className="h-full w-full object-cover"
+            />
+          </div>
         </div>
       )}
 

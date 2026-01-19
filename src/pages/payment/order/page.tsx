@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { Check, ChevronLeft } from "lucide-react";
+import { Check, ChevronLeft, X } from "lucide-react";
 import { getUserMe } from '@/api/mypage';
 import { reservationService } from '@/services/reservation.service';
 
@@ -29,12 +29,14 @@ export function PaymentOrderPage() {
   const state = location.state as {
     consultType?: "MESSAGE" | "VIDEO";
     from?: string;
+    flowFrom?: string;
     step?: number;
     expertName?: string;
     categoryLabel?: string;
     scheduleLabel?: string;
     price?: number;
     reservationId?: number;
+    fromComplete?: boolean;
   } | null;
   const scheduleLabel =
     state?.scheduleLabel ??
@@ -79,8 +81,10 @@ export function PaymentOrderPage() {
   const [pointUsed, setPointUsed] = useState(0);
   const [pointBalance, setPointBalance] = useState(0);
   const [isApplyingPoints, setIsApplyingPoints] = useState(false);
-  const availablePoints = Math.min(pointBalance, orderPrice);
+  const maxUsablePoints = Math.min(pointBalance, orderPrice);
+  const remainingPoints = Math.max(maxUsablePoints - pointUsed, 0);
   const totalPoints = pointBalance;
+  const hasPointApplied = pointUsed > 0;
   const totalPrice = Math.max(orderPrice + feePrice - couponDiscount - pointUsed, 0);
   const formatCurrency = (value: number) => `${value.toLocaleString('ko-KR')}원`;
   const formatPoint = (value: number) => `${value.toLocaleString('ko-KR')}P`;
@@ -112,6 +116,17 @@ export function PaymentOrderPage() {
   };
 
   const handleBack = () => {
+    if (state?.fromComplete && state?.flowFrom) {
+      const withReservationId =
+        hasReservationId && !state.flowFrom.includes("reservationId=")
+          ? appendStep(
+            `${state.flowFrom}${state.flowFrom.includes("?") ? "&" : "?"}reservationId=${reservationId}`,
+            state.step,
+          )
+          : appendStep(state.flowFrom, state.step);
+      navigate(withReservationId, { state });
+      return;
+    }
     if (state?.from) {
       const withReservationId =
         hasReservationId && !state.from.includes("reservationId=")
@@ -137,7 +152,8 @@ export function PaymentOrderPage() {
     return () => ac.abort();
   }, []);
 
-  const clampPoints = (value: number) => Math.min(Math.max(value, 0), availablePoints);
+  const clampPoints = (value: number) =>
+    Math.min(Math.max(value, 0), maxUsablePoints);
 
   const applyPoints = async (points: number) => {
     if (!hasReservationId) {
@@ -174,6 +190,11 @@ export function PaymentOrderPage() {
 
   const handlePointInputBlur = () => {
     void applyPoints(pointUsed);
+  };
+
+  const handlePointClear = () => {
+    handlePointInputChange("0");
+    void applyPoints(0);
   };
 
   const handlePointInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -252,26 +273,41 @@ export function PaymentOrderPage() {
         <div className="px-4 pt-[28px]">
           <p className="text-[16px] font-semibold leading-[1.4] text-[#0f0f10]">할인</p>
           <div className="mt-[16px] flex flex-col items-end gap-[12px]">
-            <div className="flex w-full items-center gap-[16px]">
-              <span className="text-[14px] leading-[1.4] text-[#878a93]">포인트</span>
-              <div className="flex flex-1 items-center gap-[8px]">
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={pointInput}
-                  onChange={(e) => handlePointInputChange(e.target.value)}
-                  onBlur={handlePointInputBlur}
-                  onKeyDown={handlePointInputKeyDown}
-                  disabled={isApplyingPoints || !hasReservationId}
-                  className="flex h-[40px] flex-1 items-center justify-end rounded-[4px] border border-[#e1e2e4] px-[16px] text-right text-[14px] font-semibold leading-[1.4] text-[#0f0f10] disabled:bg-[#f4f4f5]"
-                />
+            <div className="flex w-full flex-wrap items-center gap-x-[16px] gap-y-[8px]">
+              <span className="shrink-0 text-[14px] leading-[1.4] text-[#878a93]">
+                포인트
+              </span>
+              <div className="flex min-w-0 flex-1 flex-wrap items-center gap-[8px]">
+                <div className="relative min-w-[140px] flex-1">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={pointInput}
+                    onChange={(e) => handlePointInputChange(e.target.value)}
+                    onBlur={handlePointInputBlur}
+                    onKeyDown={handlePointInputKeyDown}
+                    disabled={isApplyingPoints || !hasReservationId}
+                    className="flex h-[40px] w-full items-center justify-end rounded-[4px] border border-[#e1e2e4] px-[16px] pr-[40px] text-right text-[14px] font-semibold leading-[1.4] text-[#0f0f10] disabled:bg-[#f4f4f5]"
+                  />
+                  {hasPointApplied && (
+                    <button
+                      type="button"
+                      onClick={handlePointClear}
+                      disabled={isApplyingPoints || !hasReservationId}
+                      aria-label="포인트 사용 취소"
+                      className="absolute right-[12px] top-1/2 flex h-[18px] w-[18px] -translate-y-1/2 items-center justify-center rounded-full bg-[#e1e2e4] text-[#878a93] disabled:opacity-50"
+                    >
+                      <X className="h-[12px] w-[12px]" />
+                    </button>
+                  )}
+                </div>
                 <button
                   type="button"
                   onClick={() => {
-                    handlePointInputChange(String(availablePoints));
-                    void applyPoints(availablePoints);
+                    handlePointInputChange(String(maxUsablePoints));
+                    void applyPoints(maxUsablePoints);
                   }}
-                  disabled={availablePoints <= 0 || isApplyingPoints || !hasReservationId}
+                  disabled={maxUsablePoints <= 0 || isApplyingPoints || !hasReservationId}
                   className="h-[40px] rounded-[4px] border border-[#dbdcdf] px-[16px] text-[14px] leading-[1.4] text-[#171719] disabled:text-[#b5b7bd]"
                 >
                   전액사용
@@ -280,7 +316,7 @@ export function PaymentOrderPage() {
             </div>
             <div className="flex items-center gap-[8px] text-[14px] leading-[1.4]">
               <span className="font-semibold text-[#0f0f10]">
-                사용 가능 {formatPoint(availablePoints)}
+                사용 가능 {formatPoint(remainingPoints)}
               </span>
               <span className="text-[#878a93]">/</span>
               <span className="text-[#878a93]">보유 {formatPoint(totalPoints)}</span>
@@ -290,13 +326,18 @@ export function PaymentOrderPage() {
 
         <div className="mt-[24px] h-[8px] w-full bg-[#f4f4f5]" />
 
-        <div className="px-4 pt-[28px] opacity-30">
-          <p className="text-[16px] font-semibold leading-[1.4] text-[#0f0f10]">결제 방법</p>
-          <div className="mt-[13px] w-[247px] rounded-[4px] border border-[#e1e2e4] px-[20px] py-[16px]">
-            <p className="text-[14px] leading-[1.4] text-[#878a93]">입금 계좌 번호</p>
-            <p className="mt-[4px] text-[14px] font-semibold leading-[1.4] text-[#0f0f10]">
-              {formatCurrency(0)} {/*  {formatCurrency(totalPrice)} */}
-            </p>
+        <div className="px-4 pt-[28px]">
+          <div className="flex items-center justify-between text-[16px] font-semibold leading-[1.4] text-[#0f0f10]">
+            <span>결제 방법</span>
+            <span className="text-[14px] font-semibold text-right">무통장 입금</span>
+          </div>
+          <div className="mt-[13px] w-full rounded-[4px] border border-[#e1e2e4] px-[20px] py-[16px]">
+            <div className="flex items-center justify-between text-[14px] leading-[1.4]">
+              <span className="text-[#878a93]">입금 계좌</span>
+              <span className="font-semibold text-[#171719]">
+                신한 110-578-261003
+              </span>
+            </div>
           </div>
         </div>
 
@@ -439,6 +480,11 @@ export function PaymentOrderPage() {
                 step: state?.step,
                 flowFrom: state?.from,
                 paymentAmount: totalPrice,
+                consultType,
+                consultLabel,
+                expertName,
+                categoryLabel,
+                scheduleLabel,
               },
             })
           }

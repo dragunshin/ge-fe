@@ -1,5 +1,14 @@
 import { Check } from "lucide-react";
 import { COLOR_OPTIONS, FIT_IMAGE_OPTIONS, IMAGE_STYLE_OPTIONS } from "./constants";
+import MuscleFit from "@/images/reservationFlow/fashionFlow/muscle.svg?react";
+import RegularFit from "@/images/reservationFlow/fashionFlow/regular.svg?react";
+import OverFit from "@/images/reservationFlow/fashionFlow/over.svg?react";
+
+const FIT_IMAGES = {
+  muscle: MuscleFit,
+  regular: RegularFit,
+  over: OverFit,
+};
 
 export function Step6StylePreference({
   colorSelections,
@@ -62,6 +71,7 @@ export function Step6StylePreference({
         <div className="mt-[12px] grid grid-cols-3 gap-[8px]">
           {FIT_IMAGE_OPTIONS.map((item) => {
             const selected = fitSelection === item.label;
+            const ImageComponent = FIT_IMAGES[item.imageKey as keyof typeof FIT_IMAGES];
             return (
               <button
                 key={item.label}
@@ -73,7 +83,9 @@ export function Step6StylePreference({
                   className={`h-[109px] w-[109px] overflow-hidden rounded-[8px] ${
                     selected ? "ring-2 ring-[#008bff]" : ""
                   }`}
-                />
+                >
+                  <ImageComponent className="h-full w-full" />
+                </div>
                 <span className="text-[14px] text-[#70737c]">{item.label}</span>
               </button>
             );

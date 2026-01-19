@@ -2,7 +2,7 @@ import * as React from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import Footer from "./component/Footer";
 import TopNav from "./component/TopNav";
-import { PRICE_MAX, SIZE_OPTIONS } from "./constants";
+import { PRICE_MAX, PRICE_PRESETS, SIZE_OPTIONS } from "./constants";
 import { uploadImageViaPresign } from "@/api/s3forFlow";
 import type { OutfitImage } from "./types";
 import { Step1Guide } from "./Step1Guide";
@@ -39,8 +39,8 @@ export default function FashionFlowPage() {
   const [frontImage, setFrontImage] = React.useState<OutfitImage | null>(null);
   const [leftImage, setLeftImage] = React.useState<OutfitImage | null>(null);
   const [rightImage, setRightImage] = React.useState<OutfitImage | null>(null);
-  const [outfits, setOutfits] = React.useState<OutfitImage[]>([]);
-  const [purposeImages, setPurposeImages] = React.useState<OutfitImage[]>([]);
+  const [outfitKeys, setOutfitKeys] = React.useState<string[]>([]);
+  const [purposeKeys, setPurposeKeys] = React.useState<string[]>([]);
   const [heightValue, setHeightValue] = React.useState("");
   const [weightValue, setWeightValue] = React.useState("");
   const [topSize, setTopSize] = React.useState<SizeOption | null>(null);
@@ -62,6 +62,10 @@ export default function FashionFlowPage() {
   );
   const [priceMin, setPriceMin] = React.useState(0);
   const [priceMax, setPriceMax] = React.useState(40);
+  const [selectedPricePreset, setSelectedPricePreset] = React.useState<string | null>(
+    null,
+  );
+  const [hasPricePresetSelection, setHasPricePresetSelection] = React.useState(false);
   const [purposeText, setPurposeText] = React.useState("");
 
   const reservationIdRaw =
@@ -77,8 +81,6 @@ export default function FashionFlowPage() {
   const frontInputRef = React.useRef<HTMLInputElement | null>(null);
   const leftInputRef = React.useRef<HTMLInputElement | null>(null);
   const rightInputRef = React.useRef<HTMLInputElement | null>(null);
-  const outfitInputRef = React.useRef<HTMLInputElement | null>(null);
-  const purposeInputRef = React.useRef<HTMLInputElement | null>(null);
 
   React.useEffect(() => {
     const stepParam = Number(searchParams.get("step"));
@@ -92,10 +94,9 @@ export default function FashionFlowPage() {
       releasePreview(frontImage);
       releasePreview(leftImage);
       releasePreview(rightImage);
-      outfits.forEach((item) => releasePreview(item));
-      purposeImages.forEach((item) => releasePreview(item));
+      // no-op for multi uploads handled by picker
     };
-  }, [frontImage, leftImage, rightImage, outfits, purposeImages]);
+  }, [frontImage, leftImage, rightImage]);
 
   const handleSingleUpload = (
     files: FileList | null,
@@ -136,60 +137,6 @@ export default function FashionFlowPage() {
       });
   };
 
-  const handleOutfitUpload = (files: FileList | null) => {
-    if (!files?.length) return;
-    if (!reservationId) {
-      window.alert("예약 ID가 없습니다. 다시 시도해주세요.");
-      return;
-    }
-    setOutfits((prev) => {
-      if (prev.length >= 5) {
-        window.alert("최대 5장까지 업로드 가능합니다.");
-        return prev;
-      }
-      const remainingSlots = Math.max(0, 5 - prev.length);
-      if (files.length > remainingSlots) {
-        window.alert("최대 5장까지 업로드 가능합니다.");
-      }
-      const next = Array.from(files)
-        .slice(0, remainingSlots)
-        .map((file) => ({ ...createPreview(file), isUploading: true }));
-      next.forEach((item) => {
-        uploadImageViaPresign({
-          file: item.file as File,
-          resourceType: "consultation",
-          resourceId: reservationId,
-          imageType: "favorite",
-        })
-          .then(({ key }) => {
-            setOutfits((current) =>
-              current.map((entry) =>
-                entry.id === item.id ? { ...entry, key, isUploading: false } : entry,
-              ),
-            );
-          })
-          .catch((error) => {
-            console.error(error);
-            window.alert("업로드에 실패했어요. 다시 시도해주세요.");
-            setOutfits((current) => {
-              const target = current.find((entry) => entry.id === item.id);
-              releasePreview(target ?? null);
-              return current.filter((entry) => entry.id !== item.id);
-            });
-          });
-      });
-      return [...prev, ...next];
-    });
-  };
-
-  const removeOutfit = (id: string) => {
-    setOutfits((prev) => {
-      const target = prev.find((item) => item.id === id);
-      releasePreview(target ?? null);
-      return prev.filter((item) => item.id !== id);
-    });
-  };
-
   const removeSingleImage = (
     setter: React.Dispatch<React.SetStateAction<OutfitImage | null>>,
   ) => {
@@ -217,67 +164,39 @@ export default function FashionFlowPage() {
 
   const handlePriceMin = (value: number) => {
     setPriceMin(Math.min(value, priceMax));
+    setSelectedPricePreset(null);
+    setHasPricePresetSelection(false);
   };
 
   const handlePriceMax = (value: number) => {
     setPriceMax(Math.max(value, priceMin));
+    setSelectedPricePreset(null);
+    setHasPricePresetSelection(false);
   };
 
-  const handlePurposeUpload = (files: FileList | null) => {
-    if (!files?.length) return;
-    if (!reservationId) {
-      window.alert("예약 ID가 없습니다. 다시 시도해주세요.");
-      return;
-    }
-    setPurposeImages((prev) => {
-      const remainingSlots = Math.max(0, 3 - prev.length);
-      const next = Array.from(files)
-        .slice(0, remainingSlots)
-        .map((file) => ({ ...createPreview(file), isUploading: true }));
-      next.forEach((item) => {
-        uploadImageViaPresign({
-          file: item.file as File,
-          resourceType: "consultation",
-          resourceId: reservationId,
-          imageType: "purpose",
-        })
-          .then(({ key }) => {
-            setPurposeImages((current) =>
-              current.map((entry) =>
-                entry.id === item.id ? { ...entry, key, isUploading: false } : entry,
-              ),
-            );
-          })
-          .catch((error) => {
-            console.error(error);
-            window.alert("업로드에 실패했어요. 다시 시도해주세요.");
-            setPurposeImages((current) => {
-              const target = current.find((entry) => entry.id === item.id);
-              releasePreview(target ?? null);
-              return current.filter((entry) => entry.id !== item.id);
-            });
-          });
-      });
-      return [...prev, ...next];
-    });
+  const addOutfitKey = (key: string) => {
+    setOutfitKeys((prev) => [...prev, key]);
   };
 
-  const removePurposeImage = (id: string) => {
-    setPurposeImages((prev) => {
-      const target = prev.find((item) => item.id === id);
-      releasePreview(target ?? null);
-      return prev.filter((item) => item.id !== id);
-    });
+  const removeOutfitKey = (key: string) => {
+    setOutfitKeys((prev) => prev.filter((item) => item !== key));
+  };
+
+  const addPurposeKey = (key: string) => {
+    setPurposeKeys((prev) => [...prev, key]);
+  };
+
+  const removePurposeKey = (key: string) => {
+    setPurposeKeys((prev) => prev.filter((item) => item !== key));
   };
 
   const canProceed = () => {
     if (step === 1) {
-      const hasMinimumOutfits = outfits.length >= 2;
+      const hasMinimumOutfits = outfitKeys.length >= 2;
       const hasRequiredKeys =
         Boolean(frontImage?.key) &&
         Boolean(leftImage?.key) &&
-        Boolean(rightImage?.key) &&
-        outfits.every((item) => item.key);
+        Boolean(rightImage?.key);
       return hasMinimumOutfits && hasRequiredKeys;
     }
     if (step === 2) {
@@ -324,10 +243,8 @@ export default function FashionFlowPage() {
       const frontKey = frontImage.key;
       const leftKey = leftImage.key;
       const rightKey = rightImage.key;
-      const favoriteKeys = outfits.map((item) => item.key).filter(Boolean) as string[];
-      const consultationKeys = purposeImages
-        .map((item) => item.key)
-        .filter(Boolean) as string[];
+      const favoriteKeys = outfitKeys;
+      const consultationKeys = purposeKeys;
 
       const bodyTypeDisadvantages = Array.from(bodySelections).map(mapBodyType);
       const styleColors = Array.from(colorSelections);
@@ -350,15 +267,15 @@ export default function FashionFlowPage() {
             minPrice: priceMin * 10000,
             maxPrice: priceMax * 10000,
           },
-          images: {
-            front: [frontKey],
-            left: [leftKey],
-            right: [rightKey],
-            favorite: favoriteKeys,
-            purpose: consultationKeys.length ? consultationKeys : undefined,
+            images: {
+              front: [frontKey],
+              left: [leftKey],
+              right: [rightKey],
+              favorite: favoriteKeys,
+              purpose: consultationKeys.length ? consultationKeys : undefined,
+            },
           },
-        },
-      });
+        });
       return true;
     } catch (error) {
       console.error(error);
@@ -371,17 +288,14 @@ export default function FashionFlowPage() {
 
   const handleNext = async () => {
     if (!canProceed()) {
-      if (step === 1 && introStage === 2 && outfits.length < 2) {
+      if (step === 1 && introStage === 2 && outfitKeys.length < 2) {
         window.alert("사진을 최소 2장 이상 업로드해 주세요.");
         return;
       }
       if (
         step === 1 &&
         introStage === 2 &&
-        (!frontImage?.key ||
-          !leftImage?.key ||
-          !rightImage?.key ||
-          outfits.some((item) => !item.key))
+        (!frontImage?.key || !leftImage?.key || !rightImage?.key)
       ) {
         window.alert("사진 업로드가 완료되지 않았어요. 잠시만 기다려주세요.");
       }
@@ -463,10 +377,10 @@ export default function FashionFlowPage() {
                   onUploadRight={(files) => handleSingleUpload(files, setRightImage, "right")}
                 />
                 <Step3OutfitPhotos
-                  outfits={outfits}
-                  outfitInputRef={outfitInputRef}
-                  onUploadOutfits={handleOutfitUpload}
-                  onRemoveOutfit={removeOutfit}
+                  keys={outfitKeys}
+                  reservationId={reservationId}
+                  onAddKey={addOutfitKey}
+                  onRemoveKey={removeOutfitKey}
                 />
               </>
             )}
@@ -524,11 +438,18 @@ export default function FashionFlowPage() {
             priceMax={priceMax}
             minPercent={minPercent}
             maxPercent={maxPercent}
+            selectedPreset={selectedPricePreset}
+            hasPresetSelection={hasPricePresetSelection}
             onPriceMinChange={handlePriceMin}
             onPriceMaxChange={handlePriceMax}
             onPricePreset={(min, max) => {
               setPriceMin(min);
               setPriceMax(max);
+              const preset = PRICE_PRESETS.find(
+                (entry) => entry.min === min && entry.max === max,
+              );
+              setSelectedPricePreset(preset?.label ?? null);
+              setHasPricePresetSelection(Boolean(preset?.label));
             }}
             formatPriceRange={formatPriceRange}
           />
@@ -536,11 +457,11 @@ export default function FashionFlowPage() {
         {step === 6 && (
           <Step9Purpose
             purposeText={purposeText}
-            purposeImages={purposeImages}
-            purposeInputRef={purposeInputRef}
+            keys={purposeKeys}
+            reservationId={reservationId}
             onPurposeTextChange={setPurposeText}
-            onUploadPurpose={handlePurposeUpload}
-            onRemovePurpose={removePurposeImage}
+            onAddKey={addPurposeKey}
+            onRemoveKey={removePurposeKey}
           />
         )}
       </main>
