@@ -34,7 +34,8 @@ import CategoryBestReviewsPage from "@/pages/category/reviews/page";
 import CategoryExpertListPage from "@/pages/category/experts/page";
 import ReviewWritePage from "@/pages/myPage/review/writeReview";
 import MyReviewPage from "@/pages/myPage/review/myReview";
-import ConcernView from "@/pages/solution/customer/readConcern";
+import ConsultationGate from "@/pages/solution/page";
+import SolutionView from "@/pages/solution/readSolution";
 
 export const router = createBrowserRouter([
   {
@@ -223,6 +224,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "/concern/:consultationId",
+    element: <ConsultationGate />,
+  },
+  {
+    path: "/consultations/:consultationId/solution",
+    element: <SolutionView />,
     element: (
       <AuthGuard>
         <ConcernView />

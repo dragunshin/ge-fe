@@ -2,9 +2,10 @@ import { useNavigate } from "react-router-dom";
 import BackIcon from "@/images/login/back.svg?react";
 import More from "@/images/chat/more.svg?react";
 import { ChatExpertHeader } from "./ChatExpertHeader";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useMemo } from "react";
 //import Minho from "@/images/chat/minho2.png";
+import Default from "@/images/chat/default.svg?url";
 
 export type ChatHeaderProps = {
   meta: ChatHeaderData;
@@ -41,7 +42,7 @@ export default function ChatHeader({ meta }: ChatHeaderProps) {
               {profile ? (
                 <AvatarImage src={profile} alt={title} className="h-full w-full object-cover" />
               ) : null}
-              <AvatarFallback className="bg-gray-200 text-slate-600" />
+              <AvatarImage src={Default} alt="profile" className="h-full w-full object-cover" />
             </Avatar>
 
             <div className="flex flex-col leading-tight">

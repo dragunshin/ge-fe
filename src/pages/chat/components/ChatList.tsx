@@ -278,8 +278,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import Default from "@/images/chat/default.svg?url";
 
 import { fetchChatRooms } from "@/api/chat";
 import type { ChatRoomListItem, ChatroomType } from "@/types/chat";
@@ -491,7 +492,11 @@ export function ChatList() {
                       {chat.profileImageUrl ? (
                         <AvatarImage src={chat.profileImageUrl} alt={chat.name} />
                       ) : null}
-                      <AvatarFallback className="bg-gray-200 text-slate-600" />
+                      <AvatarImage
+                        src={Default}
+                        alt="profile"
+                        className="h-full w-full object-cover"
+                      />
                     </Avatar>
 
                     <div className="min-w-0 flex-1">

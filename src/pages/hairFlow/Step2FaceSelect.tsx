@@ -42,6 +42,9 @@ export function Step2FaceSelect({ onNext, onBack }: { onNext: () => void; onBack
 
   const isStrengthSelected = (t: FaceStrengthTag) => faceStrengthTags.includes(t);
   const isCoverSelected = (t: FaceCoverTag) => faceCoverTags.includes(t);
+  const strengthOk = faceStrengthTags.length > 0 || faceStrengthOtherText.trim().length > 0;
+  const coverOk = faceCoverTags.length > 0 || faceCoverOtherText.trim().length > 0;
+  const canNext = strengthOk && coverOk;
 
   return (
     <div className="mx-auto min-h-[100dvh] w-full max-w-[420px] bg-white pb-28">
@@ -110,9 +113,13 @@ export function Step2FaceSelect({ onNext, onBack }: { onNext: () => void; onBack
                   )}
                 >
                   {t}
-                  {selected && (
+                  {selected ? (
                     <span className="absolute right-3 top-1/2 -translate-y-1/2">
                       <Check className="h-[13px] w-[15px] text-[#429ff0] mr-2" />
+                    </span>
+                  ) : (
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <Check className="h-[13px] w-[15px] text-[#c2c4c8] mr-2" />
                     </span>
                   )}
                 </button>
@@ -132,7 +139,7 @@ export function Step2FaceSelect({ onNext, onBack }: { onNext: () => void; onBack
         </div>
       </div>
 
-      <Footer onClick={onNext} />
+      <Footer onClick={onNext} disabled={!canNext} />
     </div>
   );
 }

@@ -1,8 +1,9 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import type { ChatMessage } from "@/types/chat";
 import { useNavigate } from "react-router-dom";
+import Default from "@/images/chat/default.svg?url";
 
 type Props = {
   message: ChatMessage;
@@ -91,10 +92,10 @@ export function MessageBubble({ message, myUserId, opponentProfileImage }: Props
       return (
         <div className="flex justify-end">
           <div className={mineBoxClass}>
-            {/* <p className="whitespace-pre-wrap pre_cap_reg_13 text-[#181818]">{message.content}</p> */}
             <p className="whitespace-pre-wrap pre_cap_reg_13 text-[#181818]">
-              김바보님의 고민지가 도착했습니다.
+              {message.content ?? "회원님의 고민지가 도착했습니다."}
             </p>
+
             {actionLabel && (
               <button
                 type="button"
@@ -121,11 +122,14 @@ export function MessageBubble({ message, myUserId, opponentProfileImage }: Props
               className="h-full w-full object-cover"
             />
           ) : null}
-          <AvatarFallback className="bg-slate-200" />
+          {/* <AvatarFallback className="bg-slate-200" /> */}
+          <AvatarImage src={Default} alt="profile" className="h-full w-full object-cover" />
         </Avatar>
 
         <div className={boxClass}>
-          <p className="whitespace-pre-wrap pre_cap_reg_13 text-[#181818]">{message.content}</p>
+          <p className="whitespace-pre-wrap pre_cap_reg_13 text-[#181818]">
+            {message.content ?? "회원님의 고민지가 도착했습니다."}
+          </p>
 
           {actionLabel && (
             <button
@@ -193,6 +197,8 @@ export function MessageBubble({ message, myUserId, opponentProfileImage }: Props
             {actionLabel && (
               <button
                 type="button"
+                ///consultations/:consultationId/solution
+                onClick={() => nav(`/consultations/${message.relatedId}/solution`)}
                 className="w-full rounded-[8px] bg-[#E5f4ff] py-[8px] px-[20px] pre_cap_semi_13 text-[#008BFF] active:scale-[0.98]"
               >
                 {actionLabel}
@@ -214,7 +220,7 @@ export function MessageBubble({ message, myUserId, opponentProfileImage }: Props
               className="h-full w-full object-cover"
             />
           ) : null}
-          <AvatarFallback className="bg-slate-200" />
+          <AvatarImage src={Default} alt="profile" className="h-full w-full object-cover" />
         </Avatar>
 
         <div className={boxClass}>
@@ -223,6 +229,7 @@ export function MessageBubble({ message, myUserId, opponentProfileImage }: Props
           {actionLabel && (
             <button
               type="button"
+              onClick={() => nav(`/consultations/${message.relatedId}/solution`)}
               className="w-full rounded-[8px] bg-[#E5f4ff] py-[8px] px-[20px] pre_cap_semi_13 text-[#008BFF] active:scale-[0.98]"
             >
               {actionLabel}
@@ -262,7 +269,7 @@ export function MessageBubble({ message, myUserId, opponentProfileImage }: Props
             className="h-full w-full object-cover"
           />
         ) : null}
-        <AvatarFallback className="bg-slate-200" />
+        <AvatarImage src={Default} alt="profile" className="h-full w-full object-cover" />
       </Avatar>
 
       <div className={textBubbleOthers}>
