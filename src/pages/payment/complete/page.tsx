@@ -45,6 +45,7 @@ export function PaymentCompletePage() {
     expertName?: string;
     categoryLabel?: string;
     scheduleLabel?: string;
+    paymentDeadline?: string;
   } | null;
   const paymentAmount = state?.paymentAmount ?? 0;
   const consultTypeFromState = state?.consultType;
@@ -65,9 +66,24 @@ export function PaymentCompletePage() {
     state?.scheduleLabel ??
     sessionStorage.getItem("consult_schedule_label") ??
     "예약 일정";
+  const paymentDeadline =
+    state?.paymentDeadline ?? sessionStorage.getItem("payment_deadline");
   const orderSummary = `${consultLabel} | ${expertName} (${categoryLabel} 전문)`;
   const consultantLabel = `${expertName} | ${categoryLabel}`;
   const formatCurrency = (value: number) => `${value.toLocaleString("ko-KR")}원`;
+  const formatPaymentDeadline = (value: string) => {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return null;
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${year}년 ${month}월 ${day}일 ${hours}:${minutes}`;
+  };
+  const paymentDeadlineLabel =
+    (paymentDeadline ? formatPaymentDeadline(paymentDeadline) : null) ??
+    "2025년 12월 13일 23:59";
   const appendStep = (path: string, step?: number) => {
     if (!step || path.includes("step=")) return path;
     const joiner = path.includes("?") ? "&" : "?";
@@ -130,7 +146,7 @@ export function PaymentCompletePage() {
         </p>
         <p className="mx-auto mt-[8px] w-[260px] text-[13px] leading-[1.4] text-[#989ba2]">
           상담 확정을 위해{" "}
-          <span className="font-semibold text-[#171719]">2025년 12월 13일 23:59</span>
+          <span className="font-semibold text-[#171719]">{paymentDeadlineLabel}</span>
           까지 입금을 완료해주세요.
         </p>
       </div>

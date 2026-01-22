@@ -63,7 +63,65 @@ export type ApplyPointsRequest = {
   pointsToUse: number;
 };
 
+export type AvailableDatesResponse = {
+  year: number;
+  month: number;
+  availableDates: string[];
+};
+
+export type AvailableTimesResponse = {
+  date: string;
+  availableTimes: string[];
+};
+
+export type ReservationSheetTargetInfo = {
+  expertNickname: string;
+  category: "HAIR" | "FASHION" | "SKIN" | "MAKEUP" | string;
+  consultationType: "MESSAGE" | "VIDEO" | string;
+  originalPrice: number;
+};
+
+export type ReservationSheetPayerInfo = {
+  userNickname: string;
+  totalPoints: number;
+};
+
+export type ReservationSheetAccountInfo = {
+  bankName: string;
+  accountNumber: string;
+  accountHolder: string;
+};
+
+export type ReservationSheetResponse = {
+  createdAt: string;
+  paymentDeadline: string;
+  targetInfo: ReservationSheetTargetInfo;
+  payerInfo: ReservationSheetPayerInfo;
+  accountInfo: ReservationSheetAccountInfo;
+};
+
 export const reservationService = {
+  async getAvailableDates(params: {
+    expertId: number;
+    year: number;
+    month: number;
+  }): Promise<ApiResponse<AvailableDatesResponse>> {
+    return await api.get<ApiResponse<AvailableDatesResponse>>("/reservations/dates", { params });
+  },
+  async getAvailableTimes(params: {
+    expertId: number;
+    date: string;
+  }): Promise<ApiResponse<AvailableTimesResponse>> {
+    return await api.get<ApiResponse<AvailableTimesResponse>>("/reservations/times", { params });
+  },
+  async getReservationSheet(params: {
+    expertId: number;
+    type: "MESSAGE" | "VIDEO";
+  }): Promise<ApiResponse<ReservationSheetResponse>> {
+    return await api.get<ApiResponse<ReservationSheetResponse>>("/reservations/sheet", {
+      params,
+    });
+  },
   async updateFashionConcern(
     reservationId: number,
     payload: UpdateFashionConcernRequest,
@@ -90,5 +148,14 @@ export const reservationService = {
       `/reservations/${reservationId}/points`,
       payload,
     );
+  },
+  async submitReservation(reservationId: number): Promise<ApiResponse<void>> {
+    return await api.post<ApiResponse<void>>(`/reservations/${reservationId}/submit`);
+  },
+  async cancelTempReservation(reservationId: number): Promise<ApiResponse<void>> {
+    return await api.post<ApiResponse<void>>(`/reservations/${reservationId}/cancel`);
+  },
+  async requestRefund(reservationId: number): Promise<ApiResponse<void>> {
+    return await api.post<ApiResponse<void>>(`/reservations/${reservationId}/refund/request`);
   },
 };

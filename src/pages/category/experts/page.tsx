@@ -340,6 +340,7 @@ export default function CategoryExpertListPage() {
     setOpenTypeSheet(true);
   };
 
+
   const activeChips = [...selectedStyles, ...selectedConcerns];
 
   return (

@@ -32,11 +32,13 @@ export function PaymentOrderPage() {
     flowFrom?: string;
     step?: number;
     expertName?: string;
+    expertId?: number;
     categoryLabel?: string;
     scheduleLabel?: string;
     price?: number;
     reservationId?: number;
     fromComplete?: boolean;
+    paymentDeadline?: string;
   } | null;
   const scheduleLabel =
     state?.scheduleLabel ??
@@ -77,10 +79,22 @@ export function PaymentOrderPage() {
     (state?.reservationId ? String(state.reservationId) : null);
   const reservationId = reservationIdParam ? Number(reservationIdParam) : Number.NaN;
   const hasReservationId = Number.isFinite(reservationId);
+  const expertIdFromState = state?.expertId;
+  const expertIdFromStorage = sessionStorage.getItem("consult_expert_id");
+  const expertId =
+    typeof expertIdFromState === "number"
+      ? expertIdFromState
+      : expertIdFromStorage
+        ? Number(expertIdFromStorage)
+        : null;
   const [pointInput, setPointInput] = useState("0");
   const [pointUsed, setPointUsed] = useState(0);
   const [pointBalance, setPointBalance] = useState(0);
   const [isApplyingPoints, setIsApplyingPoints] = useState(false);
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
+  const [paymentDeadline, setPaymentDeadline] = useState<string | null>(
+    state?.paymentDeadline ?? sessionStorage.getItem("payment_deadline"),
+  );
   const maxUsablePoints = Math.min(pointBalance, orderPrice);
   const remainingPoints = Math.max(maxUsablePoints - pointUsed, 0);
   const totalPoints = pointBalance;
@@ -152,6 +166,28 @@ export function PaymentOrderPage() {
     return () => ac.abort();
   }, []);
 
+  useEffect(() => {
+    if (!expertId || !consultType) return;
+    const ac = new AbortController();
+    (async () => {
+      try {
+        const response = await reservationService.getReservationSheet({
+          expertId,
+          type: consultType,
+        });
+        const deadline = response.data?.paymentDeadline;
+        if (typeof deadline === "string") {
+          setPaymentDeadline(deadline);
+          sessionStorage.setItem("payment_deadline", deadline);
+        }
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        console.error(error);
+      }
+    })();
+    return () => ac.abort();
+  }, [expertId, consultType]);
+
   const clampPoints = (value: number) =>
     Math.min(Math.max(value, 0), maxUsablePoints);
 
@@ -208,6 +244,22 @@ export function PaymentOrderPage() {
     state?.expertName ?? sessionStorage.getItem("consult_expert_name") ?? "전문가";
   const categoryLabel =
     state?.categoryLabel ?? sessionStorage.getItem("consult_category_label") ?? "헤어";
+  const handleSubmitReservation = async () => {
+    if (!hasReservationId) {
+      return true;
+    }
+    setIsSubmittingOrder(true);
+    try {
+      await reservationService.submitReservation(reservationId);
+      return true;
+    } catch (error) {
+      console.error(error);
+      window.alert("결제 요청에 실패했어요. 다시 시도해주세요.");
+      return false;
+    } finally {
+      setIsSubmittingOrder(false);
+    }
+  };
 
   return (
     <div className="flex min-h-full flex-col bg-white text-[#0f0f10]">
@@ -473,7 +525,9 @@ export function PaymentOrderPage() {
 
       <footer className="app-footer border-t border-[#f4f4f5] px-4 py-[16px]">
         <button
-          onClick={() =>
+          onClick={async () => {
+            const ok = await handleSubmitReservation();
+            if (!ok) return;
             navigate('/payment/complete', {
               state: {
                 from: `${location.pathname}${location.search}`,
@@ -485,17 +539,18 @@ export function PaymentOrderPage() {
                 expertName,
                 categoryLabel,
                 scheduleLabel,
+                paymentDeadline,
               },
-            })
-          }
-          disabled={!canPay || isApplyingPoints}
+            });
+          }}
+          disabled={!canPay || isApplyingPoints || isSubmittingOrder}
           className={`w-full rounded-[4px] border py-[12px] text-center text-[16px] font-semibold leading-[1.4] ${
-            canPay && !isApplyingPoints
+            canPay && !isApplyingPoints && !isSubmittingOrder
               ? 'border-[#dadada] bg-[#0f0f10] text-white'
               : 'border-[#e1e2e4] bg-[#f4f4f5] text-[#aeb0b6]'
           }`}
         >
-          {formatCurrency(totalPrice)} 결제하기
+          {isSubmittingOrder ? "결제 진행 중..." : `${formatCurrency(totalPrice)} 결제하기`}
         </button>
       </footer>
     </div>

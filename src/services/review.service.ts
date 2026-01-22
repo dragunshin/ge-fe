@@ -14,4 +14,11 @@ export const reviewService = {
       params,
     });
   },
+  async getBestReviews(params?: {
+    category?: ApiCategory;
+  }): Promise<ApiResponse<ReviewSummaryResponse[]>> {
+    return await api.get<ApiResponse<ReviewSummaryResponse[]>>('/review/best', {
+      params,
+    });
+  },
 };

@@ -22,8 +22,6 @@ type ReviewItem = {
   createdAt: string;
 };
 
-const ALL_CATEGORIES = ['HAIR', 'FASHION', 'MAKEUP', 'SKIN'] as const;
-
 const CategoryBestReviewsPage = () => {
   const navigate = useNavigate();
   const { category } = useParams();
@@ -88,7 +86,7 @@ const CategoryBestReviewsPage = () => {
       if (!hasMore || isFetchingRef.current) {
         return;
       }
-      if (!apiCategory && page > 0) {
+      if (page > 0) {
         setHasMore(false);
         return;
       }
@@ -96,22 +94,13 @@ const CategoryBestReviewsPage = () => {
       setIsLoading(true);
       const requestId = (requestIdRef.current += 1);
       try {
-        const responses = apiCategory
-          ? [await reviewService.getRecentReviews({ category: apiCategory, page, size: 5 })]
-          : (
-              await Promise.allSettled(
-                ALL_CATEGORIES.map((category) =>
-                  reviewService.getRecentReviews({ category, page, size: 5 }),
-                ),
-              )
-            )
-              .filter((result) => result.status === 'fulfilled')
-              .map((result) => result.value);
+        const response = apiCategory
+          ? await reviewService.getBestReviews({ category: apiCategory })
+          : await reviewService.getBestReviews();
         if (requestId !== requestIdRef.current) {
           return;
         }
-        const mapped = responses
-          .flatMap((response) => (Array.isArray(response.data) ? response.data : []))
+        const mapped = (Array.isArray(response.data) ? response.data : [])
           .map((review) => ({
             id: review.reviewId,
             author: '익명',
@@ -121,48 +110,13 @@ const CategoryBestReviewsPage = () => {
             rating: review.rating,
             date: formatDate(review.createdAt),
             content: review.content,
-            tags: review.category
-              ? [getLabelFromApiCategory(review.category)]
-              : [],
+            tags: review.category ? [getLabelFromApiCategory(review.category)] : [],
             images: parseMediaUrls(review.mediaUrls),
             createdAt: review.createdAt,
           }))
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        if (!apiCategory && mapped.length === 0) {
-          const fallback = await reviewService.getRecentReviews({ page, size: 5 });
-          if (requestId !== requestIdRef.current) {
-            return;
-          }
-          const fallbackMapped = (Array.isArray(fallback.data) ? fallback.data : [])
-            .map((review) => ({
-              id: review.reviewId,
-              author: '익명',
-              expertName: review.expertNickname ?? '전문가',
-              expertProfileImage: review.expertProfileImage,
-              expertRatingAverage: review.expertRatingAverage ?? review.rating,
-              rating: review.rating,
-              date: formatDate(review.createdAt),
-              content: review.content,
-              tags: review.category
-                ? [getLabelFromApiCategory(review.category)]
-                : [],
-              images: parseMediaUrls(review.mediaUrls),
-              createdAt: review.createdAt,
-            }))
-            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-          setReviews((prev) => (page === 0 ? fallbackMapped : [...prev, ...fallbackMapped]));
-          setHasMore(fallbackMapped.length === 5);
-          return;
-        }
-        setReviews((prev) => (page === 0 ? mapped : [...prev, ...mapped]));
-        if (apiCategory) {
-          const hasMoreNext = responses.some(
-            (response) => Array.isArray(response.data) && response.data.length === 5,
-          );
-          setHasMore(hasMoreNext);
-        } else {
-          setHasMore(false);
-        }
+        setReviews(mapped);
+        setHasMore(false);
       } catch (error) {
         console.error('Failed to fetch reviews:', error);
       } finally {

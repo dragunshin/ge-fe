@@ -582,7 +582,6 @@ import { reviewService } from "../../services/review.service";
 import {
   getApiCategoryFromLabel,
   getLabelFromApiCategory,
-  type ApiCategory,
 } from "../../lib/utils/category";
 
 // ✅ 아래 2개 import 경로만 프로젝트에 맞게 조정하세요.
@@ -830,23 +829,13 @@ const HomePage = () => {
     const fetchReviews = async () => {
       try {
         const category = getApiCategoryFromLabel(selectedHomeTab);
-        const categories: ApiCategory[] = ["HAIR", "FASHION", "MAKEUP", "SKIN"];
-        const responses = category
-          ? [await reviewService.getRecentReviews({ category, page: 0, size: 5 })]
-          : (
-              await Promise.allSettled(
-                categories.map((categoryItem) =>
-                  reviewService.getRecentReviews({ category: categoryItem, page: 0, size: 5 }),
-                ),
-              )
-            )
-              .filter((result) => result.status === "fulfilled")
-              .map((result) => result.value);
+        const response = category
+          ? await reviewService.getBestReviews({ category })
+          : await reviewService.getBestReviews();
         if (!isActive) {
           return;
         }
-        const reviewsData = responses
-          .flatMap((response) => (Array.isArray(response.data) ? response.data : []))
+        const reviewsData = (Array.isArray(response.data) ? response.data : [])
           .map((review) => ({
             id: review.reviewId,
             author: "익명",

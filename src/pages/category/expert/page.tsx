@@ -15,6 +15,10 @@ import redHeartIcon from '../../../images/redHeart.svg';
 import { portfolioItems, type PortfolioItem } from './portfolio-data';
 import { expertService } from '../../../services/expert.service';
 import { reviewService } from '../../../services/review.service';
+import { reservationService } from '../../../services/reservation.service';
+import ConsultationMethodSheet from '../../resevationFlow/reservationSheet/typeReservation';
+import DateTimeBottomSheet from '../../resevationFlow/reservationSheet/calendar';
+import { useAuthStore } from '../../../stores/useAuthStore';
 import type {
   ExpertInfoResponse,
   ExpertPortfolioResponse,
@@ -39,6 +43,8 @@ type RelatedExpert = {
   summary: string;
 };
 
+type ConsultType = 'MESSAGE' | 'VIDEO';
+
 const mapPortfolioResponse = (portfolio: ExpertPortfolioResponse): PortfolioItem => ({
   id: portfolio.id,
   title: portfolio.title,
@@ -54,6 +60,8 @@ const ExpertInfoPage = () => {
   const { expertId } = useParams();
   const expertIdNumber = useMemo(() => (expertId ? Number(expertId) : undefined), [expertId]);
   const portfolioPath = `/experts/${expertId ?? '1'}/portfolio`;
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const initializeAuth = useAuthStore((state) => state.initializeAuth);
   const [expertInfo, setExpertInfo] = useState<ExpertInfoResponse | null>(null);
   const [likesCount, setLikesCount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
@@ -67,6 +75,13 @@ const ExpertInfoPage = () => {
   const portfolioListRef = useRef<HTMLDivElement | null>(null);
   const portfolioSentinelRef = useRef<HTMLDivElement | null>(null);
   const portfolioFetchingRef = useRef(false);
+  const [openTypeSheet, setOpenTypeSheet] = useState(false);
+  const [openCalendarSheet, setOpenCalendarSheet] = useState(false);
+  const [selectedConsultType, setSelectedConsultType] = useState<ConsultType>('MESSAGE');
+
+  useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth]);
 
   const relatedExperts: RelatedExpert[] = [
     {
@@ -321,6 +336,86 @@ const ExpertInfoPage = () => {
     },
   } as const;
   const formatPrice = (value: number) => `${value.toLocaleString('ko-KR')}원`;
+
+  const getReservationRoute = () => {
+    const routeKey = getRouteCategoryFromApi(expertInfo?.category);
+    if (routeKey === 'fashion') {
+      return '/reservation/fashion';
+    }
+    if (routeKey !== 'hair') {
+      return '/service-ready';
+    }
+    return '/hair/setup';
+  };
+
+  const buildScheduledDateTime = (date: Date, timeId: string) => {
+    const parsed = /^t-(\d{2})(\d{2})$/.exec(timeId);
+    const hour24 = parsed ? Number(parsed[1]) : 0;
+    const minute = parsed ? Number(parsed[2]) : 0;
+    const value = new Date(date);
+    value.setHours(hour24, minute, 0, 0);
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    const day = String(value.getDate()).padStart(2, '0');
+    const hour = String(value.getHours()).padStart(2, '0');
+    const minuteStr = String(value.getMinutes()).padStart(2, '0');
+    const second = String(value.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hour}:${minuteStr}:${second}`;
+  };
+
+  const formatScheduleLabel = (date: Date, timeId: string) => {
+    const parsed = /^t-(\d{2})(\d{2})$/.exec(timeId);
+    const hour24 = parsed ? Number(parsed[1]) : 0;
+    const minute = parsed ? Number(parsed[2]) : 0;
+    const isAM = hour24 < 12;
+    const meridiem = isAM ? '오전' : '오후';
+    let hour12 = hour24 % 12;
+    if (hour12 === 0) hour12 = 12;
+    const mm = String(minute).padStart(2, '0');
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${year}년 ${month}월 ${day}일 ${meridiem} ${hour12}:${mm}`;
+  };
+
+  const handleReservationStart = () => {
+    if (!isAuthenticated) {
+      navigate('/auth/login');
+      return;
+    }
+    setOpenTypeSheet(true);
+  };
+
+  const handleTempReservation = async (date: Date, timeId: string) => {
+    if (!expertIdNumber || !expertInfo?.category) {
+      window.alert('전문가 정보가 없습니다. 다시 시도해주세요.');
+      return null;
+    }
+    const consultationType = selectedConsultType;
+    const matched = expertSchedules.find(
+      (schedule) => schedule.consultationType === consultationType,
+    );
+    if (!matched) {
+      window.alert('상담 가격 정보를 찾을 수 없습니다. 다시 시도해주세요.');
+      return null;
+    }
+    const price = matched.price;
+    sessionStorage.setItem('consult_expert_name', expertInfo.nickname ?? '전문가');
+    sessionStorage.setItem('consult_category_label', categoryLabel);
+    sessionStorage.setItem('consult_price', String(price));
+    sessionStorage.setItem('consult_expert_id', String(expertIdNumber));
+
+    const response = await reservationService.createTempReservation({
+      expertId: expertIdNumber,
+      category: expertInfo.category as 'HAIR' | 'FASHION' | 'SKIN' | 'MAKEUP',
+      consultationType,
+      scheduledDateTime:
+        consultationType === 'VIDEO' ? buildScheduledDateTime(date, timeId) : null,
+      price,
+    });
+    sessionStorage.setItem('consult_reservation_id', String(response.data.reservationId));
+    return response.data.reservationId;
+  };
 
   return (
     <div className="flex h-full flex-col bg-white">
@@ -658,10 +753,40 @@ const ExpertInfoPage = () => {
       </main>
 
       <div className="app-footer bg-white px-[16px] py-[10px]">
-        <button className="h-[44px] w-full rounded-[4px] bg-[#008bff] text-[16px] font-semibold text-white">
+        <button
+          onClick={handleReservationStart}
+          className="h-[44px] w-full rounded-[4px] bg-[#008bff] text-[16px] font-semibold text-white"
+        >
           상담 신청하기
         </button>
       </div>
+
+      <ConsultationMethodSheet
+        open={openTypeSheet}
+        onClose={() => setOpenTypeSheet(false)}
+        defaultValue={selectedConsultType}
+        onNext={(selected) => {
+          setSelectedConsultType(selected);
+          sessionStorage.setItem('consult_type', selected);
+          setOpenTypeSheet(false);
+          setOpenCalendarSheet(true);
+        }}
+      />
+
+      <DateTimeBottomSheet
+        open={openCalendarSheet}
+        onClose={() => setOpenCalendarSheet(false)}
+        onNext={async ({ date, timeId }) => {
+          sessionStorage.setItem('consult_schedule_label', formatScheduleLabel(date, timeId));
+          setOpenCalendarSheet(false);
+          const reservationId = await handleTempReservation(date, timeId);
+          if (reservationId) {
+            navigate(`${getReservationRoute()}?reservationId=${reservationId}`);
+            return;
+          }
+          navigate(getReservationRoute());
+        }}
+      />
     </div>
   );
 };
