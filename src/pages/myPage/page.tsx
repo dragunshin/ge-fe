@@ -44,7 +44,7 @@ export default function MyPage() {
   const [me, setMe] = React.useState<UserMe | null>(null);
   const [meLoading, setMeLoading] = React.useState(false);
 
-  const [isReviewOpen, setIsReviewOpen] = React.useState(true);
+  // const [isReviewOpen, setIsReviewOpen] = React.useState(true);
 
   React.useEffect(() => {
     const ac = new AbortController();
