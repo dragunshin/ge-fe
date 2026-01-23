@@ -36,6 +36,8 @@ import ReviewWritePage from "@/pages/myPage/review/writeReview";
 import MyReviewPage from "@/pages/myPage/review/myReview";
 import ConsultationGate from "@/pages/solution/page";
 import SolutionView from "@/pages/solution/readSolution";
+import PaymentHistoryPage from "@/pages/myPage/paymentHistory/page";
+import MySolutionView from "@/pages/myPage/mySolution/page";
 
 export const router = createBrowserRouter([
   {
@@ -225,6 +227,14 @@ export const router = createBrowserRouter([
   {
     path: "/concern/:consultationId",
     element: <ConsultationGate />,
+  },
+  {
+    path: "/mypage/paymentHistory",
+    element: <PaymentHistoryPage />,
+  },
+  {
+    path: "/mypage/mySolution",
+    element: <MySolutionView />,
   },
   {
     path: "/consultations/:consultationId/solution",

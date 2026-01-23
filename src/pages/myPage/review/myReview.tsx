@@ -33,6 +33,7 @@ function toSafeIso(isoLike: string) {
 
 function categoryLabel(cat: string) {
   if (cat === "HAIR") return "헤어";
+  if (cat === "FASHION") return "패션";
   return cat;
 }
 

@@ -44,6 +44,7 @@ type PastConsultation = {
   priceWon: number;
   reviewPriceWon: number;
   consultationId: string | number;
+  expertUserId: string;
 };
 
 const DESC_FALLBACK = "전문가가 작성한 자신의 강점 한줄 쓱싹문구가 작성한 자신의 강점 한줄 쓱싹";
@@ -124,6 +125,7 @@ function mapPast(c: ConsultationHistoryItem): PastConsultation {
     priceWon: c.price,
     reviewPriceWon: reward,
     consultationId: c.consultationId,
+    expertUserId: c.expertUserId,
   };
 }
 
@@ -303,6 +305,7 @@ function PastItem({ item }: { item: PastConsultation }) {
       <div className="mt-4 flex justify-end gap-2 ">
         <button
           type="button"
+          onClick={() => navigate(`/experts/${item.expertUserId}`)}
           className="rounded-[4px] px-4 py-2 bg-[#181818] pre_subtitle_med_14 text-white active:scale-[0.99]"
         >
           다시 상담받기

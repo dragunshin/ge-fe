@@ -199,11 +199,13 @@ export type ConcernJson =
 
 export type ConsultationConcern = { nickname: string } & ConcernJson;
 
+const PUBLIC_IMAGE_BASE = "https://menual-bucket.s3.ap-northeast-2.amazonaws.com";
+
 // ✅ key -> 실제 이미지 URL로 변환
 export function resolveImageUrl(keyOrUrl: string) {
   if (/^https?:\/\//i.test(keyOrUrl)) return keyOrUrl;
 
-  const PUBLIC_IMAGE_BASE = import.meta.env.VITE_PUBLIC_IMAGE_BASE_URL as string | undefined;
+  //const PUBLIC_IMAGE_BASE = import.meta.env.VITE_PUBLIC_IMAGE_BASE_URL as string | undefined;
   if (PUBLIC_IMAGE_BASE) {
     return `${PUBLIC_IMAGE_BASE.replace(/\/$/, "")}/${encodeURI(keyOrUrl)}`;
   }

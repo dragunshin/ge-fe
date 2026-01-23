@@ -14,7 +14,7 @@ import Logout from "@/images/mypage/logout.svg?react";
 
 import { getUserMe, myPageLogout, type UserMe } from "@/api/mypage";
 
-import { X } from "lucide-react";
+//import { X } from "lucide-react";
 import BottomNav from "@/components/navigation/bottom-nav";
 
 type StatItem = {
@@ -127,7 +127,7 @@ export default function MyPage() {
           key: "solution",
           label: "솔루션 확인하기",
           icon: <Solution />,
-          onClick: () => console.log("솔루션 확인"),
+          onClick: () => navigate("/mypage/mySolution"),
         },
       ],
     },
@@ -138,7 +138,7 @@ export default function MyPage() {
           key: "payments",
           label: "결제 내역 확인하기",
           icon: <Payment />,
-          onClick: () => console.log("결제 내역"),
+          onClick: () => navigate("/mypage/paymentHistory"),
         },
       ],
     },
@@ -149,7 +149,7 @@ export default function MyPage() {
           key: "interests",
           label: "관심 분야 설정",
           icon: <EmptyStar />,
-          onClick: () => console.log("관심 분야"),
+          onClick: () => alert("아직 준비중인 기능입니다."),
         },
         // {
         //   key: "notifications",
@@ -166,13 +166,13 @@ export default function MyPage() {
           key: "support",
           label: "고객센터/공지사항",
           icon: <HeadPhone className="h-5 w-5" />,
-          onClick: () => console.log("고객센터/공지사항"),
+          onClick: () => alert("아직 준비중인 기능입니다."),
         },
         {
           key: "faq",
           label: "FAQ",
           icon: <Question />,
-          onClick: () => console.log("FAQ"),
+          onClick: () => alert("아직 준비중인 기능입니다."),
         },
       ],
     },
@@ -189,7 +189,7 @@ export default function MyPage() {
           key: "deleteUser",
           label: "회원탈퇴",
           icon: <DeleteUser />,
-          onClick: () => console.log("회원탈퇴"),
+          onClick: () => alert("아직 준비중인 기능입니다."),
         },
       ],
     },
@@ -254,10 +254,10 @@ export default function MyPage() {
           <div className={`h-2 bg-[#f1f1f6] -mx-5`} />
 
           {/* Review Card */}
-          {isReviewOpen && (
+          {/*    {isReviewOpen && (
             <section className="mt-5">
               <div className="relative rounded-[12px] bg-[#e5f4ff] px-4 py-6">
-                {/* X 닫기 버튼 */}
+             
                 <button
                   type="button"
                   onClick={() => setIsReviewOpen(false)}
@@ -303,7 +303,7 @@ export default function MyPage() {
 
               <div className={`mt-7 h-2 bg-[#f1f1f6] -mx-5`} />
             </section>
-          )}
+          )} */}
 
           {/* Menus */}
           <div className="mt-3 space-y-6">

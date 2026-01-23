@@ -1,52 +1,73 @@
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
-import { X } from "lucide-react";
+//import { X } from "lucide-react";
 import Back from "@/images/login/back.svg?react";
 import Point from "@/images/mypage/point.svg?react";
 import BottomNav from "@/components/navigation/bottom-nav";
+import { getUserPointsHistory } from "@/api/mypage";
 
 /** types */
 type PointHistoryItem = {
   id: string;
   date: string; // "23.11.24"
-  title: string; // "리뷰 작성 적립"
-  expiresAt: string; // "26.11.23 23:59까지"
-  amount: number; // 3000
+  title: string; // description
+  expiresAt?: string; // API에 없음 → optional 처리
+  amount: number; // point_amount
 };
+
+function formatYYMMDD(iso: string) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const yy = String(d.getFullYear()).slice(-2);
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yy}.${mm}.${dd}`;
+}
 
 export default function PointPage() {
   const navigate = useNavigate();
 
-  // 상단 포인트
-  const myPoint = 3000;
-
   // 후기 유도 카드 닫기
-  const [reviewCardOpen, setReviewCardOpen] = React.useState(true);
+  //const [reviewCardOpen, setReviewCardOpen] = React.useState(true);
 
-  // 포인트 내역 샘플
-  const history: PointHistoryItem[] = [
-    {
-      id: "1",
-      date: "23.11.24",
-      title: "리뷰 작성 적립",
-      expiresAt: "26.11.23 23:59까지",
-      amount: 3000,
-    },
-    {
-      id: "2",
-      date: "23.11.24",
-      title: "리뷰 작성 적립",
-      expiresAt: "26.11.23 23:59까지",
-      amount: 3000,
-    },
-    {
-      id: "3",
-      date: "23.11.24",
-      title: "리뷰 작성 적립",
-      expiresAt: "26.11.23 23:59까지",
-      amount: 3000,
-    },
-  ];
+  const [myPoint, setMyPoint] = React.useState(0);
+  const [history, setHistory] = React.useState<PointHistoryItem[]>([]);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const ac = new AbortController();
+
+    (async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const data = await getUserPointsHistory({ signal: ac.signal });
+
+        setMyPoint(data.totalPoints ?? 0);
+
+        const mapped: PointHistoryItem[] = (data.history ?? []).map((h, idx) => ({
+          id: `${h.date}-${idx}`,
+          date: formatYYMMDD(h.date),
+          title: h.description,
+          amount: h.point_amount,
+          // expiresAt
+        }));
+
+        setHistory(mapped);
+      } catch (e) {
+        if (e instanceof DOMException && e.name === "AbortError") return;
+        if (e instanceof Error && (e as any).name === "AbortError") return;
+
+        setError(e instanceof Error ? e.message : "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    })();
+
+    return () => ac.abort();
+  }, []);
 
   return (
     <div className="flex h-full flex-col bg-white">
@@ -68,7 +89,7 @@ export default function PointPage() {
               <div className="mt-3 flex items-center gap-3">
                 <Point className="w-6 h-6" />
 
-                <p className="text-[28px] leading-[140%] font-semibold text-[#008bff]">
+                <p className="text-[24px] leading-[140%] font-semibold text-[#008bff]">
                   {myPoint.toLocaleString("ko-KR")}
                 </p>
               </div>
@@ -77,11 +98,10 @@ export default function PointPage() {
             {/* Divider (thick) */}
             <div className="mt-5 h-2 w-full bg-[#f4f4f5]" />
 
-            {/* Review Card */}
+            {/* Review Card (기존 그대로)
             {reviewCardOpen && (
               <section className="px-5 pt-5">
                 <div className="relative rounded-[12px] bg-[#E5F4FF] px-4 py-4">
-                  {/* title + close */}
                   <div className="flex items-start justify-between gap-3">
                     <p className="text-[14px] font-semibold text-neutral-900">
                       박서령 전문가와의 상담은 어떠셨나요?
@@ -97,7 +117,6 @@ export default function PointPage() {
                     </button>
                   </div>
 
-                  {/* expert row */}
                   <div className="mt-4 flex items-center gap-3">
                     <div className="h-11 w-11 shrink-0 rounded-full bg-neutral-300" />
                     <div className="min-w-0 flex-1">
@@ -110,7 +129,6 @@ export default function PointPage() {
 
                   <div className="mt-4 h-px w-full bg-[#E5E5EA]" />
 
-                  {/* bottom */}
                   <div className="mt-4 flex items-end justify-between gap-3">
                     <div>
                       <p className="text-[14px] font-semibold text-neutral-900">
@@ -130,37 +148,69 @@ export default function PointPage() {
                   </div>
                 </div>
               </section>
-            )}
+            )} */}
 
             {/* Point History */}
             <section className="px-5 pt-6 pb-12">
-              <h2 className="text-[16px] font-semibold text-neutral-900">포인트 내역</h2>
+              <p className="pre_subtitle_semi_16 text-[#292a2d]">포인트 내역</p>
 
-              <div className="mt-4 divide-y divide-[#E5E5EA]">
-                {history.map((h) => (
-                  <div key={h.id} className="py-5">
-                    <div className="flex items-start gap-4">
-                      {/* date (왼쪽) - 위로 올림 */}
-                      <p className="w-[48px] shrink-0 pre_body_reg_13 text-[#878a93]">{h.date}</p>
+              {loading && <p className="mt-4 pre_body_med_14 text-[#878a93]">불러오는 중…</p>}
 
-                      {/* title + expires (가운데) */}
-                      <div className="min-w-0 flex-1">
-                        <p className="pre_subtitle_semi_14 text-[#292a2d]">{h.title}</p>
-                        <p className="mt-1 pre_cap_reg_13 text-[#878a93]">{h.expiresAt}</p>
+              {!loading && error && (
+                <div className="mt-4 rounded-[12px] border border-[#F3D6D6] bg-[#FFF5F5] p-4">
+                  <p className="pre_body_med_14 text-[#c03434]">{error}</p>
+                </div>
+              )}
+
+              {!loading && !error && history.length === 0 && (
+                <div className="py-16 text-center">
+                  <p className="pre_body_med_14 text-[#878a93]">포인트 내역이 없습니다.</p>
+                </div>
+              )}
+
+              {!loading && !error && history.length > 0 && (
+                <div className="mt-4 divide-y divide-[#f4f4f5]">
+                  {history.map((h) => {
+                    const isMinus = h.amount < 0;
+                    const abs = Math.abs(h.amount);
+
+                    return (
+                      <div key={h.id} className="py-5">
+                        <div className="flex items-start gap-4">
+                          {/* date */}
+                          <p className="w-[48px] shrink-0 pre_body_reg_13 text-[#878a93]">
+                            {h.date}
+                          </p>
+
+                          {/* title + (expires optional) */}
+                          <div className="min-w-0 flex-1">
+                            <p className="pre_subtitle_semi_16 text-[#292a2d]">{h.title}</p>
+                            {h.expiresAt ? (
+                              <p className="mt-1 pre_cap_reg_13 text-[#878a93]">{h.expiresAt}</p>
+                            ) : null}
+                          </div>
+
+                          {/* amount */}
+                          <p
+                            className={
+                              "mt-[1px] shrink-0 pre_title_semi_18 " +
+                              (isMinus ? "text-[#c03434]" : "text-[#008bff]")
+                            }
+                          >
+                            {isMinus ? "-" : "+"}
+                            {abs.toLocaleString("ko-KR")}P
+                          </p>
+                        </div>
                       </div>
-
-                      {/* amount (오른쪽) - 제목 라인에 맞춰 살짝 내림/올림 조절 */}
-                      <p className="mt-[1px] shrink-0 pre_title_semi_18 text-[#008bff]">
-                        +{h.amount.toLocaleString("ko-KR")}P
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </section>
           </div>
         </div>
       </main>
+
       <BottomNav />
     </div>
   );

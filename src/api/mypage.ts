@@ -118,6 +118,7 @@ export type ConsultationHistoryItem = {
   canWriteReview: boolean;
   reviewWritten: boolean;
   dayOfWeek: string; // 서버가 주지만, 프론트에서 date 기반으로도 계산 가능
+  expertUserId: string;
 };
 
 export async function getConsultationsHistory(opts?: {
@@ -135,6 +136,124 @@ export async function getConsultationsHistory(opts?: {
   const json = (await res.json()) as ApiResponse<ConsultationHistoryItem[]>;
   if (json.statusCode !== 0)
     throw new Error(json.message || "Failed to fetch consultations history");
+
+  return json.data;
+}
+
+// payments
+
+export type PaymentStatus = "UNPAID" | "PAID" | "CANCELED" | string;
+export type PaymentCategory = "HAIR" | "MAKEUP" | "SKINCARE" | "FASHION" | string;
+export type ConsultationType = "MESSAGE" | "VIDEO" | "TIME_LIMITED" | string;
+
+export type PaymentItem = {
+  reservationId: number;
+  confirmedDate: string; // ISO
+  expertNickname: string;
+  category: PaymentCategory;
+  consultationType: ConsultationType;
+  cost: number;
+  status: PaymentStatus;
+};
+
+export type PaymentsList = {
+  listCount: number;
+  payments: PaymentItem[];
+};
+
+type ApiResponse3 = {
+  statusCode: number;
+  message: string;
+  data: PaymentsList;
+};
+
+const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL ?? ""; // 없으면 상대경로로 호출
+
+export async function getReservationPayments(signal?: AbortSignal): Promise<PaymentsList> {
+  const res = await fetch(`${API_BASE}/reservations/payments`, {
+    method: "GET",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    signal,
+  });
+
+  if (!res.ok) {
+    throw new Error(`결제 내역 조회 실패 (HTTP ${res.status})`);
+  }
+
+  const json = (await res.json()) as ApiResponse3;
+
+  if (!json || typeof json !== "object") throw new Error("서버 응답이 올바르지 않습니다.");
+  if (json.statusCode !== 0) throw new Error(json.message || "요청이 실패했습니다.");
+
+  return json.data ?? { listCount: 0, payments: [] };
+}
+
+// onsultationsSolutions
+
+export type ConsultationSolutionApiItem = {
+  consultationId: number;
+  date: string; // ISO
+  expertName: string;
+  category: "HAIR" | "MAKEUP" | "SKINCARE" | "FASHION" | string;
+  consultationType: "MESSAGE" | "TIME_LIMITED" | string;
+  expertUserId: string;
+};
+
+type ConsultationSolutionsApiResponse = {
+  statusCode: number;
+  message: string;
+  data: ConsultationSolutionApiItem[];
+};
+
+export async function getConsultationsSolutions(opts?: { signal?: AbortSignal }) {
+  const res = await fetch(`${API_BASE}/consultations/solutions`, {
+    method: "GET",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    signal: opts?.signal,
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Failed to fetch solutions (${res.status}): ${text}`);
+  }
+
+  const json = (await res.json()) as ConsultationSolutionsApiResponse;
+  return json.data ?? [];
+}
+
+// mypage/points/history
+
+export type PointHistoryApiItem = {
+  date: string; // ISO
+  point_amount: number;
+  description: string;
+};
+
+export type PointsHistoryResponse = {
+  totalPoints: number;
+  history: PointHistoryApiItem[];
+};
+
+type ApiEnvelope<T> = {
+  statusCode: number;
+  message: string;
+  data: T;
+};
+
+export async function getUserPointsHistory(opts?: { signal?: AbortSignal }) {
+  const res = await fetch(`${API_BASE}/user/points/history`, {
+    method: "GET",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    signal: opts?.signal,
+  });
+
+  if (!res.ok) throw new Error(`포인트 내역 조회 실패 (HTTP ${res.status})`);
+
+  const json = (await res.json()) as ApiEnvelope<PointsHistoryResponse>;
+  if (json.statusCode !== 0) throw new Error(json.message || "요청 실패");
 
   return json.data;
 }
