@@ -574,6 +574,7 @@ import redHeartIcon from "../../images/redHeart.svg";
 import BottomNav from "@/components/navigation/bottom-nav";
 import Logo from "@/components/ui/logo";
 import starIcon from "../../images/reviews/star.svg";
+import freeBanner from "@/images/home/free.svg";
 import banner1 from "@/images/home/banner1.svg";
 import banner2 from "@/images/home/banner2.png";
 import banner3 from "@/images/home/banner3.png";
@@ -600,6 +601,8 @@ type Banner = {
   author?: string;
   role?: string;
   image?: string;
+  link?: string;
+  alt?: string;
 };
 
 type TabItem = {
@@ -718,14 +721,20 @@ const HomePage = () => {
   const banners: Banner[] = [
     {
       id: 1,
-      image: banner1,
+      image: freeBanner,
+      link: "https://docs.google.com/forms/d/e/1FAIpQLSdIwfaOgMfshsYPqfMJshQoXq3ugNtrs3_L9ecZpNL8J14hmQ/viewform?usp=dialog",
+      alt: "무료 설문 참여 배너",
     },
     {
       id: 2,
-      image: banner2,
+      image: banner1,
     },
     {
       id: 3,
+      image: banner2,
+    },
+    {
+      id: 4,
       image: banner3,
     },
   ];
@@ -1059,15 +1068,12 @@ const HomePage = () => {
                 banner.subtitle ||
                 banner.author ||
                 banner.role;
-              return (
-                <article
-                  key={`${banner.id}-${index}`}
-                  className="relative h-[340px] w-[340px] shrink-0 overflow-hidden rounded-none bg-[#c7c9cf] snap-center"
-                >
+              const bannerContent = (
+                <>
                   {banner.image && (
                     <img
                       src={banner.image}
-                      alt=""
+                      alt={banner.alt ?? ""}
                       className="absolute inset-0 h-full w-full object-cover"
                     />
                   )}
@@ -1102,6 +1108,24 @@ const HomePage = () => {
                       </div>
                     </>
                   ) : null}
+                </>
+              );
+              return (
+                <article
+                  key={`${banner.id}-${index}`}
+                  className="relative h-[340px] w-[340px] shrink-0 overflow-hidden rounded-none bg-[#c7c9cf] snap-center"
+                >
+                  {banner.link ? (
+                    <a
+                      href={banner.link}
+                      className="absolute inset-0"
+                      aria-label={banner.alt ?? "배너 링크"}
+                    >
+                      {bannerContent}
+                    </a>
+                  ) : (
+                    bannerContent
+                  )}
                 </article>
               );
             })}
