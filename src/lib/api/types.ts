@@ -85,6 +85,7 @@ export interface ExpertInfoResponse {
   userId: number;
   nickname: string;
   profileImage: string;
+  backgroundImage?: string;
   category: string;
   specialities: string[];
   introduction: string;

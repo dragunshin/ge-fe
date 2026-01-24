@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
 import starIcon from '../../../images/reviews/star.svg';
 import { reviewService } from '../../../services/review.service';
@@ -25,7 +25,11 @@ type ReviewItem = {
 const CategoryBestReviewsPage = () => {
   const navigate = useNavigate();
   const { category } = useParams();
+  const [searchParams] = useSearchParams();
   const apiCategory = getApiCategoryFromRoute(category);
+  const expertIdParam = searchParams.get('expertId');
+  const expertId = expertIdParam ? Number(expertIdParam) : undefined;
+  const isExpertReview = Number.isFinite(expertId);
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [page, setPage] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -79,7 +83,7 @@ const CategoryBestReviewsPage = () => {
     setReviews([]);
     setPage(0);
     setHasMore(true);
-  }, [apiCategory]);
+  }, [apiCategory, expertId]);
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -94,9 +98,11 @@ const CategoryBestReviewsPage = () => {
       setIsLoading(true);
       const requestId = (requestIdRef.current += 1);
       try {
-        const response = apiCategory
-          ? await reviewService.getBestReviews({ category: apiCategory })
-          : await reviewService.getBestReviews();
+        const response = isExpertReview
+          ? await reviewService.getExpertReviews(expertId as number, { page: 0, size: 10 })
+          : apiCategory
+            ? await reviewService.getBestReviews({ category: apiCategory })
+            : await reviewService.getBestReviews();
         if (requestId !== requestIdRef.current) {
           return;
         }
@@ -154,6 +160,10 @@ const CategoryBestReviewsPage = () => {
     return () => observer.disconnect();
   }, [hasMore, isLoading]);
 
+  const noticeText = isExpertReview
+    ? '전문가 후기 리스트입니다.'
+    : '가장 많은 조회수를 기록한 리뷰입니다.';
+
   return (
     <div className="flex h-full flex-col bg-white">
       <header className="app-header flex items-center gap-[15px] px-4 pt-[14px]">
@@ -169,7 +179,7 @@ const CategoryBestReviewsPage = () => {
       <main className="flex-1 overflow-y-auto pb-8 scrollbar-hide">
         <section className="px-4 pt-4">
           <div className="rounded-[8px] bg-[#e5f4ff] px-4 py-[12px] text-[13px] text-[#505158]">
-            가장 많은 조회수를 기록한 리뷰입니다.
+            {noticeText}
           </div>
         </section>
 

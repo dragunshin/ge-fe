@@ -1,15 +1,19 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import backIcon from '../../../images/login/back.svg';
+import hairIcon from '../../../images/login/hair.svg';
+import fashionIcon from '../../../images/login/fashion.svg';
+import makeupIcon from '../../../images/login/makeup.svg';
+import skinIcon from '../../../images/login/skin.svg';
 import { InterestCard } from '../../../components/ui/interest-card';
 
-type Interest = 'hair' | 'fashion' | 'makeup' | 'skincare';
+type Interest = 'hair' | 'fashion' | 'makeup' | 'skin';
 
-const interests: { id: Interest; label: string }[] = [
-  { id: 'hair', label: '헤어' },
-  { id: 'fashion', label: '피부' },
-  { id: 'makeup', label: '메이크업' },
-  { id: 'skincare', label: '패션' },
+const interests: { id: Interest; label: string; icon: string }[] = [
+  { id: 'hair', label: '헤어', icon: hairIcon },
+  { id: 'skin', label: '피부', icon: skinIcon },
+  { id: 'makeup', label: '메이크업', icon: makeupIcon },
+  { id: 'fashion', label: '패션', icon: fashionIcon },
 ];
 
 export function InterestSelectionPage() {
@@ -58,6 +62,7 @@ export function InterestSelectionPage() {
             <InterestCard
               key={interest.id}
               label={interest.label}
+              iconSrc={interest.icon}
               isSelected={selectedInterests.includes(interest.id)}
               onClick={() => toggleInterest(interest.id)}
             />

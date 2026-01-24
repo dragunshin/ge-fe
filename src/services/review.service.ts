@@ -21,4 +21,12 @@ export const reviewService = {
       params,
     });
   },
+  async getExpertReviews(
+    userId: number,
+    params?: { page?: number; size?: number },
+  ): Promise<ApiResponse<ReviewSummaryResponse[]>> {
+    return await api.get<ApiResponse<ReviewSummaryResponse[]>>(`/expert/${userId}/reviews`, {
+      params,
+    });
+  },
 };

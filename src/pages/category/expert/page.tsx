@@ -27,7 +27,6 @@ import type {
 import {
   getLabelFromApiCategory,
   getRouteCategoryFromApi,
-  type ApiCategory,
 } from '../../../lib/utils/category';
 
 type ReviewCard = {
@@ -227,7 +226,7 @@ const ExpertInfoPage = () => {
   }, [portfolioHasMore, portfolioLoading]);
 
   useEffect(() => {
-    if (!expertInfo?.category) {
+    if (!expertIdNumber) {
       return;
     }
 
@@ -235,15 +234,15 @@ const ExpertInfoPage = () => {
 
     const fetchReviews = async () => {
       try {
-        const response = await reviewService.getRecentReviews({
-          category: expertInfo.category as ApiCategory,
+        const response = await reviewService.getExpertReviews(expertIdNumber, {
           page: 0,
           size: 5,
         });
         if (!isActive) {
           return;
         }
-        const nextCards = response.data.map((review, index) => ({
+        const reviewsData = Array.isArray(response.data) ? response.data : [];
+        const nextCards = reviewsData.map((review, index) => ({
           id: review.reviewId,
           title: `후기 ${index + 1}`,
           content: review.content,
@@ -251,10 +250,10 @@ const ExpertInfoPage = () => {
         }));
         setReviewCards(nextCards);
         const average =
-          response.data.length === 0
+          reviewsData.length === 0
             ? 0
-            : response.data.reduce((sum, review) => sum + review.rating, 0) /
-              response.data.length;
+            : reviewsData.reduce((sum, review) => sum + review.rating, 0) /
+              reviewsData.length;
         setReviewAverage(Number(average.toFixed(1)));
       } catch (error) {
         console.error('Failed to fetch reviews:', error);
@@ -266,7 +265,7 @@ const ExpertInfoPage = () => {
     return () => {
       isActive = false;
     };
-  }, [expertInfo?.category]);
+  }, [expertIdNumber]);
 
   const handleToggleLike = async () => {
     if (!expertIdNumber) {
@@ -306,6 +305,9 @@ const ExpertInfoPage = () => {
 
   const categoryLabel = getLabelFromApiCategory(expertInfo?.category);
   const reviewCategoryRoute = getRouteCategoryFromApi(expertInfo?.category) ?? 'hair';
+  const reviewListRoute = expertIdNumber
+    ? `/reviews?expertId=${expertIdNumber}`
+    : `/category/${reviewCategoryRoute}/reviews`;
   const activeSchedules = expertSchedules.filter((schedule) => schedule.isActive);
   const orderedSchedules = (["VIDEO", "MESSAGE"] as const)
     .map((type) => activeSchedules.find((schedule) => schedule.consultationType === type))
@@ -431,7 +433,15 @@ const ExpertInfoPage = () => {
             <h1 className="text-[20px] font-semibold text-[#0f0f10]">전문가 프로필</h1>
           </div>
 
-          <div className="absolute left-0 top-[100px] h-[220px] w-[375px] bg-[#d2d4d8]" />
+          <div className="absolute left-0 top-[100px] h-[220px] w-[375px] overflow-hidden bg-[#d2d4d8]">
+            {expertInfo?.backgroundImage && (
+              <img
+                src={expertInfo.backgroundImage}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            )}
+          </div>
 
           <div className="absolute left-0 top-[311px] h-[460px] w-[375px]">
             <div className="absolute left-[16px] top-[40px] flex w-[342px] items-end justify-between">
@@ -529,7 +539,7 @@ const ExpertInfoPage = () => {
                 </div>
                 <button
                   className="flex items-center gap-[2px] text-[14px] text-[#70737c]"
-                  onClick={() => navigate(`/category/${reviewCategoryRoute}/reviews`)}
+                  onClick={() => navigate(reviewListRoute)}
                 >
                   전체보기
                   <ChevronRight className="h-[24px] w-[24px]" />

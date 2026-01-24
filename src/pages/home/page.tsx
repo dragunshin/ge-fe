@@ -663,6 +663,7 @@ const HomePage = () => {
   const [openTypeSheet, setOpenTypeSheet] = useState(false);
   const [openCalendarSheet, setOpenCalendarSheet] = useState(false);
   const [selectedConsultType, setSelectedConsultType] = useState<ConsultType>("MESSAGE");
+  const [top3ServiceReady, setTop3ServiceReady] = useState(false);
 
   const refreshLikedExperts = useCallback(async () => {
     try {
@@ -774,6 +775,16 @@ const HomePage = () => {
   useEffect(() => {
     refreshLikedExperts();
   }, [refreshLikedExperts]);
+
+  useEffect(() => {
+    if (!top3ServiceReady) {
+      return;
+    }
+    const timeoutId = window.setTimeout(() => {
+      setTop3ServiceReady(false);
+    }, 1000);
+    return () => window.clearTimeout(timeoutId);
+  }, [top3ServiceReady]);
 
   useEffect(() => {
     const state = location.state as { openCalendarSheet?: boolean } | null;
@@ -995,6 +1006,10 @@ const HomePage = () => {
                     navigate("/service-ready");
                     return;
                   }
+                  if (tab.id === "skin") {
+                    navigate("/service-ready");
+                    return;
+                  }
                   setSelectedHomeTab(tab.label);
                   if (tab.route && tab.route !== "/") {
                     navigate(tab.route, { state: { fromHomeTab: true } });
@@ -1102,7 +1117,14 @@ const HomePage = () => {
               {topTabs.map((tab) => (
                 <button
                   key={tab.label}
-                  onClick={() => setSelectedTopTab(tab.label)}
+                  onClick={() => {
+                    if (tab.label === "메이크업" || tab.label === "스킨") {
+                      setTop3ServiceReady(true);
+                      return;
+                    }
+                    setTop3ServiceReady(false);
+                    setSelectedTopTab(tab.label);
+                  }}
                   className={`flex h-[30px] items-center justify-center whitespace-nowrap rounded-[4px] px-[12px] text-[13px] ${
                     selectedTopTab === tab.label
                       ? "bg-[#46474c] text-white font-semibold"
@@ -1433,6 +1455,15 @@ const HomePage = () => {
           navigate("/hair/setup");
         }}
       />
+
+      {top3ServiceReady && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center px-6">
+          <div className="rounded-[10px] bg-[#171719] px-6 py-3 text-[14px] font-semibold text-white shadow-lg">
+            서비스 준비중입니다
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

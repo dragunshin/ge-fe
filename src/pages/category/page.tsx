@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState, type KeyboardEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ChevronRight, Search } from 'lucide-react';
 import heartIcon from '../../images/mypage/heart.svg';
 import BottomNav from '@/components/navigation/bottom-nav';
 import Logo from '@/components/ui/logo';
 import starIcon from '../../images/reviews/star.svg';
+import hairBanner from '../../images/home/hairBanner.svg';
 import { expertService } from '../../services/expert.service';
 import { reviewService } from '../../services/review.service';
 import ConsultationMethodSheet from '../resevationFlow/reservationSheet/typeReservation';
@@ -84,6 +85,8 @@ const CategoryLandingPage = () => {
   const [openCalendarSheet, setOpenCalendarSheet] = useState(false);
   const [selectedConsultType, setSelectedConsultType] =
     useState<ConsultType>('MESSAGE');
+  const [activeBannerIndex, setActiveBannerIndex] = useState(0);
+  const bannerTrackRef = useRef<HTMLDivElement | null>(null);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   // 예약 시작 시 선택한 전문가 저장
   const [selectedReservationExpertId, setSelectedReservationExpertId] = useState<number | null>(
@@ -99,6 +102,28 @@ const CategoryLandingPage = () => {
     };
     return map[categoryKey] ?? '헤어';
   }, [categoryKey]);
+
+  const heroBanners = useMemo(
+    () =>
+      Array.from({ length: 5 }, (_, index) => ({
+        id: index + 1,
+        eyebrow: '이제 슬슬 준비해야지',
+        title: '소개팅 필수 헤어스타일',
+        subtitle: '‘스핀 스왈로브펌’',
+        author: '박서령',
+        role: '헤어디자이너',
+        image: hairBanner,
+      })),
+    [],
+  );
+  const bannerWidth = 375;
+  const bannerHeight = 246;
+  const bannerImageTop = -8;
+  const bannerImageHeight = 262;
+  const bannerGradientTop = 101;
+  const bannerGradientHeight = 144.5;
+  const bannerTextTop = 125;
+  const bannerIndicatorTop = 205;
 
   const handleExpertProfile = (expertId: number) => {
     navigate(`/experts/${expertId}`);
@@ -252,6 +277,13 @@ const CategoryLandingPage = () => {
       .map((item) => item.trim())
       .filter(Boolean);
   };
+
+  useEffect(() => {
+    setActiveBannerIndex(0);
+    if (bannerTrackRef.current) {
+      bannerTrackRef.current.scrollLeft = 0;
+    }
+  }, [categoryKey]);
 
   useEffect(() => {
     let isActive = true;
@@ -472,23 +504,94 @@ const CategoryLandingPage = () => {
           </section>
         </div>
 
-        <section className="relative mt-[20px] h-[246px] w-full overflow-hidden">
-          <div className="absolute left-[-25px] top-[-8px] h-[262px] w-[400px] rounded-[12px] bg-[#d2d4d8]" />
-          <div className="absolute bottom-0 left-[-20px] h-[144.5px] w-[416px] bg-gradient-to-b from-transparent to-black/50" />
-          <div className="absolute left-[19.5px] top-[125px] w-[165px] text-white">
-            <p className="text-[12px] leading-[1.4]">이제 슬슬 준비해야지</p>
-            <p className="mt-1 text-[18px] font-semibold leading-[1.35]">
-              소개팅 필수 헤어스타일
-              <br />‘스핀 스왈로브펌’
-            </p>
-            <div className="mt-3 inline-flex h-[22px] items-center gap-[4px] bg-[#008bff] px-[8px] text-[12px] font-semibold">
-              <span>박서령</span>
-              <span className="h-[7px] w-px bg-white/80" />
-              <span className="text-[10px] font-medium">헤어디자이너</span>
+        {categoryKey !== 'hair' && categoryKey !== 'fashion' && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 px-6">
+            <div className="w-full max-w-[320px] overflow-hidden rounded-[10px] bg-white text-center shadow-lg">
+              <div className="bg-[#171719] px-4 py-3 text-[14px] font-semibold text-white">
+                서비스 준비중입니다
+              </div>
+              <div className="px-5 py-4">
+                <p className="text-[13px] leading-[1.4] text-[#878a93]">
+                  빠른 시일 내에 준비하여 찾아뵙겠습니다.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => navigate('/')}
+                  className="mt-4 h-[36px] w-full rounded-[6px] bg-[#171719] text-[14px] font-semibold text-white"
+                >
+                  홈으로
+                </button>
+              </div>
             </div>
           </div>
-          <div className="absolute right-[15px] top-[205px] flex h-[20px] w-[36px] items-center justify-center rounded-[37px] bg-black/50 text-[12px] text-white">
-            1/12
+        )}
+
+        <section className="relative mt-[20px]">
+          <div
+            ref={bannerTrackRef}
+            onScroll={() => {
+              const track = bannerTrackRef.current;
+              if (!track) return;
+              const nextIndex = Math.min(
+                heroBanners.length - 1,
+                Math.max(0, Math.round(track.scrollLeft / bannerWidth)),
+              );
+              setActiveBannerIndex(nextIndex);
+            }}
+            className="flex h-[246px] w-full overflow-x-auto scrollbar-hide snap-x snap-mandatory"
+          >
+            {heroBanners.map((banner, index) => {
+              const isActive = index === activeBannerIndex;
+              return (
+                <article
+                  key={banner.id}
+                  className={`relative shrink-0 snap-start overflow-hidden transition-transform duration-300 ${
+                    isActive ? 'scale-100' : 'scale-[0.96]'
+                  }`}
+                  style={{ width: `${bannerWidth}px`, height: `${bannerHeight}px` }}
+                >
+                  <div
+                    className="absolute left-[-25px] w-[400px] rounded-[12px] bg-[#d2d4d8]"
+                    style={{ top: `${bannerImageTop}px`, height: `${bannerImageHeight}px` }}
+                  />
+                  <img
+                    src={banner.image}
+                    alt=""
+                    className="absolute left-[-25px] w-[400px] object-cover"
+                    style={{ top: `${bannerImageTop}px`, height: `${bannerImageHeight}px` }}
+                  />
+                  <div
+                    className="absolute left-[-20.5px] w-[416px] bg-gradient-to-b from-transparent to-black/50"
+                    style={{ top: `${bannerGradientTop}px`, height: `${bannerGradientHeight}px` }}
+                  />
+                  <div className="absolute left-[19.5px] w-[165px] text-white" style={{ top: `${bannerTextTop}px` }}>
+                    <div className="flex flex-col">
+                      <span className="text-[12px] leading-[1.4]">{banner.eyebrow}</span>
+                      <p className="mt-[4px] text-[18px] font-semibold leading-[1.35]">
+                        {banner.title}
+                        <br />
+                        {banner.subtitle}
+                      </p>
+                    </div>
+                    <div className="mt-[12px] inline-flex h-[22px] items-center bg-[#008bff]">
+                      <span className="pl-[8px] text-[12px] font-semibold leading-[1.4]">
+                        {banner.author}
+                      </span>
+                      <span className="mx-[4px] h-[7px] w-px bg-white/80" />
+                      <span className="pr-[8px] text-[10px] font-medium leading-[1.4]">
+                        {banner.role}
+                      </span>
+                    </div>
+                  </div>
+                  <div
+                    className="absolute left-[324px] flex h-[20px] w-[36px] items-center justify-center rounded-[37px] bg-black/50 text-[12px] text-white"
+                    style={{ top: `${bannerIndicatorTop}px` }}
+                  >
+                    {activeBannerIndex + 1}/{heroBanners.length}
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </section>
 
