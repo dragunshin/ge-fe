@@ -38,8 +38,8 @@ import ConsultationGate from "@/pages/solution/page";
 import SolutionView from "@/pages/solution/readSolution";
 import PaymentHistoryPage from "@/pages/myPage/paymentHistory/page";
 import MySolutionView from "@/pages/myPage/mySolution/page";
-import ExpertIntroductionPage from "@/pages/mypage/expert/introduction/page";
-import ExpertPortfolioPage from "@/pages/mypage/expert/portfolio/page";
+import ExpertIntroductionPage from "@/pages/myPage/expert/introduction/page";
+import ExpertPortfolioPage from "@/pages/myPage/expert/portfolio/page";
 
 export const router = createBrowserRouter([
   {
