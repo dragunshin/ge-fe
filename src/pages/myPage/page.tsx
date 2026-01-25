@@ -11,6 +11,9 @@ import EmptyStar from "@/images/mypage/emptyStar.svg?react";
 import Question from "@/images/mypage/question.svg?react";
 import DeleteUser from "@/images/mypage/deleteUser.svg?react";
 import Logout from "@/images/mypage/logout.svg?react";
+{/*소개서 수정, 포트폴리오 관리 임시 라우팅 개발하실 때 이 주석 지우고 살리시면 됩니다!*/} 
+//import Portfolio from "@/images/mypage/portfolio.svg?react";
+//import Retouch from "@/images/mypage/retouch.svg?react";
 
 import { getUserMe, myPageLogout, type UserMe } from "@/api/mypage";
 
@@ -67,6 +70,8 @@ export default function MyPage() {
   }, []);
 
   const userName = `${me?.nickname ?? "사용자"}님`;
+  {/*소개서 수정, 포트폴리오 관리 임시 라우팅 */}
+  //const isExpert = me?.userType === "EXPERT";
 
   const stats: StatItem[] = [
     {
@@ -194,6 +199,27 @@ export default function MyPage() {
       ],
     },
   ];
+
+  {/*소개서 수정, 포트폴리오 관리 임시 라우팅 */}
+  // if (isExpert) {
+  //   sections.splice(3, 0, {
+  //     title: "프로필",
+  //     items: [
+  //       {
+  //         key: "expertIntro",
+  //         label: "소개서 수정",
+  //         icon: <Retouch />,
+  //         onClick: () => navigate("/mypage/expert/introduction"),
+  //       },
+  //       {
+  //         key: "expertPortfolio",
+  //         label: "포트폴리오 관리",
+  //         icon: <Portfolio />,
+  //         onClick: () => navigate("/mypage/expert/portfolio"),
+  //       },
+  //     ],
+  //   });
+  // }
 
   return (
     <div className="flex h-full flex-col bg-white">

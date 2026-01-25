@@ -38,6 +38,8 @@ import ConsultationGate from "@/pages/solution/page";
 import SolutionView from "@/pages/solution/readSolution";
 import PaymentHistoryPage from "@/pages/myPage/paymentHistory/page";
 import MySolutionView from "@/pages/myPage/mySolution/page";
+import ExpertIntroductionPage from "@/pages/mypage/expert/introduction/page";
+import ExpertPortfolioPage from "@/pages/mypage/expert/portfolio/page";
 
 export const router = createBrowserRouter([
   {
@@ -118,6 +120,22 @@ export const router = createBrowserRouter([
     element: (
       <AuthGuard>
         <MyPage />
+      </AuthGuard>
+    ),
+  },
+  {
+    path: "/mypage/expert/introduction",
+    element: (
+      <AuthGuard>
+        <ExpertIntroductionPage />
+      </AuthGuard>
+    ),
+  },
+  {
+    path: "/mypage/expert/portfolio",
+    element: (
+      <AuthGuard>
+        <ExpertPortfolioPage />
       </AuthGuard>
     ),
   },
