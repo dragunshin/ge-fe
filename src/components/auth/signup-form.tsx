@@ -77,6 +77,9 @@ export function SignUpForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isVerificationRequested, setIsVerificationRequested] = useState(false);
+  const [isVerificationVerified, setIsVerificationVerified] = useState(false);
+  const [isRequestingCode, setIsRequestingCode] = useState(false);
+  const [isVerifyingCode, setIsVerifyingCode] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   const [verificationError, setVerificationError] = useState('');
 
@@ -101,6 +104,12 @@ export function SignUpForm() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === 'email') {
+      setIsVerificationRequested(false);
+      setIsVerificationVerified(false);
+      setVerificationCode('');
+      setVerificationError('');
+    }
     // 입력 시 해당 필드의 에러 메시지 초기화
     if (errors[name]) {
       setErrors((prev) => {
@@ -111,26 +120,57 @@ export function SignUpForm() {
     }
   };
 
-  const handleRequestVerification = () => {
-    setIsVerificationRequested(true);
+  const handleRequestVerification = async () => {
+    if (!formData.email || isRequestingCode) {
+      return;
+    }
+    setIsRequestingCode(true);
     setVerificationError('');
+    try {
+      await authService.sendEmailVerification({ email: formData.email });
+      setIsVerificationRequested(true);
+      setIsVerificationVerified(false);
+    } catch (err) {
+      setVerificationError(getErrorMessage(err) || '인증번호 요청에 실패했어요');
+    } finally {
+      setIsRequestingCode(false);
+    }
   };
 
-  const handleConfirmVerification = () => {
-    if (!verificationCode) {
+  const handleConfirmVerification = async () => {
+    if (!verificationCode || isVerifyingCode || !formData.email) {
       return;
     }
-    if (verificationCode !== '123456') {
-      setVerificationError('인증번호가 일치하지 않아요');
-      return;
-    }
+    setIsVerifyingCode(true);
     setVerificationError('');
+    try {
+      const response = await authService.verifyEmailCode({
+        email: formData.email,
+        code: verificationCode,
+      });
+      if (response.data?.verified) {
+        setIsVerificationVerified(true);
+        setVerificationError('');
+      } else {
+        setIsVerificationVerified(false);
+        setVerificationError(response.data?.message || '인증번호가 일치하지 않아요');
+      }
+    } catch (err) {
+      setIsVerificationVerified(false);
+      setVerificationError(getErrorMessage(err) || '인증번호가 일치하지 않아요');
+    } finally {
+      setIsVerifyingCode(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isAgreementsValid) {
       navigate('/auth/terms-agreement');
+      return;
+    }
+    if (!isVerificationVerified) {
+      setVerificationError('이메일 인증이 필요합니다.');
       return;
     }
     setErrors({});
@@ -198,7 +238,8 @@ export function SignUpForm() {
     formData.birthDate &&
     formData.email &&
     formData.password &&
-    formData.passwordConfirm;
+    formData.passwordConfirm &&
+    isVerificationVerified;
 
   return (
     <div className="min-h-full bg-white flex flex-col">
@@ -288,9 +329,9 @@ export function SignUpForm() {
                 type="button"
                 onClick={handleRequestVerification}
                 className="absolute right-[16px] top-1/2 -translate-y-1/2 text-[13px] font-semibold text-[#008bff]"
-                disabled={isLoading || !formData.email}
+                disabled={isLoading || isRequestingCode || !formData.email}
               >
-                인증요청
+                {isRequestingCode ? '전송 중' : '인증요청'}
               </button>
             </div>
             {errors.email && (
@@ -309,17 +350,25 @@ export function SignUpForm() {
                   }
                 }}
                 className="flex-1 h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[13px] bg-white transition-colors border-gray-200 focus:border-gray-300"
-                disabled={isLoading || !isVerificationRequested}
+                disabled={isLoading || !isVerificationRequested || isVerificationVerified}
               />
               <button
                 type="button"
                 onClick={handleConfirmVerification}
-                disabled={isLoading || !verificationCode || !isVerificationRequested}
+                disabled={
+                  isLoading ||
+                  isVerifyingCode ||
+                  !verificationCode ||
+                  !isVerificationRequested ||
+                  isVerificationVerified
+                }
                 className={`h-12 w-[104px] rounded text-[14px] font-semibold text-white ${
-                  verificationCode && isVerificationRequested ? 'bg-[#0f0f10]' : 'bg-[#aeb0b6]'
+                  verificationCode && isVerificationRequested && !isVerificationVerified
+                    ? 'bg-[#0f0f10]'
+                    : 'bg-[#aeb0b6]'
                 }`}
               >
-                인증번호 확인
+                {isVerifyingCode ? '확인 중' : '인증번호 확인'}
               </button>
             </div>
             {verificationError && (

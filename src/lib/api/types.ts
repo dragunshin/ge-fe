@@ -64,6 +64,21 @@ export interface SocialSignupResponse {
   userType: ApiUserType;
 }
 
+export interface EmailVerificationRequest {
+  email: string;
+}
+
+export interface EmailVerificationConfirmRequest {
+  email: string;
+  code: string;
+}
+
+export interface EmailVerificationResponse {
+  email: string;
+  verified: boolean;
+  message: string;
+}
+
 // 에러 타입
 export interface ApiErrorResponse {
   statusCode: number;

@@ -1,6 +1,9 @@
 import { api } from '../lib/api/client';
 import type {
   ApiResponse,
+  EmailVerificationConfirmRequest,
+  EmailVerificationRequest,
+  EmailVerificationResponse,
   LoginRequest,
   LoginResponse,
   SignupRequest,
@@ -31,6 +34,20 @@ export const authService = {
   // 소셜 회원 추가정보 입력
   async socialSignup(data: SocialSignupRequest): Promise<ApiResponse<SocialSignupResponse>> {
     return await api.post<ApiResponse<SocialSignupResponse>>('/user/social-signup', data);
+  },
+
+  // 이메일 인증번호 발송
+  async sendEmailVerification(
+    data: EmailVerificationRequest,
+  ): Promise<ApiResponse<EmailVerificationResponse>> {
+    return await api.post<ApiResponse<EmailVerificationResponse>>('/email/verification/send', data);
+  },
+
+  // 이메일 인증번호 확인
+  async verifyEmailCode(
+    data: EmailVerificationConfirmRequest,
+  ): Promise<ApiResponse<EmailVerificationResponse>> {
+    return await api.post<ApiResponse<EmailVerificationResponse>>('/email/verification/verify', data);
   },
 
   // 로그아웃
