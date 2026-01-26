@@ -123,7 +123,7 @@ export function HairSetup() {
     return (
       <Step1SidePhotos
         reservationId={reservationId}
-        onBack={() => navigate("/", { state: { openCalendarSheet: true } })}
+        onBack={() => navigate("/explore")}
         onNext={() => goStep(2)}
       />
     );

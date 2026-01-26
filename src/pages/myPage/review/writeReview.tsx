@@ -176,7 +176,7 @@ export default function ReviewWritePage() {
             file,
             resourceType: "review",
             resourceId: consultationId, // consultationId로 묶어서 관리
-            imageType: "front",
+            imageType: "",
           });
 
           setImageKeys((prev) => (prev.length >= 5 ? prev : [...prev, key]));

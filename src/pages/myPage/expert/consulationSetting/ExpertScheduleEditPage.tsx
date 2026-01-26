@@ -9,22 +9,23 @@ type LocationState = {
   existing?: ExpertSchedule[];
 };
 
-const TYPES: ConsultationType[] = ["MESSAGE", "VIDEO"];
+const TYPES: ConsultationType[] = ["VIDEO", "MESSAGE"];
 
 const META: Record<
   ConsultationType,
   { cardTitle: string; desc: string; inputTitle: string; placeholder: string }
 > = {
-  MESSAGE: {
-    cardTitle: "메시지 상담",
-    desc: "고민 설문지 답변을 바탕으로 전문가가\n24시간 내에 솔루션지를 보내드려요.",
-    inputTitle: "메시지 상담",
-    placeholder: "가격 입력",
-  },
   VIDEO: {
     cardTitle: "화상 상담",
     desc: "전문가와 화상으로 30분 상담을 진행해요. 솔루션지는 24시간 내로 전송됩니다.",
     inputTitle: "실시간 화상 상담",
+    placeholder: "가격 입력",
+  },
+
+  MESSAGE: {
+    cardTitle: "메시지 상담",
+    desc: "고민 설문지 답변을 바탕으로 전문가가\n24시간 내에 솔루션지를 보내드려요.",
+    inputTitle: "메시지 상담",
     placeholder: "가격 입력",
   },
 };

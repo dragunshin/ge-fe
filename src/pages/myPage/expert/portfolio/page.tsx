@@ -320,6 +320,7 @@ export default function ExpertPortfolioPage() {
                       type="button"
                       onClick={() => {
                         setOpenMenuId(null);
+                        alert("개발 중인 기능입니다. 삭제 후에 다시 만들어주세요.");
                         return;
                       }}
                       className="w-full border-b border-[#f1f1f6] px-[32px] py-[10px] text-center font-medium text-[#171719]"
@@ -330,8 +331,8 @@ export default function ExpertPortfolioPage() {
                       type="button"
                       onClick={() => {
                         setOpenMenuId(null);
-                        // setDeleteTarget(item);
-                        alert("개발 중인 기능입니다. 삭제 후에 다시 만들어주세요.");
+                        setDeleteTarget(item);
+                        //alert("개발 중인 기능입니다. 삭제 후에 다시 만들어주세요.");
                       }}
                       className="w-full border-b border-[#f1f1f6] px-[32px] py-[10px] text-center font-medium text-[#171719]"
                     >
