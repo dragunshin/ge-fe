@@ -18,6 +18,7 @@ const CAREER_MAX = 500;
 const LINK_MAX = 255;
 
 type DraftInfo = {
+  nickname: string;
   introduction: string;
   profileLink: string;
   careerInfo: string;
@@ -28,7 +29,7 @@ export default function ExpertIntroductionPage() {
   const [me, setMe] = React.useState<UserMe | null>(null);
   const [info, setInfo] = React.useState<ExpertInfoResponse | null>(null);
   const [activeField, setActiveField] = React.useState<
-    "introduction" | "profileLink" | "careerInfo" | null
+    "nickname" | "introduction" | "profileLink" | "careerInfo" | null
   >(null);
   const [isSaving, setIsSaving] = React.useState(false);
   const [isUploading, setIsUploading] = React.useState({
@@ -36,6 +37,7 @@ export default function ExpertIntroductionPage() {
     background: false,
   });
   const [draft, setDraft] = React.useState<DraftInfo>({
+    nickname: "",
     introduction: "",
     profileLink: "",
     careerInfo: "",
@@ -72,6 +74,7 @@ export default function ExpertIntroductionPage() {
         if (!isActive) return;
         setInfo(response.data);
         setDraft({
+          nickname: response.data.nickname ?? "",
           introduction: response.data.introduction ?? "",
           profileLink: response.data.profileLink ?? "",
           careerInfo: response.data.careerInfo ?? "",
@@ -92,6 +95,7 @@ export default function ExpertIntroductionPage() {
   const isDirty = React.useMemo(() => {
     if (!info) return false;
     return (
+      (draft.nickname ?? "") !== (info.nickname ?? "") ||
       (draft.introduction ?? "") !== (info.introduction ?? "") ||
       (draft.profileLink ?? "") !== (info.profileLink ?? "") ||
       (draft.careerInfo ?? "") !== (info.careerInfo ?? "")
@@ -254,15 +258,24 @@ export default function ExpertIntroductionPage() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setActiveField("introduction")}
+                    onClick={() => setActiveField("nickname")}
                     className="flex h-[24px] w-[24px] items-center justify-center"
                   >
                     <RetouchIcon className="h-[18px] w-[18px]" />
                   </button>
                 </div>
-                <p className="mt-[6px] text-[18px] font-semibold text-[#292a2d]">
-                  {info?.nickname ?? "전문가"} 전문가
-                </p>
+                {activeField === "nickname" ? (
+                  <input
+                    value={draft.nickname}
+                    onChange={(event) => handleChange("nickname", event.target.value)}
+                    className="mt-[6px] w-full border-b border-[#008bff] pb-[6px] text-[18px] font-semibold text-[#292a2d] outline-none"
+                    placeholder="전문가 이름"
+                  />
+                ) : (
+                  <p className="mt-[6px] text-[18px] font-semibold text-[#292a2d]">
+                    {info?.nickname ?? "전문가"}
+                  </p>
+                )}
               </div>
             </div>
 

@@ -76,6 +76,9 @@ export function SignUpForm() {
   const [agreements] = useState(initialAgreements);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isVerificationRequested, setIsVerificationRequested] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [verificationError, setVerificationError] = useState('');
 
   useEffect(() => {
     sessionStorage.setItem(
@@ -106,6 +109,22 @@ export function SignUpForm() {
         return newErrors;
       });
     }
+  };
+
+  const handleRequestVerification = () => {
+    setIsVerificationRequested(true);
+    setVerificationError('');
+  };
+
+  const handleConfirmVerification = () => {
+    if (!verificationCode) {
+      return;
+    }
+    if (verificationCode !== '123456') {
+      setVerificationError('인증번호가 일치하지 않아요');
+      return;
+    }
+    setVerificationError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -253,19 +272,58 @@ export function SignUpForm() {
           {/* 이메일 */}
           <div>
             <label className="block text-base font-medium text-black mb-3">이메일</label>
-            <input
-              name="email"
-              type="text"
-              placeholder="example@gmail.com"
-              value={formData.email}
-              onChange={handleChange}
-              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[13px] bg-white transition-colors ${
-                errors.email ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gray-300'
-              }`}
-              disabled={isLoading}
-            />
+            <div className="relative">
+              <input
+                name="email"
+                type="text"
+                placeholder="example@gmail.com"
+                value={formData.email}
+                onChange={handleChange}
+                className={`w-full h-12 px-5 pr-[78px] border rounded focus:outline-none placeholder:text-gray-400 text-[13px] bg-white transition-colors ${
+                  errors.email ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gray-300'
+                }`}
+                disabled={isLoading}
+              />
+              <button
+                type="button"
+                onClick={handleRequestVerification}
+                className="absolute right-[16px] top-1/2 -translate-y-1/2 text-[13px] font-semibold text-[#008bff]"
+                disabled={isLoading || !formData.email}
+              >
+                인증요청
+              </button>
+            </div>
             {errors.email && (
               <p className="text-red-500 text-xs mt-1 px-1">{errors.email}</p>
+            )}
+            <div className="mt-2 flex gap-2">
+              <input
+                name="verificationCode"
+                type="text"
+                placeholder="인증번호 입력"
+                value={verificationCode}
+                onChange={(event) => {
+                  setVerificationCode(event.target.value);
+                  if (verificationError) {
+                    setVerificationError('');
+                  }
+                }}
+                className="flex-1 h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[13px] bg-white transition-colors border-gray-200 focus:border-gray-300"
+                disabled={isLoading || !isVerificationRequested}
+              />
+              <button
+                type="button"
+                onClick={handleConfirmVerification}
+                disabled={isLoading || !verificationCode || !isVerificationRequested}
+                className={`h-12 w-[104px] rounded text-[14px] font-semibold text-white ${
+                  verificationCode && isVerificationRequested ? 'bg-[#0f0f10]' : 'bg-[#aeb0b6]'
+                }`}
+              >
+                인증번호 확인
+              </button>
+            </div>
+            {verificationError && (
+              <p className="mt-2 text-[13px] text-[#f02929]">{verificationError}</p>
             )}
           </div>
 

@@ -31,6 +31,7 @@ export type ToggleRepresentativePortfolioResponse = {
 };
 
 export type UpdateExpertInfoRequest = {
+  nickname?: string;
   introduction?: string;
   profileLink?: string;
   careerInfo?: string;
