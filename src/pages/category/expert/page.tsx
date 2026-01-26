@@ -1,29 +1,26 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
-import type { AxiosError } from 'axios';
-import heartIcon from '../../../images/mypage/heart.svg';
-import redHeartIcon from '../../../images/redHeart.svg';
-import instagramIcon from '../../../images/expert/instagram.svg';
-import boardIcon from '../../../images/expert/board.svg';
-import { portfolioItems, type PortfolioItem } from './portfolio-data';
-import { expertService } from '../../../services/expert.service';
-import { reviewService } from '../../../services/review.service';
-import { reservationService } from '../../../services/reservation.service';
-import ConsultationMethodSheet from '../../resevationFlow/reservationSheet/typeReservation';
-import DateTimeBottomSheet from '../../resevationFlow/reservationSheet/calendar';
-import { useAuthStore } from '../../../stores/useAuthStore';
-import starIcon from '../../../images/mypage/expertStar.svg'
-import checkIcon from '../../../images/mypage/expert/check.svg'
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import type { AxiosError } from "axios";
+import heartIcon from "../../../images/mypage/heart.svg";
+import redHeartIcon from "../../../images/redHeart.svg";
+import instagramIcon from "../../../images/expert/instagram.svg";
+import boardIcon from "../../../images/expert/board.svg";
+import { portfolioItems, type PortfolioItem } from "./portfolio-data";
+import { expertService } from "../../../services/expert.service";
+import { reviewService } from "../../../services/review.service";
+import { reservationService } from "../../../services/reservation.service";
+import ConsultationMethodSheet from "../../resevationFlow/reservationSheet/typeReservation";
+import DateTimeBottomSheet from "../../resevationFlow/reservationSheet/calendar";
+import { useAuthStore } from "../../../stores/useAuthStore";
+import starIcon from "../../../images/mypage/expertStar.svg";
+import checkIcon from "../../../images/mypage/expert/check.svg";
 import type {
   ExpertInfoResponse,
   ExpertPortfolioResponse,
   ExpertScheduleResponse,
-} from '../../../lib/api/types';
-import {
-  getLabelFromApiCategory,
-  getRouteCategoryFromApi,
-} from '../../../lib/utils/category';
+} from "../../../lib/api/types";
+import { getLabelFromApiCategory, getRouteCategoryFromApi } from "../../../lib/utils/category";
 
 type ReviewCard = {
   id: number;
@@ -39,7 +36,7 @@ type RelatedExpert = {
   summary: string;
 };
 
-type ConsultType = 'MESSAGE' | 'VIDEO';
+type ConsultType = "MESSAGE" | "VIDEO";
 
 const mapPortfolioResponse = (portfolio: ExpertPortfolioResponse): PortfolioItem => ({
   id: portfolio.id,
@@ -55,7 +52,7 @@ const ExpertInfoPage = () => {
   const navigate = useNavigate();
   const { expertId } = useParams();
   const expertIdNumber = useMemo(() => (expertId ? Number(expertId) : undefined), [expertId]);
-  const portfolioPath = `/experts/${expertId ?? '1'}/portfolio`;
+  const portfolioPath = `/experts/${expertId ?? "1"}/portfolio`;
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const initializeAuth = useAuthStore((state) => state.initializeAuth);
   const [expertInfo, setExpertInfo] = useState<ExpertInfoResponse | null>(null);
@@ -63,6 +60,8 @@ const ExpertInfoPage = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [reviewCards, setReviewCards] = useState<ReviewCard[]>([]);
   const [reviewAverage, setReviewAverage] = useState(0);
+  const [scheduleLoading, setScheduleLoading] = useState(false);
+  const [scheduleError, setScheduleError] = useState<string | null>(null);
   const [expertSchedules, setExpertSchedules] = useState<ExpertScheduleResponse[]>([]);
   const [portfolioCards, setPortfolioCards] = useState<PortfolioItem[]>([]);
   const [portfolioPage, setPortfolioPage] = useState(0);
@@ -73,7 +72,7 @@ const ExpertInfoPage = () => {
   const portfolioFetchingRef = useRef(false);
   const [openTypeSheet, setOpenTypeSheet] = useState(false);
   const [openCalendarSheet, setOpenCalendarSheet] = useState(false);
-  const [selectedConsultType, setSelectedConsultType] = useState<ConsultType>('MESSAGE');
+  const [selectedConsultType, setSelectedConsultType] = useState<ConsultType>("MESSAGE");
 
   const parseMediaUrls = (value?: string | string[]) => {
     if (!value) {
@@ -86,7 +85,7 @@ const ExpertInfoPage = () => {
     if (!trimmed) {
       return [];
     }
-    if (trimmed.startsWith('[')) {
+    if (trimmed.startsWith("[")) {
       try {
         const parsed = JSON.parse(trimmed);
         if (Array.isArray(parsed)) {
@@ -97,7 +96,7 @@ const ExpertInfoPage = () => {
       }
     }
     return trimmed
-      .split(',')
+      .split(",")
       .map((item) => item.trim())
       .filter(Boolean);
   };
@@ -109,20 +108,20 @@ const ExpertInfoPage = () => {
   const relatedExperts: RelatedExpert[] = [
     {
       id: 1,
-      name: '이민지 전문가',
+      name: "이민지 전문가",
       summary:
-        '누구보다 나다울 수 있도록 스타일에 당신의 온도를 담아드립니다. 자연스럽지만 분명히 특별한 당신만의 분위기를 만들어드릴게요',
+        "누구보다 나다울 수 있도록 스타일에 당신의 온도를 담아드립니다. 자연스럽지만 분명히 특별한 당신만의 분위기를 만들어드릴게요",
     },
     {
       id: 2,
-      name: '지규영 전문가',
-      summary: '어울리는 머리가 뭔지 몰라서 고민이신 분들! 제가 인생머리 찾아드릴게요',
+      name: "지규영 전문가",
+      summary: "어울리는 머리가 뭔지 몰라서 고민이신 분들! 제가 인생머리 찾아드릴게요",
     },
     {
       id: 3,
-      name: '김병철 전문가',
+      name: "김병철 전문가",
       summary:
-        '짧은 머리부터 긴머리까지 남자머리의 정석, 오래 유지되는 디자인으로 얼굴형에 어울리는 맞춤형으로 디자인 해드리겠습니다.',
+        "짧은 머리부터 긴머리까지 남자머리의 정석, 오래 유지되는 디자인으로 얼굴형에 어울리는 맞춤형으로 디자인 해드리겠습니다.",
     },
   ];
 
@@ -146,7 +145,7 @@ const ExpertInfoPage = () => {
         setExpertInfo(response.data);
         setLikesCount(response.data.likes ?? 0);
       } catch (error) {
-        console.error('Failed to fetch expert info:', error);
+        console.error("Failed to fetch expert info:", error);
       }
     };
 
@@ -159,19 +158,30 @@ const ExpertInfoPage = () => {
         const matched = response.data.some((expert) => expert.expertId === expertIdNumber);
         setIsLiked(matched);
       } catch (error) {
-        console.error('Failed to fetch liked experts:', error);
+        console.error("Failed to fetch liked experts:", error);
       }
     };
 
     const fetchExpertSchedules = async () => {
       try {
+        setScheduleLoading(true);
+        setScheduleError(null);
         const response = await expertService.getExpertSchedules(expertIdNumber);
         if (!isActive) {
           return;
         }
         setExpertSchedules(response.data ?? []);
       } catch (error) {
-        console.error('Failed to fetch expert schedules:', error);
+        console.error("Failed to fetch expert schedules:", error);
+        if (!isActive) {
+          return;
+        }
+        setScheduleError("상담 스케줄을 불러오지 못했어요.");
+        setExpertSchedules([]);
+      } finally {
+        if (isActive) {
+          setScheduleLoading(false);
+        }
       }
     };
 
@@ -205,7 +215,7 @@ const ExpertInfoPage = () => {
         setPortfolioCards((prev) => (portfolioPage === 0 ? mapped : [...prev, ...mapped]));
         setPortfolioHasMore(mapped.length === 3);
       } catch (error) {
-        console.error('Failed to fetch expert portfolios:', error);
+        console.error("Failed to fetch expert portfolios:", error);
         if (!isActive) {
           return;
         }
@@ -242,7 +252,7 @@ const ExpertInfoPage = () => {
           setPortfolioPage((prev) => prev + 1);
         }
       },
-      { root: container, rootMargin: '100px' },
+      { root: container, rootMargin: "100px" },
     );
 
     observer.observe(sentinel);
@@ -271,24 +281,23 @@ const ExpertInfoPage = () => {
             (review as { tagLabel?: string; reviewTag?: string; tag?: string }).tagLabel ??
             (review as { tagLabel?: string; reviewTag?: string; tag?: string }).reviewTag ??
             (review as { tagLabel?: string; reviewTag?: string; tag?: string }).tag ??
-            (review.category ? getLabelFromApiCategory(review.category) : '태그');
+            (review.category ? getLabelFromApiCategory(review.category) : "태그");
           return {
-          id: review.reviewId,
-          tagLabel,
-          content: review.content,
-          rating: review.rating,
-          imageUrl: parseMediaUrls(review.mediaUrls)[0],
+            id: review.reviewId,
+            tagLabel,
+            content: review.content,
+            rating: review.rating,
+            imageUrl: parseMediaUrls(review.mediaUrls)[0],
           };
         });
         setReviewCards(nextCards);
         const average =
           reviewsData.length === 0
             ? 0
-            : reviewsData.reduce((sum, review) => sum + review.rating, 0) /
-              reviewsData.length;
+            : reviewsData.reduce((sum, review) => sum + review.rating, 0) / reviewsData.length;
         setReviewAverage(Number(average.toFixed(1)));
       } catch (error) {
-        console.error('Failed to fetch reviews:', error);
+        console.error("Failed to fetch reviews:", error);
       }
     };
 
@@ -321,22 +330,22 @@ const ExpertInfoPage = () => {
             expertService.getLikedExperts({ page: 0, size: 100 }),
             expertService.getExpertInfo(expertIdNumber),
           ]);
-          const matched = likedResponse.data.some(
-            (expert) => expert.expertId === expertIdNumber,
-          );
+          const matched = likedResponse.data.some((expert) => expert.expertId === expertIdNumber);
           setIsLiked(matched);
           setLikesCount(infoResponse.data.likes ?? 0);
         } catch (innerError) {
-          console.error('Failed to refresh like status:', innerError);
+          console.error("Failed to refresh like status:", innerError);
         }
         return;
       }
-      console.error('Failed to toggle like:', error);
+      console.error("Failed to toggle like:", error);
     }
   };
 
   const categoryLabel = getLabelFromApiCategory(expertInfo?.category);
-  const reviewCategoryRoute = getRouteCategoryFromApi(expertInfo?.category) ?? 'hair';
+  const categoryKey = getRouteCategoryFromApi(expertInfo?.category);
+  const canCreateReservation = categoryKey === "fashion" || categoryKey === "hair";
+  const reviewCategoryRoute = getRouteCategoryFromApi(expertInfo?.category) ?? "hair";
   const reviewListRoute = expertIdNumber
     ? `/reviews?expertId=${expertIdNumber}`
     : `/category/${reviewCategoryRoute}/reviews`;
@@ -359,27 +368,27 @@ const ExpertInfoPage = () => {
   };
   const consultationCopy = {
     VIDEO: {
-      title: '실시간 화상 상담',
+      title: "실시간 화상 상담",
       description:
-        '전문가와 화상으로 30분 상담을 진행합니다. 상담한 내용을 바탕으로 전문가가 작성한 솔루션지는 상담이 끝나고 24시간 내로 전송해드립니다.',
+        "전문가와 화상으로 30분 상담을 진행합니다. 상담한 내용을 바탕으로 전문가가 작성한 솔루션지는 상담이 끝나고 24시간 내로 전송해드립니다.",
     },
     MESSAGE: {
-      title: '메세지 상담',
+      title: "메세지 상담",
       description:
-        '상담 신청 시 작성한 고민 설문지를 토대로 전문가가 24시간 내에 솔루션지를 전송해드립니다. 솔루션지를 읽고 생기는 추가 질문은 채팅을 통해 일주일 동안 질문할 수 있습니다.',
+        "상담 신청 시 작성한 고민 설문지를 토대로 전문가가 24시간 내에 솔루션지를 전송해드립니다. 솔루션지를 읽고 생기는 추가 질문은 채팅을 통해 일주일 동안 질문할 수 있습니다.",
     },
   } as const;
-  const formatPrice = (value: number) => `${value.toLocaleString('ko-KR')}원`;
+  const formatPrice = (value: number) => `${value.toLocaleString("ko-KR")}원`;
 
   const getReservationRoute = () => {
     const routeKey = getRouteCategoryFromApi(expertInfo?.category);
-    if (routeKey === 'fashion') {
-      return '/reservation/fashion';
+    if (routeKey === "fashion") {
+      return "/reservation/fashion";
     }
-    if (routeKey !== 'hair') {
-      return '/service-ready';
+    if (routeKey !== "hair") {
+      return "/service-ready";
     }
-    return '/hair/setup';
+    return "/hair/setup";
   };
 
   const buildScheduledDateTime = (date: Date, timeId: string) => {
@@ -389,11 +398,11 @@ const ExpertInfoPage = () => {
     const value = new Date(date);
     value.setHours(hour24, minute, 0, 0);
     const year = value.getFullYear();
-    const month = String(value.getMonth() + 1).padStart(2, '0');
-    const day = String(value.getDate()).padStart(2, '0');
-    const hour = String(value.getHours()).padStart(2, '0');
-    const minuteStr = String(value.getMinutes()).padStart(2, '0');
-    const second = String(value.getSeconds()).padStart(2, '0');
+    const month = String(value.getMonth() + 1).padStart(2, "0");
+    const day = String(value.getDate()).padStart(2, "0");
+    const hour = String(value.getHours()).padStart(2, "0");
+    const minuteStr = String(value.getMinutes()).padStart(2, "0");
+    const second = String(value.getSeconds()).padStart(2, "0");
     return `${year}-${month}-${day}T${hour}:${minuteStr}:${second}`;
   };
 
@@ -402,10 +411,10 @@ const ExpertInfoPage = () => {
     const hour24 = parsed ? Number(parsed[1]) : 0;
     const minute = parsed ? Number(parsed[2]) : 0;
     const isAM = hour24 < 12;
-    const meridiem = isAM ? '오전' : '오후';
+    const meridiem = isAM ? "오전" : "오후";
     let hour12 = hour24 % 12;
     if (hour12 === 0) hour12 = 12;
-    const mm = String(minute).padStart(2, '0');
+    const mm = String(minute).padStart(2, "0");
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
     const day = date.getDate();
@@ -414,40 +423,43 @@ const ExpertInfoPage = () => {
 
   const handleReservationStart = () => {
     if (!isAuthenticated) {
-      navigate('/auth/login');
+      navigate("/auth/login");
       return;
     }
     setOpenTypeSheet(true);
   };
 
-  const handleTempReservation = async (date: Date, timeId: string) => {
+  const handleTempReservation = async (
+    date: Date,
+    timeId: string,
+    consultationTypeOverride?: ConsultType,
+  ) => {
     if (!expertIdNumber || !expertInfo?.category) {
-      window.alert('전문가 정보가 없습니다. 다시 시도해주세요.');
+      window.alert("전문가 정보가 없습니다. 다시 시도해주세요.");
       return null;
     }
-    const consultationType = selectedConsultType;
+    const consultationType = consultationTypeOverride ?? selectedConsultType;
     const matched = expertSchedules.find(
       (schedule) => schedule.consultationType === consultationType,
     );
     if (!matched) {
-      window.alert('상담 가격 정보를 찾을 수 없습니다. 다시 시도해주세요.');
+      window.alert("상담 가격 정보를 찾을 수 없습니다. 다시 시도해주세요.");
       return null;
     }
     const price = matched.price;
-    sessionStorage.setItem('consult_expert_name', expertInfo.nickname ?? '전문가');
-    sessionStorage.setItem('consult_category_label', categoryLabel);
-    sessionStorage.setItem('consult_price', String(price));
-    sessionStorage.setItem('consult_expert_id', String(expertIdNumber));
+    sessionStorage.setItem("consult_expert_name", expertInfo.nickname ?? "전문가");
+    sessionStorage.setItem("consult_category_label", categoryLabel);
+    sessionStorage.setItem("consult_price", String(price));
+    sessionStorage.setItem("consult_expert_id", String(expertIdNumber));
 
     const response = await reservationService.createTempReservation({
       expertId: expertIdNumber,
-      category: expertInfo.category as 'HAIR' | 'FASHION' | 'SKIN' | 'MAKEUP',
+      category: expertInfo.category as "HAIR" | "FASHION" | "SKIN" | "MAKEUP",
       consultationType,
-      scheduledDateTime:
-        consultationType === 'VIDEO' ? buildScheduledDateTime(date, timeId) : null,
+      scheduledDateTime: consultationType === "VIDEO" ? buildScheduledDateTime(date, timeId) : null,
       price,
     });
-    sessionStorage.setItem('consult_reservation_id', String(response.data.reservationId));
+    sessionStorage.setItem("consult_reservation_id", String(response.data.reservationId));
     return response.data.reservationId;
   };
 
@@ -466,14 +478,9 @@ const ExpertInfoPage = () => {
           </div>
         </div>
         <div className="relative mx-auto -mt-[56px] min-h-[2050px] w-full max-w-[375px] bg-white">
-
           <div className="absolute left-0 top-[100px] h-[220px] w-[375px] overflow-hidden bg-[#d2d4d8]">
             {expertInfo?.backgroundImage && (
-              <img
-                src={expertInfo.backgroundImage}
-                alt=""
-                className="h-full w-full object-cover"
-              />
+              <img src={expertInfo.backgroundImage} alt="" className="h-full w-full object-cover" />
             )}
           </div>
 
@@ -491,10 +498,10 @@ const ExpertInfoPage = () => {
                 </div>
                 <div className="flex flex-col gap-[4px]">
                   <span className="inline-flex w-fit whitespace-nowrap rounded-[2px] bg-[#f5f9fd] px-[6px] py-[4px] text-[12px] text-[#429ff0]">
-                    {categoryLabel || '카테고리'}
+                    {categoryLabel || "카테고리"}
                   </span>
                   <span className="text-[18px] font-semibold text-[#292a2d]">
-                    {expertInfo?.nickname ?? '전문가'}
+                    {expertInfo?.nickname ?? "전문가"}
                   </span>
                 </div>
               </div>
@@ -520,7 +527,7 @@ const ExpertInfoPage = () => {
                 <div className="flex flex-col gap-[6px]">
                   <p className="text-[16px] font-semibold text-[#292a2d]">전문분야</p>
                   <p className="text-[13px] leading-[1.4] text-[#878a93]">
-                    {expertInfo?.introduction ?? '전문가 소개가 준비 중입니다.'}
+                    {expertInfo?.introduction ?? "전문가 소개가 준비 중입니다."}
                   </p>
                 </div>
               </div>
@@ -544,17 +551,16 @@ const ExpertInfoPage = () => {
                 <div className="flex flex-col gap-[6px]">
                   <p className="text-[16px] font-semibold text-[#292a2d]">경력 정보</p>
                   <div className="text-[14px] leading-[1.4] text-[#878a93]">
-                    {(expertInfo?.careerInfo ? expertInfo.careerInfo.split('\n') : ['경력 정보가 준비 중입니다.']).map(
-                      (line, index) => (
-                        <p key={`${line}-${index}`}>{line}</p>
-                      ),
-                    )}
+                    {(expertInfo?.careerInfo
+                      ? expertInfo.careerInfo.split("\n")
+                      : ["경력 정보가 준비 중입니다."]
+                    ).map((line, index) => (
+                      <p key={`${line}-${index}`}>{line}</p>
+                    ))}
                   </div>
                 </div>
               </div>
             </div>
-
-
           </div>
 
           <>
@@ -707,10 +713,7 @@ const ExpertInfoPage = () => {
                     </article>
                   ))}
                   {portfolioHasMore && (
-                    <div
-                      ref={portfolioSentinelRef}
-                      className="h-[1px] w-[1px] shrink-0"
-                    />
+                    <div ref={portfolioSentinelRef} className="h-[1px] w-[1px] shrink-0" />
                   )}
                 </div>
                 <div className="absolute left-1/2 top-[551px] h-[3px] w-[55px] -translate-x-1/2 bg-[#e1e2e4]">
@@ -720,7 +723,10 @@ const ExpertInfoPage = () => {
             )}
           </div>
 
-          <div className="absolute left-0 w-[375px]" style={{ top: layoutTops.consultationSection }}>
+          <div
+            className="absolute left-0 w-[375px]"
+            style={{ top: layoutTops.consultationSection }}
+          >
             <div className="h-[8px] w-full bg-[#f4f4f5]" />
             <div className="mx-auto mt-[40px] w-[343px] space-y-[12px]">
               <h2 className="text-[18px] font-semibold text-[#0f0f10]">가능한 상담 종류</h2>
@@ -730,26 +736,26 @@ const ExpertInfoPage = () => {
                 </div>
               ) : (
                 orderedSchedules.map((schedule) => {
-                const copy = consultationCopy[schedule.consultationType];
-                return (
-                  <div
-                    key={schedule.consultationType}
-                    className="rounded-[12px] border border-[#e1e2e4] bg-white p-[16px]"
-                  >
-                    <p className="text-[16px] font-semibold text-[#292a2d]">{copy.title}</p>
-                    <p className="mt-[4px] text-[13px] leading-[1.4] text-[#878a93]">
-                      {copy.description}
-                    </p>
-                    <div className="my-[12px] h-px bg-[#e1e2e4]" />
-                    <div className="flex items-center justify-between text-[13px] text-[#878a93]">
-                      <span>상담 비용</span>
-                      <span className="text-[14px] font-semibold text-[#008bff]">
-                        {formatPrice(schedule.price)}
-                      </span>
+                  const copy = consultationCopy[schedule.consultationType];
+                  return (
+                    <div
+                      key={schedule.consultationType}
+                      className="rounded-[12px] border border-[#e1e2e4] bg-white p-[16px]"
+                    >
+                      <p className="text-[16px] font-semibold text-[#292a2d]">{copy.title}</p>
+                      <p className="mt-[4px] text-[13px] leading-[1.4] text-[#878a93]">
+                        {copy.description}
+                      </p>
+                      <div className="my-[12px] h-px bg-[#e1e2e4]" />
+                      <div className="flex items-center justify-between text-[13px] text-[#878a93]">
+                        <span>상담 비용</span>
+                        <span className="text-[14px] font-semibold text-[#008bff]">
+                          {formatPrice(schedule.price)}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                );
-              })
+                  );
+                })
               )}
             </div>
           </div>
@@ -783,9 +789,7 @@ const ExpertInfoPage = () => {
                       >
                         <div className="mx-auto mt-[16px] h-[52px] w-[52px] rounded-full bg-[#e1e2e4]" />
                         <div className="mt-[12px] px-[16px] text-center">
-                          <p className="text-[14px] font-semibold text-[#292a2d]">
-                            {expert.name}
-                          </p>
+                          <p className="text-[14px] font-semibold text-[#292a2d]">{expert.name}</p>
                           <p className="mt-[6px] h-[36px] w-[124px] line-clamp-2 text-[13px] leading-[1.4] text-[#878a93]">
                             {expert.summary}
                           </p>
@@ -817,10 +821,36 @@ const ExpertInfoPage = () => {
         open={openTypeSheet}
         onClose={() => setOpenTypeSheet(false)}
         defaultValue={selectedConsultType}
-        onNext={(selected) => {
+        schedules={expertSchedules}
+        loading={scheduleLoading}
+        errorMessage={scheduleError}
+        onNext={async (selected) => {
           setSelectedConsultType(selected);
-          sessionStorage.setItem('consult_type', selected);
+          sessionStorage.setItem("consult_type", selected);
           setOpenTypeSheet(false);
+
+          // ✅ MESSAGE면 캘린더 없이 바로 임시예약 생성 (업로드 파일과 동일)
+          if (selected === "MESSAGE") {
+            setOpenCalendarSheet(false);
+            sessionStorage.removeItem("consult_schedule_label");
+            sessionStorage.setItem(
+              "consult_return_path",
+              `${window.location.pathname}${window.location.search}`,
+            );
+
+            if (canCreateReservation) {
+              // MESSAGE는 scheduledDateTime이 null로 전송되므로 더미 date/time 사용 가능
+              const reservationId = await handleTempReservation(new Date(), "t-1130", selected);
+              if (reservationId) {
+                navigate(`${getReservationRoute()}?reservationId=${reservationId}`);
+                return;
+              }
+            }
+            navigate(getReservationRoute());
+            return;
+          }
+
+          // ✅ VIDEO만 캘린더
           setOpenCalendarSheet(true);
         }}
       />
@@ -829,13 +859,22 @@ const ExpertInfoPage = () => {
         open={openCalendarSheet}
         onClose={() => setOpenCalendarSheet(false)}
         onNext={async ({ date, timeId }) => {
-          sessionStorage.setItem('consult_schedule_label', formatScheduleLabel(date, timeId));
+          sessionStorage.setItem("consult_schedule_label", formatScheduleLabel(date, timeId));
           setOpenCalendarSheet(false);
-          const reservationId = await handleTempReservation(date, timeId);
-          if (reservationId) {
-            navigate(`${getReservationRoute()}?reservationId=${reservationId}`);
-            return;
+          // const reservationId = await handleTempReservation(date, timeId);
+          sessionStorage.setItem(
+            "consult_return_path",
+            `${window.location.pathname}${window.location.search}`,
+          );
+
+          if (canCreateReservation) {
+            const reservationId = await handleTempReservation(date, timeId);
+            if (reservationId) {
+              navigate(`${getReservationRoute()}?reservationId=${reservationId}`);
+              return;
+            }
           }
+
           navigate(getReservationRoute());
         }}
       />

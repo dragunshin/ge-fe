@@ -52,7 +52,7 @@ function parseDigits(v: string) {
 function formatInputKRW(n: number) {
   if (!n) return "";
 
-  return `${String(n)}원`;
+  return `${String(n)}`;
 }
 
 function formatKRWSummary(n: number) {

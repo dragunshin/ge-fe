@@ -150,21 +150,19 @@ export default function ExpertScheduleSettingsPage() {
         )}
       </div>
 
-      {!isEmpty && (
+      {/* {!isEmpty && (
         <div className="flex justify-center px-4 pb-6 pt-3">
-          {" "}
-          {/* ✅ flex와 justify-center 추가 */}
+
           <button
             type="button"
             onClick={() => nav("/expert/schedules/edit", { state: { existing: items, userId } })}
-            // ✅ min-w-[400px] 삭제 -> w-full과 max-w-[400px] 조합으로 변경
-            // 이렇게 하면 모바일에서는 꽉 차고, PC에서는 400px 중앙 정렬이 됩니다.
+     
             className="h-12 w-full max-w-[400px] rounded-[4px] bg-[#181818] text-[16px] font-bold text-white"
           >
             편집하기
           </button>
         </div>
-      )}
+      )} */}
     </div>
   );
 }

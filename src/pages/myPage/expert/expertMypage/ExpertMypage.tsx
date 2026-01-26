@@ -8,12 +8,13 @@ import Heart from "@/images/mypage/heart.svg?react";
 import Question from "@/images/mypage/question.svg?react";
 import DeleteUser from "@/images/mypage/deleteUser.svg?react";
 import Logout from "@/images/mypage/logout.svg?react";
+import Solution from "@/images/mypage/solution.svg?react";
 
 import Cal from "@/images/expert/cal.svg?react";
-import Money from "@/images/expert/money.svg?react";
+//import Money from "@/images/expert/money.svg?react";
 import Note from "@/images/expert/note.svg?react";
 import Shape from "@/images/expert/Shape.svg?react";
-import { ClipboardList } from "lucide-react";
+//import { ClipboardList } from "lucide-react";
 
 import type { UserMe } from "@/api/mypage";
 import BottomNav from "@/components/navigation/bottom-nav";
@@ -78,7 +79,7 @@ export default function MyPageExpert({
       footerText: "보기",
       active: true,
       icon: <Shape />,
-      onClick: () => navigate("/mypage/expert/introduction"), // 소개서 수정 화면으로
+      onClick: () => navigate(`/experts/${userId}`),
     },
     {
       key: "reviews",
@@ -95,16 +96,16 @@ export default function MyPageExpert({
     {
       title: "상담",
       items: [
+        // {
+        //   key: "availableSetting",
+        //   label: "가능한 상담 설정",
+        //   icon: <ClipboardList className="h-[18px] w-[18px]" />,
+        //   onClick: () => navigate(`/expert/schedules/${userId}`), // TODO
+        // },
         {
-          key: "availableSetting",
-          label: "가능한 상담 설정",
-          icon: <ClipboardList className="h-[18px] w-[18px]" />,
-          onClick: () => navigate(`/expert/schedules/${userId}`), // TODO
-        },
-        {
-          key: "priceSetting",
-          label: "상담 가격 설정",
-          icon: <Money className="h-[18px] w-[18px]" />,
+          key: "ConsultationSetting",
+          label: "상담 설정",
+          icon: <Solution className="h-[18px] w-[18px]" />,
           onClick: () => navigate(`/expert/schedules/${userId}`), // TODO
         },
         {
