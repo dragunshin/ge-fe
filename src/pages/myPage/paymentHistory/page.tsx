@@ -26,7 +26,7 @@ function categoryKo(cat: PaymentCategory) {
     case "MAKEUP":
       return "메이크업";
     case "SKINCARE":
-      return "피부";
+      return "스킨";
     case "FASHION":
       return "패션";
     default:
@@ -74,8 +74,8 @@ function FilterChip({
 }
 
 /** ✅ 결제 내역 필터 (FilterChip용) */
-type PaymentFilter = "전체" | "헤어" | "메이크업" | "피부" | "패션";
-const FILTERS: PaymentFilter[] = ["전체", "헤어", "메이크업", "피부", "패션"];
+type PaymentFilter = "전체" | "헤어" | "메이크업" | "스킨" | "패션";
+const FILTERS: PaymentFilter[] = ["전체", "헤어", "패션", "메이크업", "스킨"];
 
 function toFilterKey(cat: PaymentCategory): Exclude<PaymentFilter, "전체"> {
   switch (cat) {
@@ -84,7 +84,7 @@ function toFilterKey(cat: PaymentCategory): Exclude<PaymentFilter, "전체"> {
     case "MAKEUP":
       return "메이크업";
     case "SKINCARE":
-      return "피부";
+      return "스킨";
     case "FASHION":
       return "패션";
     default:

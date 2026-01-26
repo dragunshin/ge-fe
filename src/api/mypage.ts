@@ -257,3 +257,41 @@ export async function getUserPointsHistory(opts?: { signal?: AbortSignal }) {
 
   return json.data;
 }
+
+// 예약취소
+
+async function apiPost<T>(path: string, body?: unknown, signal?: AbortSignal): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: body === undefined ? undefined : JSON.stringify(body),
+    signal,
+  });
+
+  // 응답이 비어있는(204 등) 케이스도 대비
+  const text = await res.text();
+  const json = text ? (JSON.parse(text) as ApiEnvelope<T> | T) : null;
+
+  if (!res.ok) {
+    const msg = (json as any)?.message ?? `HTTP ${res.status} ${res.statusText || ""}`.trim();
+    throw new Error(msg);
+  }
+
+  // Envelope 형태면 statusCode 체크
+  if (json && typeof (json as any).statusCode === "number") {
+    const env = json as ApiEnvelope<T>;
+    if (env.statusCode !== 0) throw new Error(env.message || "API error");
+    return env.data;
+  }
+
+  // envelope가 아닌 경우(혹시 서버가 plain json/empty 반환)
+  return (json as T) ?? (undefined as T);
+}
+
+export async function cancelReservation(
+  reservationId: number,
+  opts?: { signal?: AbortSignal },
+): Promise<void> {
+  await apiPost<null>(`/reservations/${reservationId}/cancel`, undefined, opts?.signal);
+}

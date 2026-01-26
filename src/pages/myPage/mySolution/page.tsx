@@ -16,7 +16,7 @@ function cn(...classes: Array<string | false | null | undefined>) {
 
 /** types */
 type ConsultKind = "MESSAGE" | "TIME_LIMITED";
-type Category = "전체" | "헤어" | "메이크업" | "피부" | "패션";
+type Category = "전체" | "헤어" | "메이크업" | "스킨" | "패션";
 
 type SolutionItem = {
   id: string;
@@ -39,7 +39,7 @@ function toKoCategory(v: string): Exclude<Category, "전체"> {
     case "MAKEUP":
       return "메이크업";
     case "SKINCARE":
-      return "피부";
+      return "스킨";
     case "FASHION":
       return "패션";
     default:
@@ -192,7 +192,7 @@ export default function MySolutionView() {
   const [loading, setLoading] = useState(false);
 
   /** ✅ ReservationHistoryView와 동일한 필터 구성 */
-  const filters: Category[] = ["전체", "헤어", "메이크업", "피부", "패션"];
+  const filters: Category[] = ["전체", "헤어", "패션", "메이크업", "스킨"];
   const [selected, setSelected] = useState<Category>("전체");
 
   const navigate = useNavigate();

@@ -4,6 +4,7 @@ import { ko } from "date-fns/locale";
 import "react-day-picker/style.css";
 import Left from "@/images/reservationFlow/left.svg?react";
 import Right from "@/images/reservationFlow/right.svg?react";
+import { X } from "lucide-react";
 
 type TimeSlot = { id: string; label: string; disabled?: boolean };
 
@@ -42,11 +43,11 @@ function startOfDay(d: Date) {
   x.setHours(0, 0, 0, 0);
   return x;
 }
-function addDays(date: Date, days: number) {
-  const d = new Date(date);
-  d.setDate(d.getDate() + days);
-  return d;
-}
+// function addDays(date: Date, days: number) {
+//   const d = new Date(date);
+//   d.setDate(d.getDate() + days);
+//   return d;
+// }
 
 function toKoreanTimeLabel(hour24: number, minute: 0 | 30) {
   const isAM = hour24 < 12;
@@ -167,7 +168,8 @@ export default function DateTimeBottomSheet({
   const startMonth = useMemo(() => new Date(today.getFullYear(), today.getMonth(), 1), [today]);
 
   const [month, setMonth] = useState<Date>(() => startMonth);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(() => addDays(today, 3));
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(() => today);
+
   const [selectedTimeId, setSelectedTimeId] = useState<string | null>("t-1130");
 
   const timeSlots = useMemo(() => buildTimeSlots(11, 22, 30), []);
@@ -199,105 +201,118 @@ export default function DateTimeBottomSheet({
       <button type="button" className="absolute inset-0 bg-black/45" onClick={onClose} />
 
       <div className="absolute inset-x-0 bottom-0 mx-auto w-full max-w-[375px] rounded-t-[24px] bg-white shadow-[0_-10px_30px_rgba(0,0,0,0.12)]">
-        <div className="px-6 pt-6">
-          <DayPicker
-            mode="single"
-            selected={selectedDate}
-            onSelect={setSelectedDate}
-            month={month}
-            onMonthChange={setMonth}
-            showOutsideDays
-            fixedWeeks
-            locale={ko}
-            weekStartsOn={0}
-            today={today}
-            disabled={{ before: disableBefore }}
-            startMonth={startMonth}
-            hideNavigation
-            components={{ MonthCaption: MonthHeader }}
-            formatters={{
-              formatWeekdayName: (d) => ["일", "월", "화", "수", "목", "금", "토"][d.getDay()],
-            }}
-            className={cn(
-              "w-full",
-              "[--rdp-accent-color:#008BFF]",
-              "[--rdp-accent-background-color:#008BFF]",
-              "[--rdp-day_button-border-radius:9999px]",
-            )}
-            classNames={{
-              months: "w-full",
-              month: "w-full",
-              month_grid: "w-full border-collapse",
-              weekday: "pb-3 text-center text-[12px] font-semibold text-[#6B6F78]",
-              day: "p-0 text-center align-middle",
-
-              // ✅ 버튼 기본 (선택 스타일은 여기서 하지 말고 selected/today/disabled에서 처리)
-              day_button: cn(
-                "mx-auto flex h-[36px] w-[36px] items-center justify-center rounded-full transition focus:outline-none",
-                "pre_cap_reg_14",
-                "text-[#0f0f10] hover:bg-[#EEF0F3]",
-              ),
-
-              /**
-               * ✅ (B) 제일 중요: selected/today/disabled는 “day(셀)”에 붙을 수 있음
-               * 그래서 그 안의 button을 그냥 잡아버리면 100% 먹음.
-               * (.rdp-day_button 같은 기본 클래스에 의존하지 않음)
-               */
-              selected: cn(
-                "[&>button]:!bg-[#008BFF]",
-                "[&>button]:!text-white",
-                "[&>button]:hover:!bg-[#008BFF]",
-              ),
-              today: cn(),
-              // "[&>button]:!bg-[#EEF0F3]",
-              // "[&>button]:!text-[#121214]",
-              // "[&>button]:hover:!bg-[#EEF0F3]",
-              disabled: cn(
-                "[&>button]:!text-[#AEB0B6]",
-                "[&>button]:cursor-default",
-                "[&>button]:hover:!bg-transparent",
-              ),
-
-              outside: "opacity-100",
-            }}
-          />
-
-          <div className="mt-4 h-[1px] w-full bg-[#EEF0F3]" />
-
-          <div className="mt-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <div className="flex gap-2">
-              {timeSlots.map((t) => {
-                const selected = selectedTimeId === t.id;
-                return (
-                  <TimePill
-                    key={t.id}
-                    label={t.label}
-                    selected={selected}
-                    disabled={t.disabled}
-                    onClick={() => {
-                      if (t.disabled) return;
-                      setSelectedTimeId(t.id);
-                    }}
-                  />
-                );
-              })}
-            </div>
-          </div>
-
+        <div className="relative">
           <button
             type="button"
-            disabled={!canNext}
-            onClick={() => {
-              if (!selectedDate || !selectedTimeId) return;
-              onNext({ date: selectedDate, timeId: selectedTimeId });
-            }}
-            className={cn(
-              "mt-5 mb-5 w-full h-[54px] rounded-[4px] pre_subtitle_semi_16",
-              canNext ? "bg-[#0F0F10] text-white active:opacity-90" : "bg-[#E6E7EA] text-[#A9ADB6]",
-            )}
+            aria-label="닫기"
+            onClick={onClose}
+            className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-black/5"
           >
-            다음
+            <X className="h-6 w-6 text-[#000000]" />
           </button>
+          <div className="px-6 pt-6">
+            <DayPicker
+              mode="single"
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              month={month}
+              onMonthChange={setMonth}
+              showOutsideDays
+              fixedWeeks
+              locale={ko}
+              weekStartsOn={0}
+              today={today}
+              disabled={{ before: disableBefore }}
+              startMonth={startMonth}
+              hideNavigation
+              components={{ MonthCaption: MonthHeader }}
+              formatters={{
+                formatWeekdayName: (d) => ["일", "월", "화", "수", "목", "금", "토"][d.getDay()],
+              }}
+              className={cn(
+                "w-full",
+                "[--rdp-accent-color:#008BFF]",
+                "[--rdp-accent-background-color:#008BFF]",
+                "[--rdp-day_button-border-radius:9999px]",
+              )}
+              classNames={{
+                months: "w-full",
+                month: "w-full",
+                month_grid: "w-full border-collapse",
+                weekday: "pb-3 text-center text-[12px] font-semibold text-[#6B6F78]",
+                day: "p-0 text-center align-middle",
+
+                // ✅ 버튼 기본 (선택 스타일은 여기서 하지 말고 selected/today/disabled에서 처리)
+                day_button: cn(
+                  "mx-auto flex h-[36px] w-[36px] items-center justify-center rounded-full transition focus:outline-none",
+                  "pre_cap_reg_14",
+                  "text-[#0f0f10] hover:bg-[#EEF0F3]",
+                ),
+
+                /**
+                 * ✅ (B) 제일 중요: selected/today/disabled는 “day(셀)”에 붙을 수 있음
+                 * 그래서 그 안의 button을 그냥 잡아버리면 100% 먹음.
+                 * (.rdp-day_button 같은 기본 클래스에 의존하지 않음)
+                 */
+                selected: cn(
+                  "[&>button]:!bg-[#008BFF]",
+                  "[&>button]:!text-white",
+                  "[&>button]:hover:!bg-[#008BFF]",
+                ),
+                today: cn(),
+                // "[&>button]:!bg-[#EEF0F3]",
+                // "[&>button]:!text-[#121214]",
+                // "[&>button]:hover:!bg-[#EEF0F3]",
+                disabled: cn(
+                  "[&>button]:!text-[#AEB0B6]",
+                  "[&>button]:cursor-default",
+                  "[&>button]:hover:!bg-transparent",
+                ),
+
+                outside: "opacity-100",
+              }}
+            />
+
+            <div className="mt-4 h-[1px] w-full bg-[#EEF0F3]" />
+
+            <div className="mt-4 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="flex gap-2">
+                {timeSlots.map((t) => {
+                  const selected = selectedTimeId === t.id;
+                  return (
+                    <TimePill
+                      key={t.id}
+                      label={t.label}
+                      selected={selected}
+                      disabled={t.disabled}
+                      onClick={() => {
+                        if (t.disabled) return;
+                        setSelectedTimeId(t.id);
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+            <div className="mt-5 mb-5 flex justify-center">
+              <button
+                type="button"
+                disabled={!canNext}
+                onClick={() => {
+                  if (!selectedDate || !selectedTimeId) return;
+                  onNext({ date: selectedDate, timeId: selectedTimeId });
+                }}
+                className={cn(
+                  "h-[48px] w-[342px] rounded-[4px] pre_subtitle_semi_16",
+                  canNext
+                    ? "bg-[#0F0F10] text-white active:opacity-90"
+                    : "bg-[#E6E7EA] text-[#A9ADB6]",
+                )}
+              >
+                다음
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

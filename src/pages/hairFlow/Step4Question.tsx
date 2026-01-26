@@ -116,7 +116,7 @@
 import TopNav from "./component/TopNav";
 import Footer from "./component/Footer";
 import { MultiPhotoPicker } from "./component/MultiPhotoPicker";
-import { useStyleSetupStore } from "@/stores/useHairSetupStore";
+import { useStyleSetupStore, resetStyleSetupAll } from "@/stores/useHairSetupStore";
 import { useNavigate } from "react-router-dom";
 
 export function Step4Question({
@@ -153,7 +153,7 @@ export function Step4Question({
         const text = await res.text().catch(() => "");
         throw new Error(`제출 실패: ${res.status} ${text}`);
       }
-
+      await resetStyleSetupAll();
       // 저장 후 초기화: 결제에서 뒤로 돌아올 수 있다면 유지하는 것도 방법
       // s.resetAll();
       //reservationId 추가

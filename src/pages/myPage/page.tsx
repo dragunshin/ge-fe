@@ -11,7 +11,7 @@ import EmptyStar from "@/images/mypage/emptyStar.svg?react";
 import Question from "@/images/mypage/question.svg?react";
 import DeleteUser from "@/images/mypage/deleteUser.svg?react";
 import Logout from "@/images/mypage/logout.svg?react";
-{/*소개서 수정, 포트폴리오 관리 임시 라우팅 개발하실 때 이 주석 지우고 살리시면 됩니다!*/} 
+
 //import Portfolio from "@/images/mypage/portfolio.svg?react";
 //import Retouch from "@/images/mypage/retouch.svg?react";
 
@@ -19,6 +19,7 @@ import { getUserMe, myPageLogout, type UserMe } from "@/api/mypage";
 
 //import { X } from "lucide-react";
 import BottomNav from "@/components/navigation/bottom-nav";
+import MyPageExpert from "./expert/expertMypage/ExpertMypage";
 
 type StatItem = {
   key: string;
@@ -47,6 +48,8 @@ export default function MyPage() {
   const [me, setMe] = React.useState<UserMe | null>(null);
   const [meLoading, setMeLoading] = React.useState(false);
 
+  const isExpert = me?.userType === "EXPERT";
+
   // const [isReviewOpen, setIsReviewOpen] = React.useState(true);
 
   React.useEffect(() => {
@@ -70,7 +73,9 @@ export default function MyPage() {
   }, []);
 
   const userName = `${me?.nickname ?? "사용자"}님`;
-  {/*소개서 수정, 포트폴리오 관리 임시 라우팅 */}
+  {
+    /*소개서 수정, 포트폴리오 관리 임시 라우팅 */
+  }
   //const isExpert = me?.userType === "EXPERT";
 
   const stats: StatItem[] = [
@@ -200,26 +205,9 @@ export default function MyPage() {
     },
   ];
 
-  {/*소개서 수정, 포트폴리오 관리 임시 라우팅 */}
-  // if (isExpert) {
-  //   sections.splice(3, 0, {
-  //     title: "프로필",
-  //     items: [
-  //       {
-  //         key: "expertIntro",
-  //         label: "소개서 수정",
-  //         icon: <Retouch />,
-  //         onClick: () => navigate("/mypage/expert/introduction"),
-  //       },
-  //       {
-  //         key: "expertPortfolio",
-  //         label: "포트폴리오 관리",
-  //         icon: <Portfolio />,
-  //         onClick: () => navigate("/mypage/expert/portfolio"),
-  //       },
-  //     ],
-  //   });
-  // }
+  if (isExpert) {
+    return <MyPageExpert me={me} meLoading={meLoading} onLogout={onLogout} />;
+  }
 
   return (
     <div className="flex h-full flex-col bg-white">
@@ -262,11 +250,11 @@ export default function MyPage() {
                       onClick={s.onClick}
                       className="flex w-full flex-col items-center justify-center gap-1 px-2 py-3"
                     >
-                      <span className="text-neutral-800">{s.icon}</span>
-                      <span className="text-[12px] font-medium text-neutral-700">{s.label}</span>
+                      <span className="text-[#292a2d]">{s.icon}</span>
+                      <span className="pre_body_reg_14 text-[#70737c]">{s.label}</span>
 
-                      <div className="mt-1 flex items-center justify-center">
-                        <span className="text-[14px] font-semibold text-[#2F80FF]">
+                      <div className="flex items-center justify-center">
+                        <span className="pre_subtitle_semi_14 text-[#008bff]">
                           {s.active ? s.footerText : s.count}
                         </span>
                       </div>

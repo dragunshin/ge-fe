@@ -40,6 +40,11 @@ import PaymentHistoryPage from "@/pages/myPage/paymentHistory/page";
 import MySolutionView from "@/pages/myPage/mySolution/page";
 import ExpertIntroductionPage from "@/pages/myPage/expert/introduction/page";
 import ExpertPortfolioPage from "@/pages/myPage/expert/portfolio/page";
+import PortfolioAddPage from "@/pages/myPage/expert/PortfolioAdd/PortfolioAddPage";
+//import ExpertConsultationSettings from "@/pages/myPage/expert/consulationSetting/ExpertConsultationSettings";
+import ExpertConsultationHistoryView from "@/pages/myPage/expert/history/ExpertConsultationHistoryView";
+import ExpertScheduleSettingsPage from "@/pages/myPage/expert/consulationSetting/ExpertScheduleSettingsPage";
+import ExpertScheduleEditPage from "@/pages/myPage/expert/consulationSetting/ExpertScheduleEditPage";
 
 export const router = createBrowserRouter([
   {
@@ -253,6 +258,26 @@ export const router = createBrowserRouter([
   {
     path: "/mypage/mySolution",
     element: <MySolutionView />,
+  },
+  {
+    path: "/portfolioAdd/:expertId",
+    element: <PortfolioAddPage />,
+  },
+  // {
+  //   path: "/consultationSetting/:expertId",
+  //   element: <ExpertConsultationSettings />,
+  // },
+  {
+    path: "/expertConsultationHistory",
+    element: <ExpertConsultationHistoryView />,
+  },
+  {
+    path: "/expert/schedules/:userId",
+    element: <ExpertScheduleSettingsPage />,
+  },
+  {
+    path: "/expert/schedules/edit",
+    element: <ExpertScheduleEditPage />,
   },
   {
     path: "/consultations/:consultationId/solution",

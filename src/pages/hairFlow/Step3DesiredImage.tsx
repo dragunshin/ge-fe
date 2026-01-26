@@ -55,9 +55,13 @@ export function Step3DesiredImage({ onNext, onBack }: { onNext: () => void; onBa
                 )}
               >
                 {t}
-                {selected && (
+                {selected ? (
                   <span className="absolute right-3 top-1/2 -translate-y-1/2">
                     <Check className="h-[13px] w-[15px] text-[#429ff0] mr-2" />
+                  </span>
+                ) : (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <Check className="h-[13px] w-[15px] text-[#c2c4c8] mr-2" />
                   </span>
                 )}
               </button>

@@ -346,7 +346,7 @@ export const useStyleSetupStore = create<State>()(
       /** legacy 초기값 */
       sidePhotoKeys: {},
 
-      desiredTags: ["귀여움"],
+      desiredTags: [],
       desiredOtherText: "",
 
       questionText: "",
@@ -600,3 +600,27 @@ export const useStyleSetupStore = create<State>()(
     },
   ),
 );
+
+/** ===== persist helpers =====
+ *  컴포넌트에서 (as any) 안 쓰려고, 여기서만 안전하게 캐스팅 처리
+ */
+type PersistApi = {
+  clearStorage?: () => void | Promise<void>;
+};
+
+function getPersistApi(): PersistApi {
+  return (useStyleSetupStore as unknown as { persist?: PersistApi }).persist ?? {};
+}
+
+/** persist(localStorage)만 비우기 */
+export async function clearStyleSetupPersist() {
+  await getPersistApi().clearStorage?.();
+  // 보험: 혹시 clearStorage가 안 먹는 환경이면 직접 제거
+  localStorage.removeItem(STORAGE_KEY);
+}
+
+/** 메모리 상태 + persist(localStorage)까지 한 번에 초기화 */
+export async function resetStyleSetupAll() {
+  useStyleSetupStore.getState().resetAll();
+  await clearStyleSetupPersist();
+}

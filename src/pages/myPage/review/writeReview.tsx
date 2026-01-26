@@ -79,7 +79,7 @@ export default function ReviewWritePage() {
   const objectUrlsRef = useRef<Set<string>>(new Set());
 
   const contentLen = content.length;
-  const isContentValid = contentLen >= 10 && contentLen <= 1000;
+  const isContentValid = contentLen >= 30 && contentLen <= 1000;
   const isFormValid =
     rating >= 1 && isContentValid && imageKeys.length <= 5 && consultationId != null;
 
@@ -117,6 +117,7 @@ export default function ReviewWritePage() {
       savedAt: Date.now(),
     };
     localStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
+    alert("임시저장 되었어요.");
   };
 
   // const addTag = (raw: string) => {

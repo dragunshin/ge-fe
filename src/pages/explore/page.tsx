@@ -1,54 +1,60 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Check, ChevronDown, Search, X } from 'lucide-react';
-import heartIcon from '../../images/mypage/heart.svg';
-import BottomNav from '@/components/navigation/bottom-nav';
-import Logo from '@/components/ui/logo';
-import starIcon from '../../images/reviews/star.svg';
-import { expertService } from '../../services/expert.service';
-import { reservationService } from '../../services/reservation.service';
-import ConsultationMethodSheet from '../resevationFlow/reservationSheet/typeReservation';
-import DateTimeBottomSheet from '../resevationFlow/reservationSheet/calendar';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Check, ChevronDown, Search, X } from "lucide-react";
+import heartIcon from "../../images/mypage/heart.svg";
+import BottomNav from "@/components/navigation/bottom-nav";
+import Logo from "@/components/ui/logo";
+import starIcon from "../../images/reviews/star.svg";
+import { expertService } from "../../services/expert.service";
+import { reservationService } from "../../services/reservation.service";
+import ConsultationMethodSheet from "../resevationFlow/reservationSheet/typeReservation";
+import DateTimeBottomSheet from "../resevationFlow/reservationSheet/calendar";
 import {
   getApiCategoryFromRoute,
   getLabelFromApiCategory,
   type ApiCategory,
-} from '../../lib/utils/category';
-import { useAuthStore } from '@/stores/useAuthStore';
+} from "../../lib/utils/category";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 const CATEGORY_TABS = [
-  { key: 'hair', label: '헤어' },
-  { key: 'fashion', label: '패션' },
-  { key: 'makeup', label: '메이크업' },
-  { key: 'skin', label: '스킨' },
+  { key: "hair", label: "헤어" },
+  { key: "fashion", label: "패션" },
+  { key: "makeup", label: "메이크업" },
+  { key: "skin", label: "스킨" },
 ];
 
-const STYLE_TABS = ['컷', '펌', '염색', '스타일링'] as const;
-const CONCERN_TABS = ['탈모', '헤어라인', '모질/모량', '두피상태'] as const;
+const STYLE_TABS = ["컷", "펌", "염색", "스타일링"] as const;
+const CONCERN_TABS = ["탈모", "헤어라인", "모질/모량", "두피상태"] as const;
 
 const CUT_STYLE_OPTIONS = [
-  '가일 컷',
-  '크롭 컷',
-  '포마드 컷',
-  '투블럭 컷',
-  '스포츠 컷',
-  '아이비리그 컷',
-  '가르마 컷',
-  '페이드 컷',
-  '리프 컷',
-  '프렌치 크롭 컷',
+  "가일 컷",
+  "크롭 컷",
+  "포마드 컷",
+  "투블럭 컷",
+  "스포츠 컷",
+  "아이비리그 컷",
+  "가르마 컷",
+  "페이드 컷",
+  "리프 컷",
+  "프렌치 크롭 컷",
 ];
 
-const HAIR_CONCERN_OPTIONS = ['M자 탈모', '원형 탈모', '정수리 탈모', '복합형 탈모'];
+const HAIR_CONCERN_OPTIONS = ["M자 탈모", "원형 탈모", "정수리 탈모", "복합형 탈모"];
 
-const HAIR_STYLE_TAGS = CUT_STYLE_OPTIONS.map((item) => item.replace(/\s+/g, ''));
-const HAIR_CONCERN_TAGS = ['탈모', ...HAIR_CONCERN_OPTIONS];
+const HAIR_STYLE_TAGS = CUT_STYLE_OPTIONS.map((item) => item.replace(/\s+/g, ""));
+const HAIR_CONCERN_TAGS = ["탈모", ...HAIR_CONCERN_OPTIONS];
 
 const OTHER_CATEGORY_TAGS: Record<ApiCategory, string[]> = {
   HAIR: [],
-  FASHION: ['코디', '핏', '스타일링'],
-  MAKEUP: ['윤곽', '톤업', '데일리'],
-  SKIN: ['보습', '진정', '민감'],
+  FASHION: ["코디", "핏", "스타일링"],
+  MAKEUP: ["윤곽", "톤업", "데일리"],
+  SKIN: ["보습", "진정", "민감"],
+};
+
+type ExpertSchedule = {
+  consultationType: ConsultType; // 'MESSAGE' | 'VIDEO'
+  price: number;
+  isActive: boolean;
 };
 
 type ExpertListCard = {
@@ -64,14 +70,14 @@ type ExpertListCard = {
   filterTags: string[];
 };
 
-type FilterTab = 'style' | 'concern';
+type FilterTab = "style" | "concern";
 
 type StyleTab = (typeof STYLE_TABS)[number];
 type ConcernTab = (typeof CONCERN_TABS)[number];
 
-type ConsultType = 'MESSAGE' | 'VIDEO';
+type ConsultType = "MESSAGE" | "VIDEO";
 
-const normalizeTag = (value: string) => value.replace(/\s+/g, '');
+const normalizeTag = (value: string) => value.replace(/\s+/g, "");
 
 const pickTags = (items: string[], count: number, seed: number) => {
   if (items.length === 0) {
@@ -86,7 +92,7 @@ const buildExpertTags = (
   category: ApiCategory | undefined,
   seed: number,
 ) => {
-  if (category === 'HAIR') {
+  if (category === "HAIR") {
     const styleTags = pickTags(HAIR_STYLE_TAGS, 2, seed);
     const concernTags = pickTags(HAIR_CONCERN_TAGS, 1, seed + 3);
     const filterTags = [...styleTags, ...concernTags];
@@ -98,7 +104,7 @@ const buildExpertTags = (
     return { displayTags: trimmedDisplayTags, filterTags };
   }
 
-  const otherTags = pickTags(OTHER_CATEGORY_TAGS[category ?? 'HAIR'], 2, seed);
+  const otherTags = pickTags(OTHER_CATEGORY_TAGS[category ?? "HAIR"], 2, seed);
   const displayTags = [categoryLabel, ...otherTags];
   return { displayTags, filterTags: otherTags };
 };
@@ -109,7 +115,7 @@ const filterExperts = (
   concerns: string[],
   category: ApiCategory | undefined,
 ) => {
-  if (category !== 'HAIR') {
+  if (category !== "HAIR") {
     return experts;
   }
   const hasStyle = styles.length > 0;
@@ -135,8 +141,8 @@ const CategoryLandingPage = () => {
   const location = useLocation();
   const categoryKey = useMemo(() => {
     const query = new URLSearchParams(location.search);
-    const value = query.get('category') ?? 'hair';
-    return CATEGORY_TABS.some((tab) => tab.key === value) ? value : 'hair';
+    const value = query.get("category") ?? "hair";
+    return CATEGORY_TABS.some((tab) => tab.key === value) ? value : "hair";
   }, [location.search]);
   const apiCategory = getApiCategoryFromRoute(categoryKey);
   const categoryLabel = getLabelFromApiCategory(apiCategory);
@@ -145,17 +151,16 @@ const CategoryLandingPage = () => {
   const [experts, setExperts] = useState<ExpertListCard[]>([]);
   const [noticeMessage, setNoticeMessage] = useState<string | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [activeFilterTab, setActiveFilterTab] = useState<FilterTab>('style');
-  const [activeStyleTab, setActiveStyleTab] = useState<StyleTab>('컷');
-  const [activeConcernTab, setActiveConcernTab] = useState<ConcernTab>('탈모');
+  const [activeFilterTab, setActiveFilterTab] = useState<FilterTab>("style");
+  const [activeStyleTab, setActiveStyleTab] = useState<StyleTab>("컷");
+  const [activeConcernTab, setActiveConcernTab] = useState<ConcernTab>("탈모");
   const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
   const [selectedConcerns, setSelectedConcerns] = useState<string[]>([]);
   const [draftStyles, setDraftStyles] = useState<string[]>([]);
   const [draftConcerns, setDraftConcerns] = useState<string[]>([]);
   const [openTypeSheet, setOpenTypeSheet] = useState(false);
   const [openCalendarSheet, setOpenCalendarSheet] = useState(false);
-  const [selectedConsultType, setSelectedConsultType] =
-    useState<ConsultType>('MESSAGE');
+  const [selectedConsultType, setSelectedConsultType] = useState<ConsultType>("MESSAGE");
   const tabTrackRef = useRef<HTMLDivElement | null>(null);
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const [tabUnderlineStyle, setTabUnderlineStyle] = useState({ left: 0, width: 0 });
@@ -163,6 +168,10 @@ const CategoryLandingPage = () => {
   const [selectedReservationExpertId, setSelectedReservationExpertId] = useState<number | null>(
     null,
   );
+
+  const [expertSchedules, setExpertSchedules] = useState<ExpertSchedule[]>([]);
+  const [scheduleLoading, setScheduleLoading] = useState(false);
+  const [scheduleError, setScheduleError] = useState<string | null>(null);
 
   const updateTabUnderline = () => {
     const track = tabTrackRef.current;
@@ -178,17 +187,49 @@ const CategoryLandingPage = () => {
     });
   };
 
+  useEffect(() => {
+    if (!openTypeSheet) return;
+    if (!selectedReservationExpertId) return;
+
+    let alive = true;
+
+    (async () => {
+      try {
+        setScheduleLoading(true);
+        setScheduleError(null);
+        setExpertSchedules([]);
+
+        const res = await expertService.getExpertSchedules(selectedReservationExpertId);
+        const data = Array.isArray(res.data) ? res.data : [];
+
+        if (!alive) return;
+        setExpertSchedules(data);
+      } catch (e) {
+        console.error(e);
+        if (!alive) return;
+        setScheduleError("상담 방식 정보를 불러오지 못했어요.");
+      } finally {
+        if (!alive) return;
+        setScheduleLoading(false);
+      }
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, [openTypeSheet, selectedReservationExpertId]);
+
   useLayoutEffect(() => {
     updateTabUnderline();
   }, [categoryKey]);
 
   useEffect(() => {
     const handleResize = () => updateTabUnderline();
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
     if (document.fonts?.ready) {
       document.fonts.ready.then(updateTabUnderline).catch(() => {});
     }
-    return () => window.removeEventListener('resize', handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [categoryKey]);
 
   useEffect(() => {
@@ -213,7 +254,7 @@ const CategoryLandingPage = () => {
           return;
         }
         const mapped = response.data.map((expert, index) => {
-          const label = getLabelFromApiCategory(expert.category) || categoryLabel || '전문가';
+          const label = getLabelFromApiCategory(expert.category) || categoryLabel || "전문가";
           const tags = buildExpertTags(label, apiCategory, expert.expertId ?? index + 1);
           const images = (expert.representativeReviewImages ?? []).filter(Boolean);
           const reviewTagsSource = tags.filterTags.length > 0 ? tags.filterTags : [label];
@@ -233,7 +274,7 @@ const CategoryLandingPage = () => {
         });
         setExperts(mapped);
       } catch (error) {
-        console.error('Failed to fetch category experts:', error);
+        console.error("Failed to fetch category experts:", error);
       }
     };
 
@@ -282,13 +323,13 @@ const CategoryLandingPage = () => {
   };
 
   const getReservationRoute = () => {
-    if (categoryKey === 'fashion') {
-      return '/reservation/fashion';
+    if (categoryKey === "fashion") {
+      return "/reservation/fashion";
     }
-    if (categoryKey !== 'hair') {
-      return '/service-ready';
+    if (categoryKey !== "hair") {
+      return "/service-ready";
     }
-    return '/hair/setup';
+    return "/hair/setup";
   };
 
   // timeId를 예약 날짜/시간 ISO로 변환
@@ -308,45 +349,45 @@ const CategoryLandingPage = () => {
   };
 
   // 패션 예약 임시 생성 후 reservationId 전달
-  const handleTempReservation = async (date: Date, timeId: string) => {
-    if (categoryKey !== 'fashion' && categoryKey !== 'hair') return null;
+  const handleTempReservation = async (
+    date: Date,
+    timeId: string,
+    consultationTypeOverride?: ConsultType,
+  ) => {
+    if (categoryKey !== "fashion" && categoryKey !== "hair") return null;
     if (!selectedReservationExpertId) {
-      window.alert('전문가 정보가 없습니다. 다시 시도해주세요.');
+      window.alert("전문가 정보가 없습니다. 다시 시도해주세요.");
       return null;
     }
 
-    const consultationType = selectedConsultType;
-    const schedulesResponse = await expertService.getExpertSchedules(
-      selectedReservationExpertId,
-    );
+    //const consultationType = selectedConsultType;
+    const consultationType = consultationTypeOverride ?? selectedConsultType;
+    const schedulesResponse = await expertService.getExpertSchedules(selectedReservationExpertId);
     const schedules = Array.isArray(schedulesResponse.data) ? schedulesResponse.data : [];
-    const matched = schedules.find(
-      (schedule) => schedule.consultationType === consultationType,
-    );
+    const matched = schedules.find((schedule) => schedule.consultationType === consultationType);
     if (!matched) {
-      window.alert('상담 가격 정보를 찾을 수 없습니다. 다시 시도해주세요.');
+      window.alert("상담 가격 정보를 찾을 수 없습니다. 다시 시도해주세요.");
       return null;
     }
     const price = matched.price;
     // 카테고리별 임시 예약 생성
-    const category = categoryKey === 'fashion' ? 'FASHION' : 'HAIR';
+    const category = categoryKey === "fashion" ? "FASHION" : "HAIR";
     const selectedExpert = experts.find((expert) => expert.id === selectedReservationExpertId);
-    sessionStorage.setItem('consult_expert_name', selectedExpert?.name ?? '전문가');
-    sessionStorage.setItem('consult_category_label', categoryLabel || '전문가');
-    sessionStorage.setItem('consult_price', String(price));
-    sessionStorage.setItem('consult_expert_id', String(selectedReservationExpertId));
+    sessionStorage.setItem("consult_expert_name", selectedExpert?.name ?? "전문가");
+    sessionStorage.setItem("consult_category_label", categoryLabel || "전문가");
+    sessionStorage.setItem("consult_price", String(price));
+    sessionStorage.setItem("consult_expert_id", String(selectedReservationExpertId));
 
     const response = await reservationService.createTempReservation({
       expertId: selectedReservationExpertId,
       category,
       consultationType,
       // MESSAGE는 scheduledDateTime을 null로 전송
-      scheduledDateTime:
-        consultationType === 'VIDEO' ? buildScheduledDateTime(date, timeId) : null,
+      scheduledDateTime: consultationType === "VIDEO" ? buildScheduledDateTime(date, timeId) : null,
       price,
     });
 
-    sessionStorage.setItem('consult_reservation_id', String(response.data.reservationId));
+    sessionStorage.setItem("consult_reservation_id", String(response.data.reservationId));
     return response.data.reservationId;
   };
 
@@ -355,10 +396,10 @@ const CategoryLandingPage = () => {
     const hour24 = parsed ? Number(parsed[1]) : 0;
     const minute = parsed ? Number(parsed[2]) : 0;
     const isAM = hour24 < 12;
-    const meridiem = isAM ? '오전' : '오후';
+    const meridiem = isAM ? "오전" : "오후";
     let hour12 = hour24 % 12;
     if (hour12 === 0) hour12 = 12;
-    const mm = String(minute).padStart(2, '0');
+    const mm = String(minute).padStart(2, "0");
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
     const day = date.getDate();
@@ -417,14 +458,14 @@ const CategoryLandingPage = () => {
                   tabRefs.current[tab.key] = element;
                 }}
                 onClick={() => {
-                  if (tab.key === 'makeup') {
-                    navigate('/service-ready');
+                  if (tab.key === "makeup") {
+                    navigate("/service-ready");
                     return;
                   }
                   navigate(`/explore?category=${tab.key}`);
                 }}
                 className={`pb-[8px] ${
-                  tab.key === categoryKey ? 'text-[#0f0f10]' : 'text-[#989ba2]'
+                  tab.key === categoryKey ? "text-[#0f0f10]" : "text-[#989ba2]"
                 }`}
               >
                 {tab.label}
@@ -442,14 +483,14 @@ const CategoryLandingPage = () => {
         <section className="mt-[14px] px-4">
           <div className="flex flex-wrap items-center gap-[8px]">
             <button
-              onClick={() => openFilterSheet('style')}
+              onClick={() => openFilterSheet("style")}
               className="flex h-[30px] items-center gap-[4px] rounded-[4px] border border-[#dbdcdf] bg-white px-[12px] text-[13px] text-[#46474c]"
             >
               스타일
               <ChevronDown className="h-4 w-4" />
             </button>
             <button
-              onClick={() => openFilterSheet('concern')}
+              onClick={() => openFilterSheet("concern")}
               className="flex h-[30px] items-center gap-[4px] rounded-[4px] border border-[#dbdcdf] bg-white px-[12px] text-[13px] text-[#46474c]"
             >
               고민
@@ -484,7 +525,7 @@ const CategoryLandingPage = () => {
                 tabIndex={0}
                 onClick={() => navigate(`/experts/${expert.id}`)}
                 onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
+                  if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault();
                     navigate(`/experts/${expert.id}`);
                   }
@@ -503,9 +544,7 @@ const CategoryLandingPage = () => {
                         <p className="text-[16px] font-semibold leading-[1.1] text-[#292a2d]">
                           {expert.name}
                         </p>
-                        <p className="line-clamp-1 text-[13px] text-[#878a93]">
-                          {expert.summary}
-                        </p>
+                        <p className="line-clamp-1 text-[13px] text-[#878a93]">{expert.summary}</p>
                       </div>
                     </div>
                     <div className="flex shrink-0 items-center gap-[6px] text-[13px] text-[#878a93]">
@@ -525,7 +564,9 @@ const CategoryLandingPage = () => {
                           key={`${expert.id}-review-${index}`}
                           className="relative h-[105px] w-[105px] overflow-hidden rounded-[4px] bg-[#e1e2e4]"
                         >
-                          {image && <img src={image} alt="" className="h-full w-full object-cover" />}
+                          {image && (
+                            <img src={image} alt="" className="h-full w-full object-cover" />
+                          )}
                           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60" />
                           {tag && (
                             <span className="absolute bottom-[27px] left-[10px] text-[12px] text-white">
@@ -543,8 +584,8 @@ const CategoryLandingPage = () => {
                           key={`${expert.id}-tag-${tag}-${index}`}
                           className={
                             tag === categoryLabel
-                              ? 'rounded-[2px] bg-[#f5f9fd] px-[6px] py-[4px] text-[12px] text-[#429ff0]'
-                              : 'rounded-[2px] bg-[#f4f4f5] px-[8px] py-[4px] text-[12px] text-[#46474c]'
+                              ? "rounded-[2px] bg-[#f5f9fd] px-[6px] py-[4px] text-[12px] text-[#429ff0]"
+                              : "rounded-[2px] bg-[#f4f4f5] px-[8px] py-[4px] text-[12px] text-[#46474c]"
                           }
                         >
                           {tag}
@@ -555,12 +596,12 @@ const CategoryLandingPage = () => {
                       className="h-[36px] w-[95px] rounded-[4px] bg-[#171719] text-[14px] font-medium text-white"
                       onClick={(event) => {
                         event.stopPropagation();
-                        if (categoryKey !== 'hair' && categoryKey !== 'fashion') {
-                          setNoticeMessage('해당 카테고리는 상담 예약이 준비 중입니다.');
+                        if (categoryKey !== "hair" && categoryKey !== "fashion") {
+                          setNoticeMessage("해당 카테고리는 상담 예약이 준비 중입니다.");
                           return;
                         }
                         if (!isAuthenticated) {
-                          navigate('/auth/login');
+                          navigate("/auth/login");
                           return;
                         }
                         // 선택한 전문가 ID 저장
@@ -602,16 +643,18 @@ const CategoryLandingPage = () => {
             </div>
             <div className="mt-[22px] flex items-center gap-[20px]">
               <button
-                onClick={() => setActiveFilterTab('style')}
+                onClick={() => setActiveFilterTab("style")}
                 className="flex flex-col items-center gap-[6px]"
               >
                 <div className="flex items-center gap-[4px] text-[14px] font-semibold">
-                  <span className={activeFilterTab === 'style' ? 'text-[#171719]' : 'text-[#989ba2]'}>
+                  <span
+                    className={activeFilterTab === "style" ? "text-[#171719]" : "text-[#989ba2]"}
+                  >
                     스타일
                   </span>
                   {draftStyles.length > 0 && (
                     <span
-                      className={activeFilterTab === 'style' ? 'text-[#171719]' : 'text-[#989ba2]'}
+                      className={activeFilterTab === "style" ? "text-[#171719]" : "text-[#989ba2]"}
                     >
                       {draftStyles.length}
                     </span>
@@ -619,24 +662,24 @@ const CategoryLandingPage = () => {
                 </div>
                 <span
                   className={`h-[2px] w-full ${
-                    activeFilterTab === 'style' ? 'bg-[#292a2d]' : 'bg-transparent'
+                    activeFilterTab === "style" ? "bg-[#292a2d]" : "bg-transparent"
                   }`}
                 />
               </button>
               <button
-                onClick={() => setActiveFilterTab('concern')}
+                onClick={() => setActiveFilterTab("concern")}
                 className="flex flex-col items-center gap-[6px]"
               >
                 <div className="flex items-center gap-[4px] text-[14px] font-semibold">
                   <span
-                    className={activeFilterTab === 'concern' ? 'text-[#171719]' : 'text-[#989ba2]'}
+                    className={activeFilterTab === "concern" ? "text-[#171719]" : "text-[#989ba2]"}
                   >
                     고민
                   </span>
                   {draftConcerns.length > 0 && (
                     <span
                       className={
-                        activeFilterTab === 'concern' ? 'text-[#171719]' : 'text-[#989ba2]'
+                        activeFilterTab === "concern" ? "text-[#171719]" : "text-[#989ba2]"
                       }
                     >
                       {draftConcerns.length}
@@ -645,7 +688,7 @@ const CategoryLandingPage = () => {
                 </div>
                 <span
                   className={`h-[2px] w-full ${
-                    activeFilterTab === 'concern' ? 'bg-[#292a2d]' : 'bg-transparent'
+                    activeFilterTab === "concern" ? "bg-[#292a2d]" : "bg-transparent"
                   }`}
                 />
               </button>
@@ -653,21 +696,21 @@ const CategoryLandingPage = () => {
 
             <div className="mt-[20px] border-b border-[#f1f1f6] pb-[12px]">
               <div className="flex items-center gap-[16px] text-[14px]">
-                {activeFilterTab === 'style'
+                {activeFilterTab === "style"
                   ? STYLE_TABS.map((tab) => (
                       <button
                         key={tab}
                         onClick={() => {
-                          if (tab !== '컷') {
-                            setNoticeMessage('준비중입니다.');
+                          if (tab !== "컷") {
+                            setNoticeMessage("준비중입니다.");
                             return;
                           }
                           setActiveStyleTab(tab);
                         }}
                         className={
                           tab === activeStyleTab
-                            ? 'font-semibold text-[#0f0f10]'
-                            : 'font-medium text-[#989ba2]'
+                            ? "font-semibold text-[#0f0f10]"
+                            : "font-medium text-[#989ba2]"
                         }
                       >
                         {tab}
@@ -677,16 +720,16 @@ const CategoryLandingPage = () => {
                       <button
                         key={tab}
                         onClick={() => {
-                          if (tab !== '탈모') {
-                            setNoticeMessage('준비중입니다.');
+                          if (tab !== "탈모") {
+                            setNoticeMessage("준비중입니다.");
                             return;
                           }
                           setActiveConcernTab(tab);
                         }}
                         className={
                           tab === activeConcernTab
-                            ? 'font-semibold text-[#0f0f10]'
-                            : 'font-medium text-[#989ba2]'
+                            ? "font-semibold text-[#0f0f10]"
+                            : "font-medium text-[#989ba2]"
                         }
                       >
                         {tab}
@@ -696,14 +739,14 @@ const CategoryLandingPage = () => {
             </div>
 
             <div className="mt-[16px] grid grid-cols-2 gap-x-[28px] gap-y-[12px]">
-              {(activeFilterTab === 'style' ? CUT_STYLE_OPTIONS : HAIR_CONCERN_OPTIONS).map(
+              {(activeFilterTab === "style" ? CUT_STYLE_OPTIONS : HAIR_CONCERN_OPTIONS).map(
                 (item) => {
                   const selected =
-                    activeFilterTab === 'style'
+                    activeFilterTab === "style"
                       ? draftStyles.includes(item)
                       : draftConcerns.includes(item);
                   const toggle =
-                    activeFilterTab === 'style'
+                    activeFilterTab === "style"
                       ? () => toggleDraftStyle(item)
                       : () => toggleDraftConcern(item);
                   return (
@@ -714,16 +757,12 @@ const CategoryLandingPage = () => {
                     >
                       <span
                         className={`flex h-[12px] w-[12px] items-center justify-center rounded-[2px] border ${
-                          selected
-                            ? 'border-[#0f0f10] bg-[#0f0f10]'
-                            : 'border-[#dbdcdf] bg-white'
+                          selected ? "border-[#0f0f10] bg-[#0f0f10]" : "border-[#dbdcdf] bg-white"
                         }`}
                       >
                         {selected && <Check className="h-[10px] w-[10px] text-white" />}
                       </span>
-                      <span className={selected ? 'text-[#0f0f10]' : 'text-[#989ba2]'}>
-                        {item}
-                      </span>
+                      <span className={selected ? "text-[#0f0f10]" : "text-[#989ba2]"}>{item}</span>
                     </button>
                   );
                 },
@@ -734,7 +773,7 @@ const CategoryLandingPage = () => {
               <button
                 onClick={applyFilters}
                 className={`h-[48px] w-full rounded-[4px] text-[16px] font-medium text-white ${
-                  isApplyDisabled ? 'bg-[#aeb0b6]' : 'bg-[#0f0f10]'
+                  isApplyDisabled ? "bg-[#aeb0b6]" : "bg-[#0f0f10]"
                 }`}
               >
                 {draftFilteredCount.toLocaleString()}명의 전문가
@@ -746,7 +785,7 @@ const CategoryLandingPage = () => {
 
       {!isFilterOpen && <BottomNav />}
 
-      <ConsultationMethodSheet
+      {/* <ConsultationMethodSheet
         open={openTypeSheet}
         onClose={() => setOpenTypeSheet(false)}
         defaultValue={selectedConsultType}
@@ -756,17 +795,59 @@ const CategoryLandingPage = () => {
           setOpenTypeSheet(false);
           setOpenCalendarSheet(true);
         }}
+      /> */}
+
+      <ConsultationMethodSheet
+        open={openTypeSheet}
+        onClose={() => setOpenTypeSheet(false)}
+        defaultValue={selectedConsultType}
+        schedules={expertSchedules}
+        loading={scheduleLoading}
+        errorMessage={scheduleError}
+        // onNext={(selected) => {
+        //   setSelectedConsultType(selected);
+        //   sessionStorage.setItem("consult_type", selected);
+        //   setOpenTypeSheet(false);
+        //   setOpenCalendarSheet(true);
+        // }}
+        onNext={async (selected) => {
+          setSelectedConsultType(selected);
+          sessionStorage.setItem("consult_type", selected);
+          setOpenTypeSheet(false);
+
+          // ✅ MESSAGE면 캘린더 없이 바로 임시예약 생성
+          if (selected === "MESSAGE") {
+            setOpenCalendarSheet(false);
+            sessionStorage.removeItem("consult_schedule_label"); // ✅ 이전 값 남아있을 수 있어서
+
+            sessionStorage.setItem("consult_return_path", `${location.pathname}${location.search}`);
+
+            if (categoryKey === "fashion" || categoryKey === "hair") {
+              // timeId/date는 MESSAGE일 땐 서버로 null 처리되므로 더미값 넣어도 됨
+              const reservationId = await handleTempReservation(new Date(), "t-1130", selected);
+              if (reservationId) {
+                navigate(`${getReservationRoute()}?reservationId=${reservationId}`);
+                return;
+              }
+            }
+            navigate(getReservationRoute());
+            return;
+          }
+
+          // ✅ VIDEO만 캘린더
+          setOpenCalendarSheet(true);
+        }}
       />
 
       <DateTimeBottomSheet
         open={openCalendarSheet}
         onClose={() => setOpenCalendarSheet(false)}
         onNext={async ({ date, timeId }) => {
-          sessionStorage.setItem('consult_schedule_label', formatScheduleLabel(date, timeId));
+          sessionStorage.setItem("consult_schedule_label", formatScheduleLabel(date, timeId));
           setOpenCalendarSheet(false);
-          sessionStorage.setItem('consult_return_path', `${location.pathname}${location.search}`);
+          sessionStorage.setItem("consult_return_path", `${location.pathname}${location.search}`);
           // 패션 예약 임시 생성 후 reservationId 전달
-          if (categoryKey === 'fashion' || categoryKey === 'hair') {
+          if (categoryKey === "fashion" || categoryKey === "hair") {
             const reservationId = await handleTempReservation(date, timeId);
             if (reservationId) {
               navigate(`${getReservationRoute()}?reservationId=${reservationId}`);

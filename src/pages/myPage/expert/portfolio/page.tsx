@@ -42,8 +42,7 @@ export default function ExpertPortfolioPage() {
   const isFetchingRef = React.useRef(false);
   const [openMenuId, setOpenMenuId] = React.useState<number | null>(null);
   const [deleteTarget, setDeleteTarget] = React.useState<ExpertPortfolioItem | null>(null);
-  const [representTarget, setRepresentTarget] =
-    React.useState<ExpertPortfolioItem | null>(null);
+  const [representTarget, setRepresentTarget] = React.useState<ExpertPortfolioItem | null>(null);
   const [expandedText, setExpandedText] = React.useState<
     Record<number, { concern: boolean; solution: boolean }>
   >({});
@@ -127,8 +126,7 @@ export default function ExpertPortfolioPage() {
       items.forEach((item) => {
         const concernEl = concernRefs.current[item.id];
         const solutionEl = solutionRefs.current[item.id];
-        const concernOverflow =
-          !!concernEl && concernEl.scrollHeight > concernEl.clientHeight + 1;
+        const concernOverflow = !!concernEl && concernEl.scrollHeight > concernEl.clientHeight + 1;
         const solutionOverflow =
           !!solutionEl && solutionEl.scrollHeight > solutionEl.clientHeight + 1;
         next[item.id] = {
@@ -179,14 +177,14 @@ export default function ExpertPortfolioPage() {
     <div className="flex h-full flex-col bg-white">
       <header className="app-header">
         <div className="flex items-center gap-[6px] px-4 py-[16px]">
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          className="flex h-[24px] w-[24px] items-center justify-center"
-        >
-          <BackIcon className="h-[24px] w-[24px]" />
-        </button>
-        <h1 className="text-[20px] font-semibold text-[#181818]">포트폴리오 관리</h1>
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="flex h-[24px] w-[24px] items-center justify-center"
+          >
+            <BackIcon className="h-[24px] w-[24px]" />
+          </button>
+          <h1 className="text-[20px] font-semibold text-[#181818]">포트폴리오 관리</h1>
         </div>
       </header>
 
@@ -206,18 +204,14 @@ export default function ExpertPortfolioPage() {
                 <div className="flex flex-col gap-[12px]">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-[8px]">
-                      <h2 className="text-[16px] font-semibold text-[#292a2d]">
-                        {item.title}
-                      </h2>
+                      <h2 className="text-[16px] font-semibold text-[#292a2d]">{item.title}</h2>
                       {item.isRepresentative && (
                         <RepresentativePinIcon className="h-[24px] w-[24px]" />
                       )}
                     </div>
                     <button
                       type="button"
-                      onClick={() =>
-                        setOpenMenuId((prev) => (prev === item.id ? null : item.id))
-                      }
+                      onClick={() => setOpenMenuId((prev) => (prev === item.id ? null : item.id))}
                       className="flex h-[24px] w-[24px] items-center justify-center"
                     >
                       <OptionIcon className="h-[24px] w-[24px]" />
@@ -242,11 +236,7 @@ export default function ExpertPortfolioPage() {
                   <div className="flex h-[164px] items-center gap-[8px]">
                     <div className="relative h-[164px] w-[167.5px] overflow-hidden rounded-[12px] bg-[#d2d4d8]">
                       {item.beforeImage && (
-                        <img
-                          src={item.beforeImage}
-                          alt=""
-                          className="h-full w-full object-cover"
-                        />
+                        <img src={item.beforeImage} alt="" className="h-full w-full object-cover" />
                       )}
                       <span className="absolute bottom-[8px] left-[8px] rounded-[4px] bg-black/40 px-[6px] py-[2px] text-[14px] text-white">
                         전
@@ -254,11 +244,7 @@ export default function ExpertPortfolioPage() {
                     </div>
                     <div className="relative h-[164px] w-[167.5px] overflow-hidden rounded-[12px] bg-[#d2d4d8]">
                       {item.afterImage && (
-                        <img
-                          src={item.afterImage}
-                          alt=""
-                          className="h-full w-full object-cover"
-                        />
+                        <img src={item.afterImage} alt="" className="h-full w-full object-cover" />
                       )}
                       <span className="absolute bottom-[8px] right-[8px] rounded-[4px] bg-black/40 px-[6px] py-[2px] text-[14px] text-white">
                         후
@@ -344,7 +330,8 @@ export default function ExpertPortfolioPage() {
                       type="button"
                       onClick={() => {
                         setOpenMenuId(null);
-                        setDeleteTarget(item);
+                        // setDeleteTarget(item);
+                        alert("개발 중인 기능입니다. 삭제 후에 다시 만들어주세요.");
                       }}
                       className="w-full border-b border-[#f1f1f6] px-[32px] py-[10px] text-center font-medium text-[#171719]"
                     >
@@ -387,7 +374,7 @@ export default function ExpertPortfolioPage() {
         <div className="fixed bottom-[24px] left-1/2 z-30 w-full max-w-[375px] -translate-x-1/2 px-[16px]">
           <button
             type="button"
-            onClick={() => undefined}
+            onClick={() => navigate(`/portfolioAdd/${me?.userId}`)}
             className="ml-auto flex h-[56px] w-[56px] items-center justify-center"
           >
             <AddPortfolioIcon className="h-[56px] w-[56px]" />
@@ -395,7 +382,12 @@ export default function ExpertPortfolioPage() {
         </div>
 
         {openMenuId !== null && (
-          <div className="fixed inset-0 z-60 bg-black/50" />
+          <button
+            type="button"
+            aria-label="메뉴 닫기"
+            onClick={() => setOpenMenuId(null)}
+            className="fixed inset-0 z-60 bg-black/50"
+          />
         )}
 
         {representTarget && (
