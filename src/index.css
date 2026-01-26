@@ -26,13 +26,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
   scrollbar-gutter: stable;
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: center;
 }
 
 #root {
   width: 100%;
   max-width: 375px;
+  /* margin: 0 auto; */
   height: 100dvh;
   min-height: 100dvh;
   border-radius: 0;
