@@ -201,7 +201,7 @@ const CategoryBestReviewsPage = () => {
             expertResponses
               .map((res) => res.data)
               .filter(Boolean)
-              .map((expert) => [expert.expertId, expert]),
+              .map((expert) => [expert.userId, expert]),
           );
           const patched = mapped.map((item) => {
             if (!item.expertId) return item;
@@ -211,7 +211,7 @@ const CategoryBestReviewsPage = () => {
               ...item,
               expertName: item.expertName || expert.nickname || '전문가',
               expertProfileImage: item.expertProfileImage || expert.profileImage,
-              expertRatingAverage: item.expertRatingAverage || expert.ratingAverage || item.rating,
+              expertRatingAverage: item.expertRatingAverage || item.rating,
             };
           });
           setReviews(patched);
