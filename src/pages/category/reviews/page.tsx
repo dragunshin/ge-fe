@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ChevronLeft, MoreHorizontal } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import starIcon from '../../../images/reviews/star.svg';
 import { reviewService } from '../../../services/review.service';
+import { expertService } from '../../../services/expert.service';
 import {
   getApiCategoryFromRoute,
   getLabelFromApiCategory,
@@ -11,6 +12,7 @@ import {
 type ReviewItem = {
   id: number;
   author: string;
+  expertId?: number;
   expertName: string;
   expertProfileImage?: string;
   expertRatingAverage: number;
@@ -31,12 +33,16 @@ const getDisplayName = (value?: string) => {
 };
 
 const getReviewAuthorName = (review: {
+  reviewerNickname?: string;
   memberNickname?: string;
   authorNickname?: string;
   nickname?: string;
 }) => {
   return getDisplayName(
-    review.memberNickname ?? review.authorNickname ?? review.nickname,
+    review.reviewerNickname ??
+      review.memberNickname ??
+      review.authorNickname ??
+      review.nickname,
   );
 };
 
@@ -104,7 +110,7 @@ const CategoryBestReviewsPage = () => {
         key={`star-${rating}-${index}`}
         src={starIcon}
         alt=""
-        className={`h-[16px] w-[16px] ${index < filledCount ? '' : 'opacity-30 grayscale'}`}
+        className={`h-[18px] w-[18px] ${index < filledCount ? '' : 'opacity-40 grayscale'}`}
       />
     ));
   };
@@ -130,24 +136,41 @@ const CategoryBestReviewsPage = () => {
       try {
         const response = isExpertReview
           ? await reviewService.getExpertReviews(expertId as number, { page: 0, size: 10 })
-          : apiCategory
-            ? await reviewService.getBestReviews({ category: apiCategory })
-            : await reviewService.getBestReviews();
+          : await reviewService.getRecentReviews({
+              category: apiCategory ?? undefined,
+              page: 0,
+              size: 10,
+            });
         if (requestId !== requestIdRef.current) {
           return;
         }
         const mapped = (Array.isArray(response.data) ? response.data : [])
           .map((review) => {
             const authorSource = review as typeof review & {
+              reviewerNickname?: string;
               memberNickname?: string;
               authorNickname?: string;
               nickname?: string;
             };
+            const expertIdCandidate =
+              (review as { expertId?: number; expertUserId?: number }).expertId ??
+              (review as { expertId?: number; expertUserId?: number }).expertUserId;
+            const expertName =
+              getDisplayName(
+                review.expertNickname ??
+                  (review as { expertName?: string }).expertName ??
+                  (review as { expertUserName?: string }).expertUserName,
+              ) || '전문가';
+            const expertProfileImage =
+              review.expertProfileImage ??
+              (review as { expertImage?: string }).expertImage ??
+              (review as { profileImage?: string }).profileImage;
             return {
               id: review.reviewId,
               author: getReviewAuthorName(authorSource),
-              expertName: getDisplayName(review.expertNickname) || '전문가',
-              expertProfileImage: review.expertProfileImage,
+              expertId: typeof expertIdCandidate === 'number' ? expertIdCandidate : undefined,
+              expertName,
+              expertProfileImage,
               expertRatingAverage: review.expertRatingAverage ?? review.rating,
               rating: review.rating,
               date: formatDate(review.createdAt),
@@ -158,7 +181,44 @@ const CategoryBestReviewsPage = () => {
             };
           })
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        setReviews(mapped);
+        const missingExpertIds = Array.from(
+          new Set(
+            mapped
+              .filter((item) => item.expertId && (!item.expertName || !item.expertProfileImage))
+              .map((item) => item.expertId as number),
+          ),
+        );
+        if (missingExpertIds.length === 0) {
+          setReviews(mapped);
+          setHasMore(false);
+          return;
+        }
+        try {
+          const expertResponses = await Promise.all(
+            missingExpertIds.map((id) => expertService.getExpertInfo(id)),
+          );
+          const expertMap = new Map(
+            expertResponses
+              .map((res) => res.data)
+              .filter(Boolean)
+              .map((expert) => [expert.expertId, expert]),
+          );
+          const patched = mapped.map((item) => {
+            if (!item.expertId) return item;
+            const expert = expertMap.get(item.expertId);
+            if (!expert) return item;
+            return {
+              ...item,
+              expertName: item.expertName || expert.nickname || '전문가',
+              expertProfileImage: item.expertProfileImage || expert.profileImage,
+              expertRatingAverage: item.expertRatingAverage || expert.ratingAverage || item.rating,
+            };
+          });
+          setReviews(patched);
+        } catch (error) {
+          console.error('Failed to hydrate expert info:', error);
+          setReviews(mapped);
+        }
         setHasMore(false);
       } catch (error) {
         console.error('Failed to fetch reviews:', error);
@@ -213,41 +273,73 @@ const CategoryBestReviewsPage = () => {
         <section className="px-4 pt-[24px]">
           {reviews.map((review, index) => (
             <div key={review.id}>
-              <article className="flex flex-col gap-[8px]">
-                <div className="flex items-center gap-[3px]">
-                  <div className="flex flex-1 flex-col gap-[3px]">
-                    <span className="min-h-[20px] text-[14px] font-semibold text-[#878a93]">
-                      {review.author}
-                    </span>
-                    <div className="flex items-center gap-[12px] text-[13px] text-[#989ba2]">
-                      <div className="flex items-center gap-px">{renderStars(review.rating)}</div>
-                      <div className="h-[14px] w-px bg-[#e1e2e4]" />
-                      <span>{review.date}</span>
+              <article className="relative flex w-full flex-col overflow-hidden rounded-[8px] bg-white">
+                <div className="flex items-center justify-between border-b border-[#f4f4f5] px-4 py-[14px]">
+                  <div className="flex items-center gap-[10px]">
+                    <div className="h-[36px] w-[36px] shrink-0 overflow-hidden rounded-full bg-[#e1e2e4]">
+                      {review.expertProfileImage && (
+                        <img
+                          src={review.expertProfileImage}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-[4px]">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (review.expertId) {
+                            navigate(`/experts/${review.expertId}`);
+                          }
+                        }}
+                        disabled={!review.expertId}
+                        className="flex items-center gap-[2px] disabled:cursor-default"
+                      >
+                        <span className="text-[14px] font-semibold text-[#0f0f10]">
+                          {review.expertName}
+                        </span>
+                        <ChevronRight className="h-4 w-4 text-[#0f0f10]" />
+                      </button>
+                      <div className="flex items-center gap-[4px] text-[13px] text-[#989ba2]">
+                        <img src={starIcon} alt="" className="h-[18px] w-[18px]" />
+                        <span>{review.expertRatingAverage.toFixed(1)}</span>
+                      </div>
                     </div>
                   </div>
-                  <button className="p-1 text-[#171719]">
-                    <MoreHorizontal className="h-6 w-6 rotate-90" />
-                  </button>
                 </div>
-                <div className="flex gap-[6px]">
-                  {Array.from({ length: 3 }).map((_, imageIndex) => {
-                    const image = review.images[imageIndex];
-                    return (
+
+                <div className="px-4 pt-[14px]">
+                  <div className="flex gap-[8px]">
+                    {review.images.slice(0, 2).map((image, imageIndex) => (
                       <div
                         key={`${review.id}-image-${imageIndex}`}
                         className="h-[130px] w-[130px] overflow-hidden rounded-[4px] bg-[#e1e2e4]"
                       >
-                        {image && (
-                          <img src={image} alt="" className="h-full w-full object-cover" />
-                        )}
+                        <img src={image} alt="" className="h-full w-full object-cover" />
                       </div>
-                    );
-                  })}
+                    ))}
+                  </div>
                 </div>
-                <p className="text-[14px] leading-[1.5] text-[#505158]">
-                  {review.content}
-                </p>
-                <div className="flex flex-wrap gap-[8px]">
+
+                <div className="px-4 pt-3">
+                  <div className="flex items-center gap-[12px] text-[13px] text-[#989ba2]">
+                    {review.author ? (
+                      <>
+                        <span className="font-semibold text-[#878a93]">{review.author}</span>
+                        <span className="h-[14px] w-px bg-[#e1e2e4]" />
+                      </>
+                    ) : null}
+                    <div className="flex items-center gap-[2px]">{renderStars(review.rating)}</div>
+                    <span className="h-[14px] w-px bg-[#e1e2e4]" />
+                    <span>{review.date}</span>
+                  </div>
+                  <p className="mt-2 text-[13px] leading-[1.4] text-[#505158]">
+                    {review.content}
+                  </p>
+                </div>
+
+                <div className="mt-auto flex gap-[6px] px-4 pb-4 pt-2">
                   {review.tags.map((tag, tagIndex) => (
                     <span
                       key={`${review.id}-${tag}-${tagIndex}`}

@@ -73,7 +73,7 @@ export default function ExpertListCard({
                 {image && <img src={image} alt="" className="h-full w-full object-cover" />}
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60" />
                 {tag && (
-                  <span className="absolute bottom-[27px] left-[10px] text-[12px] text-white">
+                  <span className="absolute bottom-[27px] left-[10px] translate-y-full text-[12px] text-white drop-shadow-[0px_4px_10px_rgba(0,0,0,0.25)]">
                     {tag}
                   </span>
                 )}

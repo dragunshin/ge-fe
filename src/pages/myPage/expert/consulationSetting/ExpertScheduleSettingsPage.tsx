@@ -21,7 +21,7 @@ const META: Record<ConsultationType, { title: string; desc: string }> = {
 function TopBar({ title, right }: { title: string; right?: React.ReactNode }) {
   const nav = useNavigate();
   return (
-    <header className="px-5 pt-3">
+    <header className="sticky top-0 z-50 bg-white px-5 pt-3">
       <div className="flex items-center px-1 py-2 bg-white">
         <button onClick={() => nav("/mypage")} className="mr-[8px]" aria-label="뒤로가기">
           <Back className="h-[18px] w-[18px]" />

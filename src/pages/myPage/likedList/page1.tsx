@@ -106,32 +106,31 @@ export default function LikedListPage() {
             {filteredData.map((item) => (
               <article
                 key={item.expertId}
-                className="relative rounded-lg border border-neutral-200 bg-white p-4"
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate(`/experts/${item.expertId}`)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    navigate(`/experts/${item.expertId}`);
+                  }
+                }}
+                className="relative cursor-pointer rounded-[12px] border border-[#dbdcdf] bg-white px-[12px] py-[12px]"
               >
-                {/* heart (위치 고정) */}
-                <div className="absolute right-4 top-4">
-                  {/* <button
-                    type="button"
-                    aria-label="like"
-                    className="inline-flex items-center justify-center"
-                  >
-                    <Heart className="h-6 w-6 fill-[#FF3434]" stroke="none" />
-                  </button> */}
+                <button
+                  type="button"
+                  aria-label="like"
+                  className="absolute right-[12px] top-[12px] inline-flex items-center justify-center"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleToggleLike(item.expertId);
+                  }}
+                >
+                  <Heart className="h-[18px] w-[18px] fill-[#ff3434]" stroke="none" />
+                </button>
 
-                  <button
-                    type="button"
-                    aria-label="like"
-                    className="inline-flex items-center justify-center"
-                    onClick={() => handleToggleLike(item.expertId)}
-                  >
-                    <Heart className="h-6 w-6 fill-[#FF3434]" stroke="none" />
-                  </button>
-                </div>
-
-                {/* [수정 1] 상단 영역: 아바타 + 이름/평점 (Flex 컨테이너) */}
-                <div className="flex items-start gap-4">
-                  {/* avatar */}
-                  <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-neutral-200">
+                <div className="flex items-start gap-[16px]">
+                  <div className="h-[60px] w-[60px] shrink-0 overflow-hidden rounded-full bg-[#dbdcdf]">
                     {item.profileImage && (
                       <img
                         src={item.profileImage}
@@ -141,25 +140,18 @@ export default function LikedListPage() {
                       />
                     )}
                   </div>
-
-                  {/* right content (이름, 평점 정보만 남김) */}
-                  <div className="min-w-0 flex-1 pr-8">
-                    {/* name + category */}
-                    <div className="flex items-center gap-3">
-                      <p
-                        className="pre_subtitle_semi_16 truncate text-[#292a2d] cursor-pointer hover:opacity-70"
-                        onClick={() => navigate(`/experts/${item.expertId}`)}
-                      >
+                  <div className="flex min-w-0 flex-1 flex-col gap-[10px] pr-[28px]">
+                    <div className="flex items-center gap-[10px]">
+                      <p className="pre_subtitle_semi_16 truncate text-[#292a2d]">
                         {item.nickname}
                       </p>
-                      <span className="pre_cap_reg_12 inline-flex items-center bg-[#e5f4ff] px-2 py-1 text-[#008bff]">
+                      <span className="pre_cap_reg_12 inline-flex items-center rounded-[2px] bg-[#e5f4ff] px-[8px] py-[4px] text-[#008bff]">
                         {getLabelFromApiCategory(item.category)}
                       </span>
                     </div>
 
-                    {/* rating */}
-                    <div className="mt-2 flex items-center gap-1">
-                      <Star className="h-4 w-4 stroke-none" />
+                    <div className="flex items-center gap-[2px]">
+                      <Star className="h-[18px] w-[18px] stroke-none" />
                       <span className="pre_cap_semi_13 text-[#989ba2]">
                         {item.ratingAverage ? item.ratingAverage.toFixed(1) : "0.0"}
                       </span>
@@ -170,28 +162,9 @@ export default function LikedListPage() {
                   </div>
                 </div>
 
-                {/* ✅ 별점 아래 구분선 (사진상으로는 구분선 없이 공백만 있어 보여 제거하거나 필요시 유지) */}
-                {/* <div className="mt-3 h-px w-full bg-[#E5E5EA]" /> */}
-
-                {/* [수정 2] 소개글: Flex 컨테이너 밖으로 꺼내서 전체 너비 사용 */}
-                <p className="pre_body_reg_13 mt-4 line-clamp-2 text-[#878a93]">
+                <p className="pre_body_reg_13 mt-[14px] line-clamp-2 text-[#878a93]">
                   {item.introduction}
                 </p>
-
-                {/* [수정 3] 하단 버튼 영역: Flex 컨테이너 밖으로 꺼내고 justify-between 적용 */}
-                <div className="mt-4 flex w-full items-center justify-between">
-                  <button type="button" className="pre_body_semi_13 text-[#008bff]">
-                    바로 상담 가능
-                  </button>
-
-                  <button
-                    onClick={() => navigate(`/experts/${item.expertId}`)}
-                    type="button"
-                    className="pre_body_med_14 ml-auto h-[32px] w-[84px] rounded-[4px] bg-[#0f0f10] px-[10px] py-[6px] text-white"
-                  >
-                    상담 예약
-                  </button>
-                </div>
               </article>
             ))}
 

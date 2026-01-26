@@ -164,24 +164,24 @@ const PortfolioLandingPage = () => {
                     </span>
                   ))}
                 </div>
-                <div className="flex h-[164px] items-center gap-[8px]">
-                  <div className="relative h-[164px] w-[167.5px] overflow-hidden rounded-[12px] bg-[#d2d4d8]">
-                    {item.beforeImage && (
-                      <img
-                        src={item.beforeImage}
-                        alt=""
-                        className="h-full w-full object-cover"
-                      />
-                    )}
-                    <span className="absolute bottom-[8px] left-[8px] rounded-[4px] bg-black/40 px-[6px] py-[2px] text-[14px] text-white">
-                      전
-                    </span>
-                  </div>
-                  <div className="relative h-[164px] w-[167.5px] overflow-hidden rounded-[12px] bg-[#d2d4d8]">
-                    {item.afterImage && (
-                      <img
-                        src={item.afterImage}
-                        alt=""
+                  <div className="flex h-[164px] items-center gap-[8px]">
+                    <div className="relative h-[164px] w-[167.5px] overflow-hidden rounded-[12px] bg-[#d2d4d8] shadow-[0px_2px_8px_rgba(0,0,0,0.12)]">
+                      {item.beforeImage && (
+                        <img
+                          src={item.beforeImage}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      )}
+                      <span className="absolute bottom-[8px] left-[8px] rounded-[4px] bg-black/40 px-[6px] py-[2px] text-[14px] text-white">
+                        전
+                      </span>
+                    </div>
+                    <div className="relative h-[164px] w-[167.5px] overflow-hidden rounded-[12px] bg-[#d2d4d8] shadow-[0px_2px_8px_rgba(0,0,0,0.12)]">
+                      {item.afterImage && (
+                        <img
+                          src={item.afterImage}
+                          alt=""
                         className="h-full w-full object-cover"
                       />
                     )}

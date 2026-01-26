@@ -1,17 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-  CheckCircle2,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ClipboardList,
-  Instagram,
-  Star,
-} from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { AxiosError } from 'axios';
 import heartIcon from '../../../images/mypage/heart.svg';
 import redHeartIcon from '../../../images/redHeart.svg';
+import instagramIcon from '../../../images/expert/instagram.svg';
+import boardIcon from '../../../images/expert/board.svg';
 import { portfolioItems, type PortfolioItem } from './portfolio-data';
 import { expertService } from '../../../services/expert.service';
 import { reviewService } from '../../../services/review.service';
@@ -19,6 +13,8 @@ import { reservationService } from '../../../services/reservation.service';
 import ConsultationMethodSheet from '../../resevationFlow/reservationSheet/typeReservation';
 import DateTimeBottomSheet from '../../resevationFlow/reservationSheet/calendar';
 import { useAuthStore } from '../../../stores/useAuthStore';
+import starIcon from '../../../images/mypage/expertStar.svg'
+import checkIcon from '../../../images/mypage/expert/check.svg'
 import type {
   ExpertInfoResponse,
   ExpertPortfolioResponse,
@@ -31,7 +27,7 @@ import {
 
 type ReviewCard = {
   id: number;
-  title: string;
+  tagLabel: string;
   content: string;
   rating: number;
   imageUrl?: string;
@@ -270,13 +266,20 @@ const ExpertInfoPage = () => {
           return;
         }
         const reviewsData = Array.isArray(response.data) ? response.data : [];
-        const nextCards = reviewsData.map((review, index) => ({
+        const nextCards = reviewsData.map((review) => {
+          const tagLabel =
+            (review as { tagLabel?: string; reviewTag?: string; tag?: string }).tagLabel ??
+            (review as { tagLabel?: string; reviewTag?: string; tag?: string }).reviewTag ??
+            (review as { tagLabel?: string; reviewTag?: string; tag?: string }).tag ??
+            (review.category ? getLabelFromApiCategory(review.category) : '태그');
+          return {
           id: review.reviewId,
-          title: `후기 ${index + 1}`,
+          tagLabel,
           content: review.content,
           rating: review.rating,
           imageUrl: parseMediaUrls(review.mediaUrls)[0],
-        }));
+          };
+        });
         setReviewCards(nextCards);
         const average =
           reviewsData.length === 0
@@ -451,8 +454,8 @@ const ExpertInfoPage = () => {
   return (
     <div className="flex h-full flex-col bg-white">
       <main className="relative flex-1 overflow-x-hidden overflow-y-auto pb-[120px] scrollbar-hide">
-        <div className="relative mx-auto min-h-[2050px] w-full max-w-[375px] bg-white">
-          <div className="absolute left-[16px] top-0 flex items-center gap-[15px] pt-[14px]">
+        <div className="sticky top-0 z-50 bg-white">
+          <div className="mx-auto flex h-[56px] w-full max-w-[375px] items-center gap-[15px] px-[16px]">
             <button
               onClick={() => navigate(-1)}
               className="flex h-[24px] w-[24px] items-center justify-center"
@@ -461,6 +464,8 @@ const ExpertInfoPage = () => {
             </button>
             <h1 className="text-[20px] font-semibold text-[#0f0f10]">전문가 프로필</h1>
           </div>
+        </div>
+        <div className="relative mx-auto -mt-[56px] min-h-[2050px] w-full max-w-[375px] bg-white">
 
           <div className="absolute left-0 top-[100px] h-[220px] w-[375px] overflow-hidden bg-[#d2d4d8]">
             {expertInfo?.backgroundImage && (
@@ -485,7 +490,7 @@ const ExpertInfoPage = () => {
                   )}
                 </div>
                 <div className="flex flex-col gap-[4px]">
-                  <span className="inline-flex rounded-[2px] bg-[#f5f9fd] px-[6px] py-[4px] text-[12px] text-[#429ff0]">
+                  <span className="inline-flex w-fit whitespace-nowrap rounded-[2px] bg-[#f5f9fd] px-[6px] py-[4px] text-[12px] text-[#429ff0]">
                     {categoryLabel || '카테고리'}
                   </span>
                   <span className="text-[18px] font-semibold text-[#292a2d]">
@@ -511,7 +516,7 @@ const ExpertInfoPage = () => {
 
             <div className="absolute left-[16px] top-[134px] flex w-[338px] flex-col gap-[14px]">
               <div className="flex items-start gap-[8px]">
-                <CheckCircle2 className="h-[24px] w-[24px] text-[#008bff]" />
+                <img src={checkIcon} alt="" className="h-[24px] w-[24px]" />
                 <div className="flex flex-col gap-[6px]">
                   <p className="text-[16px] font-semibold text-[#292a2d]">전문분야</p>
                   <p className="text-[13px] leading-[1.4] text-[#878a93]">
@@ -520,7 +525,7 @@ const ExpertInfoPage = () => {
                 </div>
               </div>
               <div className="flex items-center gap-[8px]">
-                <Instagram className="h-[24px] w-[24px] text-[#292a2d]" />
+                <img src={instagramIcon} alt="" className="h-[24px] w-[24px]" />
                 {expertInfo?.profileLink ? (
                   <a
                     href={expertInfo.profileLink}
@@ -535,7 +540,7 @@ const ExpertInfoPage = () => {
                 )}
               </div>
               <div className="flex items-start gap-[8px]">
-                <ClipboardList className="h-[24px] w-[24px] text-[#292a2d]" />
+                <img src={boardIcon} alt="" className="h-[24px] w-[24px]" />
                 <div className="flex flex-col gap-[6px]">
                   <p className="text-[16px] font-semibold text-[#292a2d]">경력 정보</p>
                   <div className="text-[14px] leading-[1.4] text-[#878a93]">
@@ -577,7 +582,7 @@ const ExpertInfoPage = () => {
               {hasReviews && (
                 <>
                   <div className="absolute left-[16px] top-[60px] flex items-center gap-[8px]">
-                    <Star className="h-[24px] w-[24px] text-[#ffb800]" />
+                    <img src={starIcon} alt="" className="h-[24px] w-[24px]" />
                     <span className="text-[14px] font-semibold text-[#292a2d]">
                       {reviewAverage || 0}
                     </span>
@@ -603,7 +608,7 @@ const ExpertInfoPage = () => {
                               Best
                             </span>
                             <span className="text-[14px] font-medium text-[#46474c]">
-                              {review.title}
+                              {review.tagLabel}
                             </span>
                           </div>
                           <p className="line-clamp-2 text-[13px] leading-[1.3] text-[#878a93]">
@@ -652,7 +657,7 @@ const ExpertInfoPage = () => {
                         {card.title}
                       </p>
                       <div className="mt-[12px] flex gap-[8px]">
-                        <div className="relative h-[130px] w-[130px] overflow-hidden rounded-[12px] bg-[#e1e2e4]">
+                        <div className="relative h-[130px] w-[130px] overflow-hidden rounded-[12px] bg-[#e1e2e4] shadow-[0px_2px_8px_rgba(0,0,0,0.12)]">
                           {card.beforeImage && (
                             <img
                               src={card.beforeImage}
@@ -664,7 +669,7 @@ const ExpertInfoPage = () => {
                             전
                           </span>
                         </div>
-                        <div className="relative h-[130px] w-[130px] overflow-hidden rounded-[12px] bg-[#e1e2e4]">
+                        <div className="relative h-[130px] w-[130px] overflow-hidden rounded-[12px] bg-[#e1e2e4] shadow-[0px_2px_8px_rgba(0,0,0,0.12)]">
                           {card.afterImage && (
                             <img
                               src={card.afterImage}

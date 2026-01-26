@@ -44,6 +44,9 @@ export default function ExpertIntroductionPage() {
   });
   const [profilePreview, setProfilePreview] = React.useState<string | null>(null);
   const [backgroundPreview, setBackgroundPreview] = React.useState<string | null>(null);
+  const [showIncompleteModal, setShowIncompleteModal] = React.useState(false);
+  const [showPortfolioModal, setShowPortfolioModal] = React.useState(false);
+  const [hasPortfolio, setHasPortfolio] = React.useState<boolean | null>(null);
   const profileInputRef = React.useRef<HTMLInputElement | null>(null);
   const backgroundInputRef = React.useRef<HTMLInputElement | null>(null);
 
@@ -90,7 +93,35 @@ export default function ExpertIntroductionPage() {
     };
   }, [me?.userId]);
 
+  React.useEffect(() => {
+    if (!me?.userId) return;
+
+    let isActive = true;
+    (async () => {
+      try {
+        const response = await expertService.getExpertPortfolios(me.userId, { page: 0, size: 1 });
+        if (!isActive) return;
+        setHasPortfolio((response.data ?? []).length > 0);
+      } catch (error) {
+        if (!isActive) return;
+        console.error("Failed to fetch expert portfolios:", error);
+        setHasPortfolio(true);
+      }
+    })();
+
+    return () => {
+      isActive = false;
+    };
+  }, [me?.userId]);
+
   const isEditing = activeField !== null;
+  const isIntroEmpty = React.useMemo(() => {
+    if (!info) return false;
+    const intro = info.introduction?.trim() ?? "";
+    const career = info.careerInfo?.trim() ?? "";
+    const link = info.profileLink?.trim() ?? "";
+    return intro.length === 0 && career.length === 0 && link.length === 0;
+  }, [info]);
 
   const isDirty = React.useMemo(() => {
     if (!info) return false;
@@ -174,14 +205,27 @@ export default function ExpertIntroductionPage() {
   const backgroundImage =
     backgroundPreview ?? info?.backgroundImage ?? info?.profileImage ?? "";
   const profileImage = profilePreview ?? info?.profileImage ?? "";
+  const categoryLabel = getLabelFromApiCategory(info?.category);
+
+  const handleBack = () => {
+    if (isIntroEmpty) {
+      setShowIncompleteModal(true);
+      return;
+    }
+    if (hasPortfolio === false) {
+      setShowPortfolioModal(true);
+      return;
+    }
+    navigate(-1);
+  };
 
   return (
     <div className="flex h-full flex-col bg-white overflow-hidden">
-      <header className="app-header w-full">
+      <header className="app-header sticky top-0 z-50 w-full bg-white">
         <div className="mx-auto flex w-full max-w-[375px] items-center gap-[6px] px-4 py-[16px]">
         <button
           type="button"
-          onClick={() => navigate(-1)}
+          onClick={handleBack}
           className="flex h-[24px] w-[24px] items-center justify-center"
         >
           <BackIcon className="h-[24px] w-[24px]" />
@@ -251,10 +295,10 @@ export default function ExpertIntroductionPage() {
                   }}
                 />
               </div>
-              <div className="flex-1">
+                <div className="flex-1">
                 <div className="flex items-center justify-between">
                   <div className="inline-flex rounded-[2px] bg-[#f5f9fd] px-[6px] py-[4px] text-[12px] text-[#429ff0]">
-                    {getLabelFromApiCategory(info?.category)}
+                    {categoryLabel || "카테고리"}
                   </div>
                   <button
                     type="button"
@@ -297,8 +341,12 @@ export default function ExpertIntroductionPage() {
                           rows={3}
                         />
                       ) : (
-                        <p className="mt-[6px] text-[13px] leading-[1.4] text-[#878a93]">
-                          {info?.introduction ?? ""}
+                        <p
+                          className={`mt-[6px] text-[13px] leading-[1.4] ${
+                            info?.introduction ? "text-[#878a93]" : "text-[#aeb0b6]"
+                          }`}
+                        >
+                          {info?.introduction || "최소 30자 이상 입력해주세요."}
                         </p>
                       )}
                     </div>
@@ -330,7 +378,11 @@ export default function ExpertIntroductionPage() {
                       placeholder="instagram link"
                     />
                   ) : (
-                    <span className="min-w-0 text-[14px] text-[#429ff0]">
+                    <span
+                      className={`min-w-0 text-[14px] ${
+                        info?.profileLink ? "text-[#429ff0]" : "text-[#aeb0b6]"
+                      }`}
+                    >
                       {info?.profileLink || "instagram link"}
                     </span>
                   )}
@@ -359,8 +411,13 @@ export default function ExpertIntroductionPage() {
                           rows={3}
                         />
                       ) : (
-                        <p className="mt-[6px] whitespace-pre-line text-[14px] leading-[1.4] text-[#878a93]">
-                          {info?.careerInfo ?? ""}
+                        <p
+                          className={`mt-[6px] whitespace-pre-line text-[14px] leading-[1.4] ${
+                            info?.careerInfo ? "text-[#878a93]" : "text-[#aeb0b6]"
+                          }`}
+                        >
+                          {info?.careerInfo ||
+                            "ex.\n탈모 헤어스타일링 전문가\n2021~2023 청담동 후고바버샵 근무\n전)옹스샵 원장"}
                         </p>
                       )}
                     </div>
@@ -391,6 +448,88 @@ export default function ExpertIntroductionPage() {
           >
             {isSaving ? "저장 중" : "수정 완료"}
           </button>
+        </div>
+      )}
+
+      {!isEditing && isIntroEmpty && (
+        <div className="fixed bottom-0 left-1/2 w-full max-w-[375px] -translate-x-1/2 bg-white px-[16px] pb-[42px] pt-[16px]">
+          <button
+            type="button"
+            onClick={() => setActiveField("introduction")}
+            className="h-[48px] w-full rounded-[4px] bg-[#181818] text-[16px] font-bold text-white"
+          >
+            소개서 등록
+          </button>
+        </div>
+      )}
+
+      {showIncompleteModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 px-5">
+          <div className="w-[343px] rounded-[8px] border border-[#f1f1f6] bg-white px-[32px] py-[24px]">
+            <p className="text-center text-[16px] font-semibold leading-[1.4] text-[#46474c]">
+              전문가 소개서 작성이 완료되지
+              <br />
+              않았어요. 마저 작성해보실래요?
+            </p>
+            <div className="mt-[20px] flex gap-[8px]">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowIncompleteModal(false);
+                  navigate(-1);
+                }}
+                className="h-[40px] w-[120px] rounded-[4px] border border-[#dbdcdf] text-[14px] font-medium text-[#171719]"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowIncompleteModal(false);
+                  setActiveField("introduction");
+                }}
+                className="h-[40px] w-[136px] rounded-[4px] bg-[#181818] text-[14px] font-semibold text-white"
+              >
+                마저 작성하러가기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showPortfolioModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 px-5">
+          <div className="w-[343px] rounded-[8px] border border-[#f1f1f6] bg-white px-[32px] py-[24px]">
+            <p className="text-center text-[16px] font-semibold leading-[1.4] text-[#46474c]">
+              아직 등록된 포트폴리오가 없어요.
+              <br />
+              지금 작성해보실래요?
+            </p>
+            <div className="mt-[20px] flex gap-[8px]">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPortfolioModal(false);
+                  navigate(-1);
+                }}
+                className="h-[40px] w-[120px] rounded-[4px] border border-[#dbdcdf] text-[14px] font-medium text-[#171719]"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPortfolioModal(false);
+                  if (me?.userId) {
+                    navigate(`/portfolioAdd/${me.userId}`);
+                  }
+                }}
+                className="h-[40px] w-[136px] rounded-[4px] bg-[#181818] text-[14px] font-semibold text-white"
+              >
+                지금 작성하러가기
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

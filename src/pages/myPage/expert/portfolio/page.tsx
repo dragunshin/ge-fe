@@ -175,7 +175,7 @@ export default function ExpertPortfolioPage() {
 
   return (
     <div className="flex h-full flex-col bg-white">
-      <header className="app-header">
+      <header className="app-header sticky top-0 z-50 bg-white">
         <div className="flex items-center gap-[6px] px-4 py-[16px]">
           <button
             type="button"

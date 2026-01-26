@@ -4,6 +4,33 @@ import backIcon from '../../../images/login/back.svg';
 
 const STORAGE_KEY = 'signup_terms_agreements_v1';
 
+function AgreementCheckbox({ checked }: { checked: boolean }) {
+  return (
+    <span
+      className={`inline-flex h-[14px] w-[14px] items-center justify-center rounded-[2px] ${
+        checked ? 'bg-[#008bff]' : 'bg-[#c2c4c8]'
+      }`}
+    >
+      <svg
+        width="12"
+        height="12"
+        viewBox="0 0 12 12"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <path
+          d="M10 3L4.75 8.25L2 5.5"
+          stroke="white"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </span>
+  );
+}
+
 export function TermsAgreementPage() {
   const navigate = useNavigate();
   const [agreements, setAgreements] = useState(() => {
@@ -89,8 +116,9 @@ export function TermsAgreementPage() {
               type="checkbox"
               checked={isAllChecked}
               onChange={(e) => handleAllCheck(e.target.checked)}
-              className="h-[14px] w-[14px] rounded border-[#c2c4c8]"
+              className="sr-only"
             />
+            <AgreementCheckbox checked={isAllChecked} />
             <div className="flex items-center gap-2 text-[14px]">
               <span className="font-semibold text-[#171719]">전체 동의</span>
               <span className="font-normal text-[#70737c]">선택 항목에 대한 동의 포함</span>
@@ -107,8 +135,9 @@ export function TermsAgreementPage() {
                 type="checkbox"
                 checked={agreements.age}
                 onChange={(e) => handleIndividualCheck('age', e.target.checked)}
-                className="h-[14px] w-[14px] rounded border-[#c2c4c8]"
+                className="sr-only"
               />
+              <AgreementCheckbox checked={agreements.age} />
               <span className="text-[14px] leading-[1.5] text-[#70737c]">
                 만 14세 이상입니다.<span className="text-[#429ff0]">(필수)</span>
               </span>
@@ -128,8 +157,9 @@ export function TermsAgreementPage() {
                 type="checkbox"
                 checked={agreements.service}
                 onChange={(e) => handleIndividualCheck('service', e.target.checked)}
-                className="h-[14px] w-[14px] rounded border-[#c2c4c8]"
+                className="sr-only"
               />
+              <AgreementCheckbox checked={agreements.service} />
               <span className="text-[14px] leading-[1.5] text-[#70737c]">
                 서비스 이용약관 동의<span className="text-[#429ff0]">(필수)</span>
               </span>
@@ -150,8 +180,9 @@ export function TermsAgreementPage() {
                 type="checkbox"
                 checked={agreements.privacy}
                 onChange={(e) => handleIndividualCheck('privacy', e.target.checked)}
-                className="h-[14px] w-[14px] rounded border-[#c2c4c8]"
+                className="sr-only"
               />
+              <AgreementCheckbox checked={agreements.privacy} />
               <span className="text-[14px] leading-[1.5] text-[#70737c]">
                 개인정보 수집 및 이용 동의<span className="text-[#429ff0]">(필수)</span>
               </span>
@@ -172,8 +203,9 @@ export function TermsAgreementPage() {
                 type="checkbox"
                 checked={agreements.marketing}
                 onChange={(e) => handleIndividualCheck('marketing', e.target.checked)}
-                className="h-[14px] w-[14px] rounded border-[#c2c4c8]"
+                className="sr-only"
               />
+              <AgreementCheckbox checked={agreements.marketing} />
               <span className="text-[14px] leading-[1.5] text-[#70737c]">
                 마케팅 목적의 개인정보 수집 및 이용 동의<span className="text-[#70737c]">(선택)</span>
               </span>

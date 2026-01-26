@@ -128,6 +128,7 @@ export interface ExpertPortfolioResponse {
 
 export interface ReviewSummaryResponse {
   reviewId: number;
+  reviewerNickname?: string;
   expertNickname?: string;
   expertProfileImage?: string;
   expertRatingAverage?: number;

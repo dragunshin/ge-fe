@@ -224,7 +224,7 @@ export default function ExpertConsultationHistoryView() {
     <div className="flex h-full flex-col bg-white">
       <main className="flex-1 overflow-y-auto scrollbar-hide overscroll-none">
         {/* header */}
-        <header className="mt-3 flex items-center bg-white px-1 py-2 ml-4">
+        <header className="sticky top-0 z-50 flex items-center bg-white px-1 pb-2 pt-3 ml-4">
           <button onClick={() => navigate(-1)} className="mr-[8px]">
             <Back className="h-[18px] w-[18px]" />
           </button>

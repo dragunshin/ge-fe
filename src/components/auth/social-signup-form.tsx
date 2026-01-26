@@ -8,6 +8,33 @@ import { useAuthStore } from '../../stores/useAuthStore';
 
 type UserType = 'customer' | 'expert';
 
+function AgreementCheckbox({ checked }: { checked: boolean }) {
+  return (
+    <span
+      className={`inline-flex h-[14px] w-[14px] items-center justify-center rounded-[2px] ${
+        checked ? 'bg-[#008bff]' : 'bg-[#c2c4c8]'
+      }`}
+    >
+      <svg
+        width="12"
+        height="12"
+        viewBox="0 0 12 12"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <path
+          d="M10 3L4.75 8.25L2 5.5"
+          stroke="white"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </span>
+  );
+}
+
 export function SocialSignUpForm() {
   const STORAGE_KEY = 'social_signup_form_state_v1';
   const defaultState = {
@@ -243,8 +270,9 @@ export function SocialSignUpForm() {
             type="checkbox"
             checked={agreed}
             onChange={(e) => setAgreed(e.target.checked)}
-            className="h-[14px] w-[14px] rounded border-[#c2c4c8]"
+            className="sr-only"
           />
+          <AgreementCheckbox checked={agreed} />
           <span className="text-[12px] leading-[1.4] text-[#70737c]">
             <button
               type="button"

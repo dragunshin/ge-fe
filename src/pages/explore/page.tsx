@@ -426,7 +426,7 @@ const CategoryLandingPage = () => {
                   tabRefs.current[tab.key] = element;
                 }}
                 onClick={() => {
-                  if (tab.key === "makeup") {
+                  if (tab.key === "makeup" || tab.key === "skin") {
                     navigate("/service-ready");
                     return;
                   }
@@ -530,7 +530,7 @@ const CategoryLandingPage = () => {
                           )}
                           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60" />
                           {tag && (
-                            <span className="absolute bottom-[27px] left-[10px] text-[12px] text-white">
+                            <span className="absolute bottom-[27px] left-[10px] translate-y-full text-[12px] text-white drop-shadow-[0px_4px_10px_rgba(0,0,0,0.25)]">
                               {tag}
                             </span>
                           )}
@@ -539,14 +539,14 @@ const CategoryLandingPage = () => {
                     })}
                   </div>
                   <div className="flex items-center justify-between">
-                    <div className="flex gap-[6px]">
+                    <div className="flex flex-nowrap gap-[6px] overflow-hidden">
                       {expert.tags.map((tag, index) => (
                         <span
                           key={`${expert.id}-tag-${tag}-${index}`}
                           className={
                             tag === categoryLabel
-                              ? "rounded-[2px] bg-[#f5f9fd] px-[6px] py-[4px] text-[12px] text-[#429ff0]"
-                              : "rounded-[2px] bg-[#f4f4f5] px-[8px] py-[4px] text-[12px] text-[#46474c]"
+                              ? "rounded-[2px] bg-[#f5f9fd] px-[6px] py-[4px] text-[12px] text-[#429ff0] whitespace-nowrap"
+                              : "rounded-[2px] bg-[#f4f4f5] px-[8px] py-[4px] text-[12px] text-[#46474c] whitespace-nowrap"
                           }
                         >
                           {tag}

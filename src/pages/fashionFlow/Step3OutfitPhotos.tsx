@@ -45,7 +45,7 @@ export function Step3OutfitPhotos({
         </ul>
       </div>
 
-      <div className="mt-[16px] flex items-center justify-center">
+      <div className="mt-[16px] flex items-center justify-start">
         <MultiPhotoPicker
           keys={keys}
           max={5}

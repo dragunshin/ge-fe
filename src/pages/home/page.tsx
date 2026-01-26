@@ -602,12 +602,16 @@ const getDisplayName = (value?: string) => {
 };
 
 const getReviewAuthorName = (review: {
+  reviewerNickname?: string;
   memberNickname?: string;
   authorNickname?: string;
   nickname?: string;
 }) => {
   return getDisplayName(
-    review.memberNickname ?? review.authorNickname ?? review.nickname,
+    review.reviewerNickname ??
+      review.memberNickname ??
+      review.authorNickname ??
+      review.nickname,
   );
 };
 
@@ -647,6 +651,7 @@ type ReviewCard = {
   category: string;
   concern: string;
   images: string[];
+  expertId?: number;
   expertName: string;
   expertRating: number;
   expertAvatar?: string;
@@ -890,11 +895,14 @@ const HomePage = () => {
         const reviewsData = (Array.isArray(response.data) ? response.data : [])
           .map((review) => {
             const authorSource = review as typeof review & {
+              reviewerNickname?: string;
               memberNickname?: string;
               authorNickname?: string;
               nickname?: string;
             };
             const expertName = getDisplayName(review.expertNickname) || "전문가";
+            const expertIdCandidate = (review as { expertId?: number; expertUserId?: number }).expertId ??
+              (review as { expertId?: number; expertUserId?: number }).expertUserId;
             return {
             id: review.reviewId,
             author: getReviewAuthorName(authorSource),
@@ -904,6 +912,7 @@ const HomePage = () => {
             category: getLabelFromApiCategory(review.category),
             concern: "후기",
             images: parseMediaUrls(review.mediaUrls).slice(0, 2),
+            expertId: typeof expertIdCandidate === "number" ? expertIdCandidate : undefined,
             expertName,
             expertRating: review.expertRatingAverage ?? review.rating,
             expertAvatar: review.expertProfileImage,
@@ -1032,7 +1041,10 @@ const HomePage = () => {
       <header className="flex h-[56px] items-center justify-between px-4">
         <Logo />
         <div className="flex items-center gap-4">
-          <button className="flex h-6 w-6 items-center justify-center">
+          <button
+            className="flex h-6 w-6 items-center justify-center"
+            onClick={() => navigate("/explore")}
+          >
             <Search className="h-6 w-6 text-[#0f0f10]" />
           </button>
           <button
@@ -1335,12 +1347,21 @@ const HomePage = () => {
                       )}
                     </div>
                     <div className="flex flex-col gap-[4px]">
-                      <div className="flex items-center gap-[2px]">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (review.expertId) {
+                            navigate(`/experts/${review.expertId}`);
+                          }
+                        }}
+                        disabled={!review.expertId}
+                        className="flex items-center gap-[2px] disabled:cursor-default"
+                      >
                         <span className="text-[14px] font-semibold text-[#0f0f10]">
                           {review.expertName}
                         </span>
                         <ChevronRight className="h-4 w-4 text-[#0f0f10]" />
-                      </div>
+                      </button>
                       <div className="flex items-center gap-[4px] text-[13px] text-[#989ba2]">
                         <img src={starIcon} alt="" className="h-[18px] w-[18px]" />
                         <span>{review.expertRating.toFixed(1)}</span>
@@ -1351,17 +1372,14 @@ const HomePage = () => {
 
                 <div className="px-4 pt-[14px]">
                   <div className="flex gap-[8px]">
-                    {Array.from({ length: 2 }).map((_, idx) => {
-                      const image = review.images[idx];
-                      return (
-                        <div
-                          key={`${review.id}-image-${idx}`}
-                          className="h-[130px] w-[130px] overflow-hidden rounded-[4px] bg-[#e1e2e4]"
-                        >
-                          {image && <img src={image} alt="" className="h-full w-full object-cover" />}
-                        </div>
-                      );
-                    })}
+                    {review.images.slice(0, 2).map((image, idx) => (
+                      <div
+                        key={`${review.id}-image-${idx}`}
+                        className="h-[130px] w-[130px] overflow-hidden rounded-[4px] bg-[#e1e2e4]"
+                      >
+                        <img src={image} alt="" className="h-full w-full object-cover" />
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -1377,7 +1395,9 @@ const HomePage = () => {
                     <span className="h-[14px] w-px bg-[#e1e2e4]" />
                     <span>{review.date}</span>
                   </div>
-                  <p className="mt-2 text-[13px] leading-[1.4] text-[#505158]">{review.content}</p>
+                  <p className="mt-2 line-clamp-4 text-[13px] leading-[1.4] text-[#505158]">
+                    {review.content}
+                  </p>
                 </div>
 
                 <div className="mt-auto flex gap-[6px] px-4 pb-4 pt-2">
@@ -1460,7 +1480,7 @@ const HomePage = () => {
                     >
                       {image && <img src={image} alt="" className="h-full w-full object-cover" />}
                       <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60" />
-                      <span className="absolute bottom-[10px] left-[10px] text-[12px] text-white">
+                      <span className="absolute bottom-[27px] left-[10px] translate-y-full text-[12px] text-white drop-shadow-[0px_4px_10px_rgba(0,0,0,0.25)]">
                         {expert.reviewTags[idx]}
                       </span>
                     </div>
@@ -1483,7 +1503,7 @@ const HomePage = () => {
                     <span
                       key={`${expert.id}-tag-${tag}-${idx}`}
                       className={
-                        tag === "헤어"
+                        tag === expert.tags[0]
                           ? "rounded-[2px] bg-[#f5f9fd] px-[6px] py-[4px] text-[12px] text-[#429ff0]"
                           : "rounded-[2px] bg-[#f4f4f5] px-[8px] py-[4px] text-[12px] text-[#46474c]"
                       }

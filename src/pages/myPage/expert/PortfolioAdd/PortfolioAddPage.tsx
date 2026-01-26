@@ -177,7 +177,7 @@ export default function PortfolioAddPage() {
   return (
     <div className="mx-auto min-h-[100dvh] w-full max-w-[420px] bg-white pb-28">
       {/* Top bar (writeReview 스타일 참고) :contentReference[oaicite:10]{index=10} */}
-      <header className="px-5 pt-3">
+      <header className="sticky top-0 z-50 bg-white px-5 pt-3">
         <div className="flex items-center px-1 py-2 bg-white">
           <button onClick={onBack} className="mr-[8px]" aria-label="뒤로가기">
             <Back className="h-[18px] w-[18px]" />
