@@ -545,28 +545,6 @@ const CategoryLandingPage = () => {
           </section>
         </div>
 
-        {categoryKey !== 'hair' && categoryKey !== 'fashion' && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 px-6">
-            <div className="w-full max-w-[320px] overflow-hidden rounded-[10px] bg-white text-center shadow-lg">
-              <div className="bg-[#171719] px-4 py-3 text-[14px] font-semibold text-white">
-                서비스 준비중입니다
-              </div>
-              <div className="px-5 py-4">
-                <p className="text-[13px] leading-[1.4] text-[#878a93]">
-                  빠른 시일 내에 준비하여 찾아뵙겠습니다.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => navigate('/')}
-                  className="mt-4 h-[36px] w-full rounded-[6px] bg-[#171719] text-[14px] font-semibold text-white"
-                >
-                  홈으로
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
         <section className="relative mt-[20px]">
           <div
             ref={bannerTrackRef}
@@ -775,7 +753,7 @@ const CategoryLandingPage = () => {
                     <span className="h-[14px] w-px bg-[#e1e2e4]" />
                     <span>{review.date}</span>
                   </div>
-                  <p className="mt-[8px] line-clamp-4 text-[13px] leading-[1.4] text-[#505158]">
+                  <p className="mt-[8px] text-[13px] leading-[1.4] text-[#505158]">
                     {review.content}
                   </p>
                 </div>
