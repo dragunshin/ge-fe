@@ -10,6 +10,7 @@ export default function Footer({
   return (
     <footer className="app-footer bg-transparent">
       <div className="px-[16px] pb-[4px]">
+        {/*
         <div className="flex justify-end">
           <button
             type="button"
@@ -19,6 +20,7 @@ export default function Footer({
             다음 단계로
           </button>
         </div>
+        */}
       </div>
       <button
         type="button"

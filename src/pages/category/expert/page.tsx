@@ -34,6 +34,7 @@ type ReviewCard = {
   title: string;
   content: string;
   rating: number;
+  imageUrl?: string;
 };
 
 type RelatedExpert = {
@@ -77,6 +78,33 @@ const ExpertInfoPage = () => {
   const [openTypeSheet, setOpenTypeSheet] = useState(false);
   const [openCalendarSheet, setOpenCalendarSheet] = useState(false);
   const [selectedConsultType, setSelectedConsultType] = useState<ConsultType>('MESSAGE');
+
+  const parseMediaUrls = (value?: string | string[]) => {
+    if (!value) {
+      return [];
+    }
+    if (Array.isArray(value)) {
+      return value.filter(Boolean);
+    }
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return [];
+    }
+    if (trimmed.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          return parsed.filter(Boolean);
+        }
+      } catch {
+        return [];
+      }
+    }
+    return trimmed
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean);
+  };
 
   useEffect(() => {
     initializeAuth();
@@ -247,6 +275,7 @@ const ExpertInfoPage = () => {
           title: `후기 ${index + 1}`,
           content: review.content,
           rating: review.rating,
+          imageUrl: parseMediaUrls(review.mediaUrls)[0],
         }));
         setReviewCards(nextCards);
         const average =
@@ -559,7 +588,15 @@ const ExpertInfoPage = () => {
                         key={review.id}
                         className="flex h-[87px] w-[240px] shrink-0 items-center gap-[10px] rounded-[8px] border border-[#e1e2e4] bg-white p-[12px]"
                       >
-                        <div className="h-[57px] w-[57px] rounded-[4px] bg-[#e1e2e4]" />
+                        <div className="h-[57px] w-[57px] overflow-hidden rounded-[4px] bg-[#e1e2e4]">
+                          {review.imageUrl && (
+                            <img
+                              src={review.imageUrl}
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
+                          )}
+                        </div>
                         <div className="flex flex-1 flex-col gap-[4px]">
                           <div className="flex items-center gap-[6px]">
                             <span className="rounded-[4px] bg-[#f5f9fd] px-[8px] py-[2px] text-[12px] text-[#429ff0]">

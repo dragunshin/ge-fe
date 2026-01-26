@@ -72,6 +72,24 @@ type ImmediateCard = {
 
 type ConsultType = 'MESSAGE' | 'VIDEO';
 
+const getDisplayName = (value?: string) => {
+  if (typeof value !== 'string') {
+    return '';
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : '';
+};
+
+const getReviewAuthorName = (review: {
+  memberNickname?: string;
+  authorNickname?: string;
+  nickname?: string;
+}) => {
+  return getDisplayName(
+    review.memberNickname ?? review.authorNickname ?? review.nickname,
+  );
+};
+
 const CategoryLandingPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -299,18 +317,26 @@ const CategoryLandingPage = () => {
           return;
         }
         const reviewsData = Array.isArray(response.data) ? response.data : [];
-        const mapped = reviewsData.map((review) => ({
-          id: review.reviewId,
-          name: '익명',
-          expertName: review.expertNickname,
-          rating: review.rating,
-          date: formatDate(review.createdAt),
-          content: review.content,
-          category: getLabelFromApiCategory(review.category),
-          concern: '후기',
-          avatar: review.expertProfileImage,
-          images: parseMediaUrls(review.mediaUrls).slice(0, 2),
-        }));
+        const mapped = reviewsData.map((review) => {
+          const authorSource = review as typeof review & {
+            memberNickname?: string;
+            authorNickname?: string;
+            nickname?: string;
+          };
+          const expertName = getDisplayName(review.expertNickname) || '전문가';
+          return {
+            id: review.reviewId,
+            name: getReviewAuthorName(authorSource),
+            expertName,
+            rating: review.rating,
+            date: formatDate(review.createdAt),
+            content: review.content,
+            category: getLabelFromApiCategory(review.category),
+            concern: '후기',
+            avatar: review.expertProfileImage,
+            images: parseMediaUrls(review.mediaUrls).slice(0, 2),
+          };
+        });
         setReviews(mapped);
       } catch (error) {
         console.error('Failed to fetch category reviews:', error);
@@ -692,7 +718,7 @@ const CategoryLandingPage = () => {
                     <div className="flex flex-col gap-[4px]">
                       <div className="flex items-center gap-[2px]">
                         <span className="text-[14px] font-semibold text-[#0f0f10]">
-                          {review.expertName ?? '상담사'}
+                          {review.expertName}
                         </span>
                         <ChevronRight className="h-4 w-4 text-[#0f0f10]" />
                       </div>
@@ -720,8 +746,12 @@ const CategoryLandingPage = () => {
                     })}
                   </div>
                   <div className="mt-[16px] flex items-center gap-[12px] text-[13px] text-[#989ba2]">
-                    <span className="font-semibold text-[#878a93]">{review.name}</span>
-                    <span className="h-[14px] w-px bg-[#e1e2e4]" />
+                    {review.name ? (
+                      <>
+                        <span className="font-semibold text-[#878a93]">{review.name}</span>
+                        <span className="h-[14px] w-px bg-[#e1e2e4]" />
+                      </>
+                    ) : null}
                     <div className="flex items-center gap-[2px]">{renderStars(review.rating)}</div>
                     <span className="h-[14px] w-px bg-[#e1e2e4]" />
                     <span>{review.date}</span>

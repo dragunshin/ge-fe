@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { ChevronLeft, MoreHorizontal } from 'lucide-react';
 import starIcon from '../../../images/reviews/star.svg';
 import { reviewService } from '../../../services/review.service';
 import {
@@ -20,6 +20,24 @@ type ReviewItem = {
   tags: string[];
   images: string[];
   createdAt: string;
+};
+
+const getDisplayName = (value?: string) => {
+  if (typeof value !== 'string') {
+    return '';
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : '';
+};
+
+const getReviewAuthorName = (review: {
+  memberNickname?: string;
+  authorNickname?: string;
+  nickname?: string;
+}) => {
+  return getDisplayName(
+    review.memberNickname ?? review.authorNickname ?? review.nickname,
+  );
 };
 
 const CategoryBestReviewsPage = () => {
@@ -79,6 +97,18 @@ const CategoryBestReviewsPage = () => {
       .filter(Boolean);
   };
 
+  const renderStars = (rating: number) => {
+    const filledCount = Math.max(0, Math.min(5, Math.round(rating)));
+    return Array.from({ length: 5 }).map((_, index) => (
+      <img
+        key={`star-${rating}-${index}`}
+        src={starIcon}
+        alt=""
+        className={`h-[16px] w-[16px] ${index < filledCount ? '' : 'opacity-30 grayscale'}`}
+      />
+    ));
+  };
+
   useEffect(() => {
     setReviews([]);
     setPage(0);
@@ -107,19 +137,26 @@ const CategoryBestReviewsPage = () => {
           return;
         }
         const mapped = (Array.isArray(response.data) ? response.data : [])
-          .map((review) => ({
-            id: review.reviewId,
-            author: '익명',
-            expertName: review.expertNickname ?? '전문가',
-            expertProfileImage: review.expertProfileImage,
-            expertRatingAverage: review.expertRatingAverage ?? review.rating,
-            rating: review.rating,
-            date: formatDate(review.createdAt),
-            content: review.content,
-            tags: review.category ? [getLabelFromApiCategory(review.category)] : [],
-            images: parseMediaUrls(review.mediaUrls),
-            createdAt: review.createdAt,
-          }))
+          .map((review) => {
+            const authorSource = review as typeof review & {
+              memberNickname?: string;
+              authorNickname?: string;
+              nickname?: string;
+            };
+            return {
+              id: review.reviewId,
+              author: getReviewAuthorName(authorSource),
+              expertName: getDisplayName(review.expertNickname) || '전문가',
+              expertProfileImage: review.expertProfileImage,
+              expertRatingAverage: review.expertRatingAverage ?? review.rating,
+              rating: review.rating,
+              date: formatDate(review.createdAt),
+              content: review.content,
+              tags: review.category ? [getLabelFromApiCategory(review.category)] : [],
+              images: parseMediaUrls(review.mediaUrls),
+              createdAt: review.createdAt,
+            };
+          })
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         setReviews(mapped);
         setHasMore(false);
@@ -160,65 +197,42 @@ const CategoryBestReviewsPage = () => {
     return () => observer.disconnect();
   }, [hasMore, isLoading]);
 
-  const noticeText = isExpertReview
-    ? '전문가 후기 리스트입니다.'
-    : '가장 많은 조회수를 기록한 리뷰입니다.';
-
   return (
     <div className="flex h-full flex-col bg-white">
-      <header className="app-header flex items-center gap-[15px] px-4 pt-[14px]">
+      <header className="app-header flex items-center gap-[6px] px-4 pt-[14px]">
         <button
           onClick={() => navigate(-1)}
-          className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-50"
+          className="flex h-[24px] w-[24px] items-center justify-center"
         >
           <ChevronLeft className="h-6 w-6 text-[#0f0f10]" />
         </button>
-        <h1 className="text-[20px] font-semibold text-[#0f0f10]">후기 리스트</h1>
+        <h1 className="text-[20px] font-semibold text-black">후기 리스트</h1>
       </header>
 
       <main className="flex-1 overflow-y-auto pb-8 scrollbar-hide">
-        <section className="px-4 pt-4">
-          <div className="rounded-[8px] bg-[#e5f4ff] px-4 py-[12px] text-[13px] text-[#505158]">
-            {noticeText}
-          </div>
-        </section>
-
-        <section className="space-y-[24px] px-4 pt-[24px]">
+        <section className="px-4 pt-[24px]">
           {reviews.map((review, index) => (
             <div key={review.id}>
-              <article className="overflow-hidden rounded-[8px] border border-[#f4f4f5] bg-white">
-                <div className="border-b border-[#f4f4f5] px-4 py-[14px]">
-                  <div className="flex items-center gap-[10px]">
-                    <div className="h-[36px] w-[36px] overflow-hidden rounded-full bg-[#f4f4f5]">
-                      {review.expertProfileImage && (
-                        <img
-                          src={review.expertProfileImage}
-                          alt=""
-                          className="h-full w-full object-cover"
-                        />
-                      )}
+              <article className="flex flex-col gap-[8px]">
+                <div className="flex items-center gap-[3px]">
+                  <div className="flex flex-1 flex-col gap-[3px]">
+                    <span className="min-h-[20px] text-[14px] font-semibold text-[#878a93]">
+                      {review.author}
+                    </span>
+                    <div className="flex items-center gap-[12px] text-[13px] text-[#989ba2]">
+                      <div className="flex items-center gap-px">{renderStars(review.rating)}</div>
+                      <div className="h-[14px] w-px bg-[#e1e2e4]" />
+                      <span>{review.date}</span>
                     </div>
-                    <div className="flex flex-col gap-[4px]">
-                      <div className="flex items-center gap-[2px]">
-                        <span className="text-[14px] font-semibold text-[#0f0f10]">
-                          {review.expertName}
-                        </span>
-                        <ChevronRight className="h-4 w-4 text-[#0f0f10]" />
-                      </div>
-                      <div className="flex items-center gap-[4px] text-[13px] text-[#989ba2]">
-                        <img src={starIcon} alt="" className="h-[16px] w-[16px]" />
-                        <span>{review.expertRatingAverage.toFixed(1)}</span>
-                      </div>
-                    </div>
-                    <button className="ml-auto rounded-full p-1 text-[#aeb0b6] hover:bg-gray-50">
-                      <MoreHorizontal className="h-6 w-6 rotate-90" />
-                    </button>
                   </div>
+                  <button className="p-1 text-[#171719]">
+                    <MoreHorizontal className="h-6 w-6 rotate-90" />
+                  </button>
                 </div>
-
-                <div className="px-4 pt-[16px]">
-                  <div className="flex gap-[8px]">
-                    {review.images.slice(0, 2).map((image, imageIndex) => (
+                <div className="flex gap-[6px]">
+                  {Array.from({ length: 3 }).map((_, imageIndex) => {
+                    const image = review.images[imageIndex];
+                    return (
                       <div
                         key={`${review.id}-image-${imageIndex}`}
                         className="h-[130px] w-[130px] overflow-hidden rounded-[4px] bg-[#e1e2e4]"
@@ -227,33 +241,13 @@ const CategoryBestReviewsPage = () => {
                           <img src={image} alt="" className="h-full w-full object-cover" />
                         )}
                       </div>
-                    ))}
-                  </div>
+                    );
+                  })}
                 </div>
-
-                <div className="px-4 pt-[12px]">
-                  <div className="flex items-center gap-[12px] text-[13px] text-[#989ba2]">
-                    <span className="font-semibold text-[#878a93]">{review.author}</span>
-                    <div className="h-[14px] w-px bg-[#e1e2e4]" />
-                    <div className="flex items-center gap-[2px]">
-                      {Array.from({ length: 5 }).map((_, starIndex) => (
-                        <img
-                          key={`star-${review.id}-${starIndex}`}
-                          src={starIcon}
-                          alt=""
-                          className={`h-[16px] w-[16px] ${starIndex < review.rating ? '' : 'opacity-30'}`}
-                        />
-                      ))}
-                    </div>
-                    <div className="h-[14px] w-px bg-[#e1e2e4]" />
-                    <span>{review.date}</span>
-                  </div>
-                  <p className="mt-[8px] text-[13px] leading-[1.4] text-[#505158]">
-                    {review.content}
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap gap-[6px] px-4 pb-[16px] pt-[10px]">
+                <p className="text-[14px] leading-[1.5] text-[#505158]">
+                  {review.content}
+                </p>
+                <div className="flex flex-wrap gap-[8px]">
                   {review.tags.map((tag, tagIndex) => (
                     <span
                       key={`${review.id}-${tag}-${tagIndex}`}

@@ -593,6 +593,24 @@ import DateTimeBottomSheet from "../resevationFlow/reservationSheet/calendar";
 
 type ConsultType = "MESSAGE" | "VIDEO";
 
+const getDisplayName = (value?: string) => {
+  if (typeof value !== "string") {
+    return "";
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : "";
+};
+
+const getReviewAuthorName = (review: {
+  memberNickname?: string;
+  authorNickname?: string;
+  nickname?: string;
+}) => {
+  return getDisplayName(
+    review.memberNickname ?? review.authorNickname ?? review.nickname,
+  );
+};
+
 type Banner = {
   id: number;
   eyebrow?: string;
@@ -689,6 +707,18 @@ const HomePage = () => {
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
     return `${year}.${month}.${day}`;
+  };
+
+  const renderStars = (rating: number) => {
+    const filledCount = Math.max(0, Math.min(5, Math.round(rating)));
+    return Array.from({ length: 5 }).map((_, index) => (
+      <img
+        key={`star-${rating}-${index}`}
+        src={starIcon}
+        alt=""
+        className={`h-[18px] w-[18px] ${index < filledCount ? "" : "opacity-40 grayscale"}`}
+      />
+    ));
   };
 
   const parseMediaUrls = (value?: string | string[]) => {
@@ -849,27 +879,37 @@ const HomePage = () => {
     const fetchReviews = async () => {
       try {
         const category = getApiCategoryFromLabel(selectedHomeTab);
-        const response = category
-          ? await reviewService.getBestReviews({ category })
-          : await reviewService.getBestReviews();
+        const response = await reviewService.getRecentReviews({
+          category: category ?? undefined,
+          page: 0,
+          size: 5,
+        });
         if (!isActive) {
           return;
         }
         const reviewsData = (Array.isArray(response.data) ? response.data : [])
-          .map((review) => ({
+          .map((review) => {
+            const authorSource = review as typeof review & {
+              memberNickname?: string;
+              authorNickname?: string;
+              nickname?: string;
+            };
+            const expertName = getDisplayName(review.expertNickname) || "전문가";
+            return {
             id: review.reviewId,
-            author: "익명",
+            author: getReviewAuthorName(authorSource),
             rating: review.rating,
             date: formatDate(review.createdAt),
             content: review.content,
             category: getLabelFromApiCategory(review.category),
             concern: "후기",
             images: parseMediaUrls(review.mediaUrls).slice(0, 2),
-            expertName: review.expertNickname ?? "전문가",
+            expertName,
             expertRating: review.expertRatingAverage ?? review.rating,
             expertAvatar: review.expertProfileImage,
             createdAt: review.createdAt,
-          }))
+          };
+          })
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
           .slice(0, 5)
           .map(({ createdAt, ...review }) => review);
@@ -1281,9 +1321,9 @@ const HomePage = () => {
             {reviews.map((review) => (
               <article
                 key={review.id}
-                className="flex h-[393px] w-[300px] shrink-0 flex-col rounded-[8px] border border-[#e1e2e4] bg-white snap-start"
+                className="relative flex h-[393px] w-[300px] shrink-0 flex-col overflow-hidden rounded-[8px] bg-white snap-start"
               >
-                <div className="flex items-center justify-between px-4 pt-[14px]">
+                <div className="flex items-center justify-between border-b border-[#f4f4f5] px-4 py-[14px]">
                   <div className="flex items-center gap-[10px]">
                     <div className="h-[36px] w-[36px] shrink-0 overflow-hidden rounded-full bg-[#e1e2e4]">
                       {review.expertAvatar && (
@@ -1302,7 +1342,7 @@ const HomePage = () => {
                         <ChevronRight className="h-4 w-4 text-[#0f0f10]" />
                       </div>
                       <div className="flex items-center gap-[4px] text-[13px] text-[#989ba2]">
-                        <img src={starIcon} alt="" className="h-[16px] w-[16px]" />
+                        <img src={starIcon} alt="" className="h-[18px] w-[18px]" />
                         <span>{review.expertRating.toFixed(1)}</span>
                       </div>
                     </div>
@@ -1327,7 +1367,14 @@ const HomePage = () => {
 
                 <div className="px-4 pt-3">
                   <div className="flex items-center gap-[12px] text-[13px] text-[#989ba2]">
-                    <span className="font-semibold text-[#878a93]">{review.author}</span>
+                    {review.author ? (
+                      <>
+                        <span className="font-semibold text-[#878a93]">{review.author}</span>
+                        <span className="h-[14px] w-px bg-[#e1e2e4]" />
+                      </>
+                    ) : null}
+                    <div className="flex items-center gap-[2px]">{renderStars(review.rating)}</div>
+                    <span className="h-[14px] w-px bg-[#e1e2e4]" />
                     <span>{review.date}</span>
                   </div>
                   <p className="mt-2 text-[13px] leading-[1.4] text-[#505158]">{review.content}</p>

@@ -24,7 +24,6 @@ const CATEGORY_TABS = [
 ];
 
 const STYLE_TABS = ["컷", "펌", "염색", "스타일링"] as const;
-const CONCERN_TABS = ["탈모", "헤어라인", "모질/모량", "두피상태"] as const;
 
 const CUT_STYLE_OPTIONS = [
   "가일 컷",
@@ -39,10 +38,7 @@ const CUT_STYLE_OPTIONS = [
   "프렌치 크롭 컷",
 ];
 
-const HAIR_CONCERN_OPTIONS = ["M자 탈모", "원형 탈모", "정수리 탈모", "복합형 탈모"];
-
 const HAIR_STYLE_TAGS = CUT_STYLE_OPTIONS.map((item) => item.replace(/\s+/g, ""));
-const HAIR_CONCERN_TAGS = ["탈모", ...HAIR_CONCERN_OPTIONS];
 
 const OTHER_CATEGORY_TAGS: Record<ApiCategory, string[]> = {
   HAIR: [],
@@ -70,10 +66,7 @@ type ExpertListCard = {
   filterTags: string[];
 };
 
-type FilterTab = "style" | "concern";
-
 type StyleTab = (typeof STYLE_TABS)[number];
-type ConcernTab = (typeof CONCERN_TABS)[number];
 
 type ConsultType = "MESSAGE" | "VIDEO";
 
@@ -94,8 +87,7 @@ const buildExpertTags = (
 ) => {
   if (category === "HAIR") {
     const styleTags = pickTags(HAIR_STYLE_TAGS, 2, seed);
-    const concernTags = pickTags(HAIR_CONCERN_TAGS, 1, seed + 3);
-    const filterTags = [...styleTags, ...concernTags];
+    const filterTags = [...styleTags];
     const displayTags = [categoryLabel, ...filterTags];
     const trimmedDisplayTags =
       displayTags.length > 4
@@ -112,27 +104,22 @@ const buildExpertTags = (
 const filterExperts = (
   experts: ExpertListCard[],
   styles: string[],
-  concerns: string[],
   category: ApiCategory | undefined,
 ) => {
   if (category !== "HAIR") {
     return experts;
   }
   const hasStyle = styles.length > 0;
-  const hasConcern = concerns.length > 0;
-  if (!hasStyle && !hasConcern) {
+  if (!hasStyle) {
     return experts;
   }
   const normalizedStyles = styles.map(normalizeTag);
-  const normalizedConcerns = concerns.map(normalizeTag);
 
   return experts.filter((expert) => {
     const normalizedTags = expert.filterTags.map(normalizeTag);
     const styleMatch =
       !hasStyle || normalizedStyles.some((style) => normalizedTags.includes(style));
-    const concernMatch =
-      !hasConcern || normalizedConcerns.some((concern) => normalizedTags.includes(concern));
-    return styleMatch && concernMatch;
+    return styleMatch;
   });
 };
 
@@ -151,13 +138,9 @@ const CategoryLandingPage = () => {
   const [experts, setExperts] = useState<ExpertListCard[]>([]);
   const [noticeMessage, setNoticeMessage] = useState<string | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [activeFilterTab, setActiveFilterTab] = useState<FilterTab>("style");
   const [activeStyleTab, setActiveStyleTab] = useState<StyleTab>("컷");
-  const [activeConcernTab, setActiveConcernTab] = useState<ConcernTab>("탈모");
   const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
-  const [selectedConcerns, setSelectedConcerns] = useState<string[]>([]);
   const [draftStyles, setDraftStyles] = useState<string[]>([]);
-  const [draftConcerns, setDraftConcerns] = useState<string[]>([]);
   const [openTypeSheet, setOpenTypeSheet] = useState(false);
   const [openCalendarSheet, setOpenCalendarSheet] = useState(false);
   const [selectedConsultType, setSelectedConsultType] = useState<ConsultType>("MESSAGE");
@@ -287,9 +270,7 @@ const CategoryLandingPage = () => {
 
   useEffect(() => {
     setSelectedStyles([]);
-    setSelectedConcerns([]);
     setDraftStyles([]);
-    setDraftConcerns([]);
   }, [apiCategory]);
 
   useEffect(() => {
@@ -301,20 +282,18 @@ const CategoryLandingPage = () => {
   }, [noticeMessage]);
 
   const filteredExperts = useMemo(
-    () => filterExperts(experts, selectedStyles, selectedConcerns, apiCategory),
-    [experts, selectedStyles, selectedConcerns, apiCategory],
+    () => filterExperts(experts, selectedStyles, apiCategory),
+    [experts, selectedStyles, apiCategory],
   );
 
   const draftFilteredCount = useMemo(
-    () => filterExperts(experts, draftStyles, draftConcerns, apiCategory).length,
-    [experts, draftStyles, draftConcerns, apiCategory],
+    () => filterExperts(experts, draftStyles, apiCategory).length,
+    [experts, draftStyles, apiCategory],
   );
-  const isApplyDisabled = draftStyles.length === 0 && draftConcerns.length === 0;
+  const isApplyDisabled = draftStyles.length === 0;
 
-  const openFilterSheet = (tab: FilterTab) => {
+  const openFilterSheet = () => {
     setDraftStyles(selectedStyles);
-    setDraftConcerns(selectedConcerns);
-    setActiveFilterTab(tab);
     setIsFilterOpen(true);
   };
 
@@ -408,7 +387,6 @@ const CategoryLandingPage = () => {
 
   const applyFilters = () => {
     setSelectedStyles(draftStyles);
-    setSelectedConcerns(draftConcerns);
     setIsFilterOpen(false);
   };
 
@@ -418,21 +396,11 @@ const CategoryLandingPage = () => {
     );
   };
 
-  const toggleDraftConcern = (label: string) => {
-    setDraftConcerns((prev) =>
-      prev.includes(label) ? prev.filter((item) => item !== label) : [...prev, label],
-    );
-  };
-
   const removeFilterChip = (label: string) => {
-    if (selectedStyles.includes(label)) {
-      setSelectedStyles((prev) => prev.filter((item) => item !== label));
-      return;
-    }
-    setSelectedConcerns((prev) => prev.filter((item) => item !== label));
+    setSelectedStyles((prev) => prev.filter((item) => item !== label));
   };
 
-  const activeChips = [...selectedStyles, ...selectedConcerns];
+  const activeChips = [...selectedStyles];
 
   return (
     <div className="relative flex h-full flex-col bg-white">
@@ -483,17 +451,10 @@ const CategoryLandingPage = () => {
         <section className="mt-[14px] px-4">
           <div className="flex flex-wrap items-center gap-[8px]">
             <button
-              onClick={() => openFilterSheet("style")}
+              onClick={openFilterSheet}
               className="flex h-[30px] items-center gap-[4px] rounded-[4px] border border-[#dbdcdf] bg-white px-[12px] text-[13px] text-[#46474c]"
             >
               스타일
-              <ChevronDown className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => openFilterSheet("concern")}
-              className="flex h-[30px] items-center gap-[4px] rounded-[4px] border border-[#dbdcdf] bg-white px-[12px] text-[13px] text-[#46474c]"
-            >
-              고민
               <ChevronDown className="h-4 w-4" />
             </button>
             {activeChips.map((chip) => (
@@ -643,130 +604,67 @@ const CategoryLandingPage = () => {
             </div>
             <div className="mt-[22px] flex items-center gap-[20px]">
               <button
-                onClick={() => setActiveFilterTab("style")}
                 className="flex flex-col items-center gap-[6px]"
               >
                 <div className="flex items-center gap-[4px] text-[14px] font-semibold">
-                  <span
-                    className={activeFilterTab === "style" ? "text-[#171719]" : "text-[#989ba2]"}
-                  >
-                    스타일
-                  </span>
+                  <span className="text-[#171719]">스타일</span>
                   {draftStyles.length > 0 && (
-                    <span
-                      className={activeFilterTab === "style" ? "text-[#171719]" : "text-[#989ba2]"}
-                    >
-                      {draftStyles.length}
-                    </span>
+                    <span className="text-[#171719]">{draftStyles.length}</span>
                   )}
                 </div>
-                <span
-                  className={`h-[2px] w-full ${
-                    activeFilterTab === "style" ? "bg-[#292a2d]" : "bg-transparent"
-                  }`}
-                />
-              </button>
-              <button
-                onClick={() => setActiveFilterTab("concern")}
-                className="flex flex-col items-center gap-[6px]"
-              >
-                <div className="flex items-center gap-[4px] text-[14px] font-semibold">
-                  <span
-                    className={activeFilterTab === "concern" ? "text-[#171719]" : "text-[#989ba2]"}
-                  >
-                    고민
-                  </span>
-                  {draftConcerns.length > 0 && (
-                    <span
-                      className={
-                        activeFilterTab === "concern" ? "text-[#171719]" : "text-[#989ba2]"
-                      }
-                    >
-                      {draftConcerns.length}
-                    </span>
-                  )}
-                </div>
-                <span
-                  className={`h-[2px] w-full ${
-                    activeFilterTab === "concern" ? "bg-[#292a2d]" : "bg-transparent"
-                  }`}
-                />
+                <span className="h-[2px] w-full bg-[#292a2d]" />
               </button>
             </div>
 
             <div className="mt-[20px] border-b border-[#f1f1f6] pb-[12px]">
               <div className="flex items-center gap-[16px] text-[14px]">
-                {activeFilterTab === "style"
-                  ? STYLE_TABS.map((tab) => (
-                      <button
-                        key={tab}
-                        onClick={() => {
-                          if (tab !== "컷") {
-                            setNoticeMessage("준비중입니다.");
-                            return;
-                          }
-                          setActiveStyleTab(tab);
-                        }}
-                        className={
-                          tab === activeStyleTab
-                            ? "font-semibold text-[#0f0f10]"
-                            : "font-medium text-[#989ba2]"
-                        }
-                      >
-                        {tab}
-                      </button>
-                    ))
-                  : CONCERN_TABS.map((tab) => (
-                      <button
-                        key={tab}
-                        onClick={() => {
-                          if (tab !== "탈모") {
-                            setNoticeMessage("준비중입니다.");
-                            return;
-                          }
-                          setActiveConcernTab(tab);
-                        }}
-                        className={
-                          tab === activeConcernTab
-                            ? "font-semibold text-[#0f0f10]"
-                            : "font-medium text-[#989ba2]"
-                        }
-                      >
-                        {tab}
-                      </button>
-                    ))}
+                {STYLE_TABS.map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => {
+                      if (tab !== '컷') {
+                        setNoticeMessage('준비중입니다.');
+                        return;
+                      }
+                      setActiveStyleTab(tab);
+                    }}
+                    className={
+                      tab === activeStyleTab
+                        ? 'font-semibold text-[#0f0f10]'
+                        : 'font-medium text-[#989ba2]'
+                    }
+                  >
+                    {tab}
+                  </button>
+                ))}
               </div>
             </div>
 
             <div className="mt-[16px] grid grid-cols-2 gap-x-[28px] gap-y-[12px]">
-              {(activeFilterTab === "style" ? CUT_STYLE_OPTIONS : HAIR_CONCERN_OPTIONS).map(
-                (item) => {
-                  const selected =
-                    activeFilterTab === "style"
-                      ? draftStyles.includes(item)
-                      : draftConcerns.includes(item);
-                  const toggle =
-                    activeFilterTab === "style"
-                      ? () => toggleDraftStyle(item)
-                      : () => toggleDraftConcern(item);
-                  return (
-                    <button
-                      key={item}
-                      className="flex items-center gap-[7px] text-[14px]"
-                      onClick={toggle}
+              {CUT_STYLE_OPTIONS.map((item) => {
+                const selected = draftStyles.includes(item);
+                const toggle = () => toggleDraftStyle(item);
+                return (
+                  <button
+                    key={item}
+                    className="flex items-center gap-[7px] text-[14px]"
+                    onClick={toggle}
+                  >
+                    <span
+                      className={`flex h-[12px] w-[12px] items-center justify-center rounded-[2px] border ${
+                        selected
+                          ? 'border-[#0f0f10] bg-[#0f0f10]'
+                          : 'border-[#dbdcdf] bg-white'
+                      }`}
                     >
-                      <span
-                        className={`flex h-[12px] w-[12px] items-center justify-center rounded-[2px] border ${
-                          selected ? "border-[#0f0f10] bg-[#0f0f10]" : "border-[#dbdcdf] bg-white"
-                        }`}
-                      >
-                        {selected && <Check className="h-[10px] w-[10px] text-white" />}
-                      </span>
-                      <span className={selected ? "text-[#0f0f10]" : "text-[#989ba2]"}>{item}</span>
-                    </button>
-                  );
-                },
-              )}
+                      {selected && <Check className="h-[10px] w-[10px] text-white" />}
+                    </span>
+                    <span className={selected ? 'text-[#0f0f10]' : 'text-[#989ba2]'}>
+                      {item}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
 
             <div className="mt-[24px]">
