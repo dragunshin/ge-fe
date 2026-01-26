@@ -1,7 +1,6 @@
 export default function Footer({
   disabled,
   onNext,
-  onPreviewNext,
 }: {
   disabled: boolean;
   onNext: () => void;
