@@ -576,8 +576,8 @@ import Logo from "@/components/ui/logo";
 import starIcon from "../../images/reviews/star.svg";
 import freeBanner from "@/images/home/free.svg";
 import banner1 from "@/images/home/banner1.svg";
-import banner2 from "@/images/home/banner2.png";
-import banner3 from "@/images/home/banner3.png";
+import banner2 from "@/images/home/banner2.svg";
+import banner3 from "@/images/home/banner3.svg";
 import { expertService } from "../../services/expert.service";
 import { reviewService } from "../../services/review.service";
 import {
