@@ -142,19 +142,31 @@ export default function ExpertIntroductionPage() {
 
   const handleSave = async () => {
     if (!activeField || isSaving || !info) return;
-    const nextValue = draft[activeField] ?? "";
-    const prevValue = info[activeField] ?? "";
-    if (nextValue === prevValue) {
+
+    const payload: Record<string, string> = {};
+    (Object.keys(draft) as Array<keyof DraftInfo>).forEach((field) => {
+      const nextValue = draft[field] ?? "";
+      const prevValue = info[field] ?? "";
+      if (nextValue !== prevValue) {
+        payload[field] = nextValue;
+      }
+    });
+
+    if (Object.keys(payload).length === 0) {
       setActiveField(null);
       return;
     }
 
     try {
       setIsSaving(true);
-      const response = await expertService.updateExpertInfo({
-        [activeField]: nextValue,
-      });
+      const response = await expertService.updateExpertInfo(payload);
       setInfo(response.data);
+      setDraft({
+        nickname: response.data.nickname ?? "",
+        introduction: response.data.introduction ?? "",
+        profileLink: response.data.profileLink ?? "",
+        careerInfo: response.data.careerInfo ?? "",
+      });
       setActiveField(null);
     } catch (error) {
       console.error("Failed to update expert info:", error);

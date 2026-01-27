@@ -8,7 +8,6 @@ import { useNavigate } from "react-router-dom";
 import { getUserMe, type UserMe } from "@/api/mypage";
 import { expertService } from "@/services/expert.service";
 import type { ExpertPortfolioResponse } from "@/lib/api/types";
-import { portfolioItems } from "@/pages/category/expert/portfolio-data";
 
 type ExpertPortfolioItem = {
   id: number;
@@ -97,12 +96,7 @@ export default function ExpertPortfolioPage() {
         console.error("Failed to fetch expert portfolios:", error);
         if (!isActive) return;
         if (page === 0) {
-          setItems(
-            portfolioItems.map((item) => ({
-              ...item,
-              isRepresentative: false,
-            })),
-          );
+          setItems([]);
         }
         setHasMore(false);
       } finally {
@@ -190,6 +184,21 @@ export default function ExpertPortfolioPage() {
 
       <main className="relative flex-1 overflow-y-auto pb-[80px]">
         <div className="flex flex-col gap-[2px] pt-[14px]">
+          {items.length === 0 && !isLoading && (
+            <div className="flex flex-col items-center gap-[12px] px-[16px] py-[60px] text-center">
+              <p className="text-[16px] font-semibold text-[#292a2d]">
+                아직 등록된 포트폴리오가 없어요.
+              </p>
+              <p className="text-[13px] text-[#878a93]">첫 포트폴리오를 등록해보세요.</p>
+              <button
+                type="button"
+                onClick={() => navigate(`/portfolioAdd/${me?.userId}`)}
+                className="mt-[4px] h-[40px] rounded-[4px] bg-[#181818] px-[16px] text-[14px] font-semibold text-white"
+              >
+                포트폴리오 등록
+              </button>
+            </div>
+          )}
           {items.map((item) => {
             const isConcernExpanded = expandedText[item.id]?.concern ?? false;
             const isSolutionExpanded = expandedText[item.id]?.solution ?? false;

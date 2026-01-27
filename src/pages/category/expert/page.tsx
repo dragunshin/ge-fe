@@ -6,7 +6,7 @@ import heartIcon from "../../../images/mypage/heart.svg";
 import redHeartIcon from "../../../images/redHeart.svg";
 import instagramIcon from "../../../images/expert/instagram.svg";
 import boardIcon from "../../../images/expert/board.svg";
-import { portfolioItems, type PortfolioItem } from "./portfolio-data";
+import { type PortfolioItem } from "./portfolio-data";
 import { expertService } from "../../../services/expert.service";
 import { reviewService } from "../../../services/review.service";
 import { reservationService } from "../../../services/reservation.service";
@@ -220,7 +220,7 @@ const ExpertInfoPage = () => {
           return;
         }
         if (portfolioPage === 0) {
-          setPortfolioCards(portfolioItems);
+          setPortfolioCards([]);
         }
         setPortfolioHasMore(false);
       } finally {
@@ -357,7 +357,7 @@ const ExpertInfoPage = () => {
   const reviewSectionHeight = hasReviews ? 216 : 72;
   const reviewSectionOffset = hasReviews ? 0 : -(216 - reviewSectionHeight);
   const hasPortfolios = portfolioCards.length > 0;
-  const portfolioSectionHeight = hasPortfolios ? 610 : 72;
+  const portfolioSectionHeight = hasPortfolios ? 610 : 160;
   const portfolioSectionOffset = hasPortfolios ? 0 : -(610 - portfolioSectionHeight);
   const layoutTops = {
     reviewDivider: 771,
@@ -648,6 +648,11 @@ const ExpertInfoPage = () => {
                 <ChevronRight className="h-[24px] w-[24px]" />
               </button>
             </div>
+            {!hasPortfolios && !portfolioLoading && (
+              <div className="absolute left-[16px] top-[96px] w-[343px] rounded-[12px] border border-dashed border-[#e1e2e4] bg-[#fafafa] px-[16px] py-[20px] text-center text-[14px] font-medium text-[#878a93]">
+                아직 등록된 포트폴리오가 없어요.
+              </div>
+            )}
             {hasPortfolios && (
               <>
                 <div

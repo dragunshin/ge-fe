@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
-import { portfolioItems, type PortfolioItem } from '../expert/portfolio-data';
+import { type PortfolioItem } from '../expert/portfolio-data';
 import { expertService } from '../../../services/expert.service';
 import type { ExpertPortfolioResponse } from '../../../lib/api/types';
 
@@ -36,7 +36,7 @@ const PortfolioLandingPage = () => {
 
   useEffect(() => {
     if (!expertIdNumber) {
-      setItems(portfolioItems);
+      setItems([]);
       setHasMore(false);
       return;
     }
@@ -73,7 +73,7 @@ const PortfolioLandingPage = () => {
           return;
         }
         if (page === 0) {
-          setItems(portfolioItems);
+          setItems([]);
         }
         setHasMore(false);
       } finally {
@@ -144,6 +144,11 @@ const PortfolioLandingPage = () => {
 
       <main className="flex-1 overflow-x-hidden overflow-y-auto pb-10 scrollbar-hide">
         <div className="flex flex-col gap-[2px] pt-[14px]">
+          {items.length === 0 && !isLoading && (
+            <div className="mx-[16px] rounded-[12px] border border-dashed border-[#e1e2e4] bg-[#fafafa] px-[16px] py-[24px] text-center text-[14px] font-medium text-[#878a93]">
+              아직 등록된 포트폴리오가 없어요.
+            </div>
+          )}
           {visibleItems.map((item) => {
             const isConcernExpanded = expandedText[item.id]?.concern ?? false;
             const isSolutionExpanded = expandedText[item.id]?.solution ?? false;
