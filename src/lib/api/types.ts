@@ -90,6 +90,7 @@ export interface ExpertRanking {
   category: string;
   profileImage: string;
   introduction: string;
+  liked: boolean;
 }
 
 export interface PopularExpertsResponse {

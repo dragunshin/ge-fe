@@ -525,7 +525,7 @@ const ExpertInfoPage = () => {
               <div className="flex items-start gap-[8px]">
                 <img src={checkIcon} alt="" className="h-[24px] w-[24px]" />
                 <div className="flex flex-col gap-[6px]">
-                  <p className="text-[16px] font-semibold text-[#292a2d]">전문분야</p>
+                  <p className="text-[16px] font-semibold text-[#292a2d]">한 줄 소개</p>
                   <p className="text-[13px] leading-[1.4] text-[#878a93]">
                     {expertInfo?.introduction ?? "전문가 소개가 준비 중입니다."}
                   </p>

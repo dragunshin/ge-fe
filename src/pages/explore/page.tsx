@@ -410,7 +410,10 @@ const CategoryLandingPage = () => {
           <button className="flex h-6 w-6 items-center justify-center">
             <Search className="h-6 w-6 text-[#0f0f10]" />
           </button>
-          <button className="flex h-6 w-6 items-center justify-center">
+          <button
+            className="flex h-6 w-6 items-center justify-center"
+            onClick={() => navigate("/LikedList")}
+          >
             <img src={heartIcon} alt="찜" className="h-6 w-6" />
           </button>
         </div>
@@ -529,11 +532,6 @@ const CategoryLandingPage = () => {
                             <img src={image} alt="" className="h-full w-full object-cover" />
                           )}
                           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60" />
-                          {tag && (
-                            <span className="absolute bottom-[27px] left-[10px] translate-y-full text-[12px] text-white drop-shadow-[0px_4px_10px_rgba(0,0,0,0.25)]">
-                              {tag}
-                            </span>
-                          )}
                         </div>
                       );
                     })}
