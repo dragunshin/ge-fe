@@ -522,7 +522,6 @@ const CategoryLandingPage = () => {
                   <div className="flex gap-[2px]">
                     {Array.from({ length: 3 }).map((_, index) => {
                       const image = expert.images[index];
-                      const tag = expert.reviewTags[index];
                       return (
                         <div
                           key={`${expert.id}-review-${index}`}
