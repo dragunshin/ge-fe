@@ -310,7 +310,7 @@ export default function PortfolioAddPage() {
             />
 
             <div className="absolute bottom-3 right-4 flex items-center gap-1 text-[12px]">
-              <span className={cn(isConcernValid ? "text-[#70737c]" : "text-[#FF3B30]")}>
+              <span className={cn(isConcernValid ? "text-[#FF3B30]" : "text-[#FF3B30]")}>
                 {concernLen}
               </span>
               <span className="text-[#70737c]">|</span>
@@ -338,7 +338,7 @@ export default function PortfolioAddPage() {
             />
 
             <div className="absolute bottom-3 right-4 flex items-center gap-1 text-[12px]">
-              <span className={cn(isSolutionValid ? "text-[#70737c]" : "text-[#FF3B30]")}>
+              <span className={cn(isSolutionValid ? "text-[#FF3B30]" : "text-[#FF3B30]")}>
                 {solutionLen}
               </span>
               <span className="text-[#70737c]">|</span>

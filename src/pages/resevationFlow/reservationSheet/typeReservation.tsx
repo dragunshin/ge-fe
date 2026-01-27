@@ -279,16 +279,16 @@ export default function ConsultationMethodSheet({
     // ✅ 타이틀/설명은 기존 유지(디자인/구조 유지)
     const baseMeta: Array<Omit<Option, "priceLabel">> = [
       {
-        id: "MESSAGE",
-        title: "메세지 상담",
-        // ✅ 스샷처럼 2줄로 보이게 강제 개행
-        description: "고민 설문지 답변을 바탕으로 전문가가\n24시간 내에 솔루션지를 보내드려요.",
-      },
-      {
         id: "VIDEO",
         title: "실시간 화상 상담",
         // ✅ 스샷처럼 2줄
         description: "전문가와 화상으로 30분 상담을 진행해요. 솔루션은 24시간 내로 전송됩니다.",
+      },
+      {
+        id: "MESSAGE",
+        title: "메세지 상담",
+        // ✅ 스샷처럼 2줄로 보이게 강제 개행
+        description: "고민 설문지 답변을 바탕으로 전문가가\n24시간 내에 솔루션지를 보내드려요.",
       },
     ];
 
