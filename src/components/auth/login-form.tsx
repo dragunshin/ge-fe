@@ -213,14 +213,14 @@ export function LoginForm() {
             </div>
 
             <div className="flex flex-col gap-3 pb-8">
-              <button
+              {/* <button
                 type="button"
                 disabled={isLoading}
                 className="w-full h-12 flex items-center justify-center gap-3 border border-[#dbdcdf] bg-white hover:bg-gray-50 transition-colors rounded-[4px] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <img src={googleIcon} alt="Google" className="w-5 h-5" />
                 <span className="text-[14px] font-semibold text-[#0f0f10]">Google 로그인</span>
-              </button>
+              </button> */}
               <button
                 type="button"
                 onClick={redirectToKakaoLogin}
