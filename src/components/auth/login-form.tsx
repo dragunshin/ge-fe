@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
-import googleIcon from '../../images/login/google.svg';
+//import googleIcon from '../../images/login/google.svg';
 import kakaoIcon from '../../images/login/kakao.svg';
 import separateIcon from '../../images/login/seperate.svg';
 import menualLogo from '../../images/home/menual.svg';
