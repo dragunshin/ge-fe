@@ -200,13 +200,13 @@ export default function DateTimeBottomSheet({
     <div className="fixed inset-0 z-50">
       <button type="button" className="absolute inset-0 bg-black/45" onClick={onClose} />
 
-      <div className="absolute inset-x-0 bottom-0 mx-auto w-full max-w-[375px] rounded-t-[24px] bg-white shadow-[0_-10px_30px_rgba(0,0,0,0.12)]">
+      <div className="absolute inset-x-0 bottom-0 z-10 mx-auto w-full max-w-[375px] rounded-t-[24px] bg-white shadow-[0_-10px_30px_rgba(0,0,0,0.12)]">
         <div className="relative">
           <button
             type="button"
             aria-label="닫기"
             onClick={onClose}
-            className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-black/5"
+            className="absolute right-5 top-6 inline-flex h-9 w-9 z-20 items-center justify-center rounded-full hover:bg-black/5"
           >
             <X className="h-6 w-6 text-[#000000]" />
           </button>
@@ -303,10 +303,8 @@ export default function DateTimeBottomSheet({
                   onNext({ date: selectedDate, timeId: selectedTimeId });
                 }}
                 className={cn(
-                  "h-[48px] w-[342px] rounded-[4px] pre_subtitle_semi_16",
-                  canNext
-                    ? "bg-[#0F0F10] text-white active:opacity-90"
-                    : "bg-[#E6E7EA] text-[#A9ADB6]",
+                  "h-[48px] w-[342px] shrink-0 rounded-[4px] pre_subtitle_semi_16",
+                  canNext ? "bg-[#0F0F10] text-white " : "bg-[#E6E7EA] text-[#A9ADB6]",
                 )}
               >
                 다음

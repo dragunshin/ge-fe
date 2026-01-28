@@ -167,45 +167,45 @@ export function Step4Question({
   };
 
   return (
-    <div className="mx-auto bg-white">
+    <div className="mx-auto flex min-h-[100dvh] w-full max-w-[420px] flex-col bg-white">
       <TopNav onBack={onBack} />
+      <div className="flex-1 pb-28">
+        <div className="px-4">
+          <p className="pre_body_med_16 text-[#008bff]">7/7</p>
 
-      <div className="px-4">
-        <p className="pre_body_med_16 text-[#008bff]">7/7</p>
+          <p className="mt-2 pre_title_semi_20 text-[#0f0f10]">
+            스타일링 시 느낀 어려움이나 궁금증이 있다면 알려주세요.
+          </p>
+          <p className="mt-2 pre_body_reg_14 leading-relaxed text-[#656870]">
+            상담하실 전문가에게 전달해드려요.
+          </p>
 
-        <p className="mt-2 pre_title_semi_20 text-[#0f0f10]">
-          스타일링 시 느낀 어려움이나 궁금증이 있다면 알려주세요.
-        </p>
-        <p className="mt-2 pre_body_reg_14 leading-relaxed text-[#656870]">
-          상담하실 전문가에게 전달해드려요.
-        </p>
-
-        <div className="mt-5">
-          <div className="relative">
-            <textarea
-              value={s.questionText}
-              onChange={(e) => s.setQuestionText(e.target.value)}
-              placeholder=""
-              className="h-[177px] w-full bg-[#f4f4f5] pre_body_reg_14 placeholder:text-[#989ba2] resize-none rounded-[8px] border border-[#e1e2e4] px-4 py-3 pb-8 outline-none"
-            />
-            <div className="absolute bottom-5 right-4 pre_body_reg_14">
-              <span className="text-[#008bff]">{s.questionText.length}</span>
-              <span className="text-[#656870]">/400</span>
+          <div className="mt-5">
+            <div className="relative">
+              <textarea
+                value={s.questionText}
+                onChange={(e) => s.setQuestionText(e.target.value)}
+                placeholder=""
+                className="h-[177px] w-full bg-[#f4f4f5] pre_body_reg_14 placeholder:text-[#989ba2] resize-none rounded-[8px] border border-[#e1e2e4] px-4 py-3 pb-8 outline-none"
+              />
+              <div className="absolute bottom-5 right-4 pre_body_reg_14">
+                <span className="text-[#008bff]">{s.questionText.length}</span>
+                <span className="text-[#656870]">/400</span>
+              </div>
             </div>
           </div>
+
+          <MultiPhotoPicker
+            keys={s.images.difficulty}
+            max={3}
+            resourceType="consultation"
+            resourceId={reservationId}
+            imageType="difficulty"
+            onAddKey={(key) => s.addImage("difficulty", key, 3)}
+            onRemoveKey={(key) => s.removeImage("difficulty", key)}
+          />
         </div>
-
-        <MultiPhotoPicker
-          keys={s.images.difficulty}
-          max={3}
-          resourceType="consultation"
-          resourceId={reservationId}
-          imageType="difficulty"
-          onAddKey={(key) => s.addImage("difficulty", key, 3)}
-          onRemoveKey={(key) => s.removeImage("difficulty", key)}
-        />
       </div>
-
       <Footer label="다음" disabled={!canSubmit} onClick={handleSubmit} />
     </div>
   );

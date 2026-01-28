@@ -47,7 +47,7 @@ export default function SolutionView() {
   return (
     <div className="min-h-screen bg-[#F6F6F7] p-2">
       {/* Top bar */}
-      <header className="px-2 my-1 mb-2">
+      <header className="sticky top-0 z-50 bg-[#F6F6F7] px-2 my-1 mb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center px-1 py-2">
             <button onClick={() => nav(-1)} className="mr-[8px]">

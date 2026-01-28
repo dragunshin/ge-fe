@@ -260,8 +260,8 @@ export default function ReviewWritePage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Top bar */}
-      <header className="px-5 pt-3">
-        <div className="sticky top-0 z-50 flex items-center justify-between">
+      <header className="sticky top-0 z-50 px-5 pt-3">
+        <div className="flex items-center justify-between">
           <div className="flex items-center px-1 py-2 bg-white">
             <button onClick={() => nav(-1)} className="mr-[8px]">
               <Back className="w-[18px] h-[18px]" />

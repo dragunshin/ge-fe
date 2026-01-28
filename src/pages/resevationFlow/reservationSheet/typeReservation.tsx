@@ -434,7 +434,7 @@ export default function ConsultationMethodSheet({
               type="button"
               disabled={!canNext}
               className={cn(
-                "h-[48px] w-[342px] rounded-[4px] pre_subtitle_semi_16",
+                "h-[48px] w-[342px] rounded-[4px] shrink-0 pre_subtitle_semi_16",
                 canNext ? "bg-[#181818] text-white" : "bg-[#E6E7EA] text-[#A9ADB6]",
               )}
               onClick={() => {

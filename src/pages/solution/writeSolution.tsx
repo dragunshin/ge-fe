@@ -419,7 +419,7 @@ import { postConsultationSolution } from "@/api/solution";
 import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useParams } from "react-router-dom";
 import Back from "@/images/login/back.svg?react";
@@ -643,59 +643,51 @@ export default function EditorPage() {
   }, []);
 
   return (
-    <main className="min-h-full flex items-center justify-center py-1 px-[0px] overflow-y-auto scrollbar-hide">
-      <Card className="w-full border-none shadow-none px-4">
-        <CardHeader className="space-y-1 px-0">
-          {/* Top bar */}
-          <header className="px-0">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center px-0">
-                <button onClick={() => nav(-1)} className="mr-[8px]">
-                  <Back className="w-[18px] h-[18px]" />
-                </button>
-                {/* ✅ 디자인 유지: 텍스트만 undefined 방지 */}
-                <p className="pre_title_semi_18 ml-1">
-                  {(memberNickname ?? "") + "님에 대한 솔루션지 작성"}
-                </p>
-              </div>
-            </div>
-          </header>
-
-          <div className="mt-4">
-            {concernLoading && (
-              <div className="rounded-2xl border border-[#dbdcdf] bg-white p-4 text-sm text-slate-500">
-                고민지 불러오는 중…
-              </div>
-            )}
-            {concernError && (
-              <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                고민지 로드 실패: {concernError}
-              </div>
-            )}
-            {/* ✅ HAIR일 때 */}
-            {!concernLoading &&
-              !concernError &&
-              concernType === "HAIR" &&
-              (concern as any)?.hair && (
-                <div className="rounded-xl bg-white p-0">
-                  <ConcernContent hair={(concern as any).hair} />
-                </div>
-              )}
-            {/* ✅ FASHION일 때 (패션 컴포넌트가 있을 경우 활성화) */}
-            {!concernLoading &&
-              !concernError &&
-              concernType === "FASHION" &&
-              (concern as any)?.fashion && (
-                <div className="rounded-xl bg-white p-0">
-                  <FashionConcernContent fashion={(concern as any).fashion} />
-                </div>
-              )}
+    <main className="h-screen overflow-y-auto bg-white scrollbar-hide">
+      <header className="sticky top-0 z-50 bg-white border-b border-transparent px-4 py-3 mt-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <button onClick={() => nav(-1)} className="mr-[8px]">
+              <Back className="w-[18px] h-[18px]" />
+            </button>
+            <p className="pre_title_semi_18 ml-1">
+              {(memberNickname ?? "") + "님에 대한 솔루션지 작성"}
+            </p>
           </div>
-        </CardHeader>
+        </div>
+      </header>
 
+      <Card className="w-full border-none shadow-none px-4">
+        <div className="mt-1">
+          {concernLoading && (
+            <div className="rounded-2xl border border-[#dbdcdf] bg-white p-4 text-sm text-slate-500">
+              고민지 불러오는 중…
+            </div>
+          )}
+          {concernError && (
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              고민지 로드 실패: {concernError}
+            </div>
+          )}
+          {/* ✅ HAIR일 때 */}
+          {!concernLoading && !concernError && concernType === "HAIR" && (concern as any)?.hair && (
+            <div className="rounded-xl bg-white p-0">
+              <ConcernContent hair={(concern as any).hair} />
+            </div>
+          )}
+          {/* ✅ FASHION일 때 (패션 컴포넌트가 있을 경우 활성화) */}
+          {!concernLoading &&
+            !concernError &&
+            concernType === "FASHION" &&
+            (concern as any)?.fashion && (
+              <div className="rounded-xl bg-white p-0">
+                <FashionConcernContent fashion={(concern as any).fashion} />
+              </div>
+            )}
+        </div>
         <Separator />
 
-        <CardContent className="space-y-6 px-1 pt-6">
+        <CardContent className="space-y-6 px-1 ">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               {isUploadingImage && (
@@ -722,7 +714,7 @@ export default function EditorPage() {
               placeholder="내용을 입력해 주세요"
               className="
                w-full
-                mt-1
+        
                 rounded-xl border border-[#dbdcdf] bg-white
                 [&_.ql-toolbar]:rounded-t-xl
                 [&_.ql-toolbar]:border-[#dbdcdf]
