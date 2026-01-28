@@ -60,7 +60,7 @@ export function Step2FaceSelect({ onNext, onBack }: { onNext: () => void; onBack
           <p className="pre_body_med_16 text-[#008bff]">4/7</p>
 
           <p className="mt-2 pre_title_semi_20 text-black">
-            <span className="text-[#429ff0]">자신이 생각하는 얼굴 장점</span>을 선택해주세요.
+            <span className="text-[#008bff]">자신이 생각하는 얼굴 장점</span>을 선택해주세요.
           </p>
 
           <div className="mt-6 grid grid-cols-2 gap-3">
@@ -105,7 +105,8 @@ export function Step2FaceSelect({ onNext, onBack }: { onNext: () => void; onBack
           <div className="mt-12">
             <p className="pre_body_med_16 text-[#008bff]">5/7</p>
             <p className="mt-2 pre_title_semi_20 text-[#0f0f10]">
-              <span className="text-[#429ff0]">얼굴에서 커버하고 싶은 부분</span>을 선택해주세요.
+              <span className="text-[#008bff]">얼굴에서 커버하고 싶은 부분</span>을<br />
+              선택해주세요.
             </p>
 
             <div className="mt-6 grid grid-cols-2 gap-3">

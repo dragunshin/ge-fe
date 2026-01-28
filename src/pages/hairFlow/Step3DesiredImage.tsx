@@ -43,7 +43,7 @@ export function Step3DesiredImage({ onNext, onBack }: { onNext: () => void; onBa
         <div className="px-4">
           <p className="pre_body_med_16 text-[#008bff]">6/7</p>
           <p className="mt-2 pre_title_semi_20 text-[#0f0f10]">
-            <span className="text-[#429ff0]">추구하는 이미지</span>를 선택해주세요.
+            <span className="text-[#008bff]">추구하는 이미지</span>를 선택해주세요.
           </p>
 
           <div className="mt-6 grid grid-cols-2 gap-3">

@@ -30,7 +30,7 @@ export function Step1SidePhotos({
       <div className="flex-1 pb-28">
         {/* 1/7 */}
         <div className="px-4">
-          <p className="text-[14px] font-semibold text-[#008bff]">1/7</p>
+          <p className="pre_subtitle_med_16 text-[#008bff]">1/7</p>
 
           {/* <div className="mt-2">
           <p className="pre_title_semi_20 text-[#429ff0]">평상시의 헤어스타일</p>
@@ -39,7 +39,7 @@ export function Step1SidePhotos({
 
           <div className="mt-2">
             <p className="pre_title_semi_20 text-black">
-              <span className="text-[#429ff0]">평상시의 헤어스타일</span>을 1장 업로드해주세요.
+              <span className="text-[#008bff]">평상시의 헤어스타일</span>을 1장 업로드해주세요.
             </p>
           </div>
         </div>
@@ -73,13 +73,13 @@ export function Step1SidePhotos({
 
         {/* 2/7 */}
         <div className="px-4 mt-[36px]">
-          <p className="text-[14px] font-semibold text-[#008bff]">2/7</p>
+          <p className="pre_subtitle_med_16 text-[#008bff]">2/7</p>
 
           <div className="mt-2">
             <p className="pre_title_semi_20 text-black">
-              <span className="text-[#429ff0]">머리를 올린 상태의 정면 사진</span>을
+              <span className="text-[#008bff]">머리를 올린 상태의 정면 사진</span>을
             </p>
-            <p className="pre_title_semi_20 text-neutral-900">1장 업로드해 주세요.</p>
+            <p className="pre_title_semi_20 text-black">1장 업로드해 주세요.</p>
           </div>
         </div>
 
@@ -119,11 +119,11 @@ export function Step1SidePhotos({
         {/* 3/7 */}
 
         <div className="px-4 mt-[36px]">
-          <p className="text-[14px] font-semibold text-[#008bff]">3/7</p>
+          <p className="pre_subtitle_med_16 text-[#008bff]">3/7</p>
 
           <div className="mt-2">
-            <p className="pre_title_semi_20 text-[#429ff0]">머리를 올린 상태의 측면 사진을</p>
-            <p className="pre_title_semi_20 text-neutral-900">좌우 1장씩 업로드해 주세요.</p>
+            <p className="pre_title_semi_20 text-[#008bff]">머리를 올린 상태의 측면 사진을</p>
+            <p className="pre_title_semi_20 text-black">좌우 1장씩 업로드해 주세요.</p>
           </div>
         </div>
 
