@@ -108,7 +108,7 @@ export default function Footer({
 }) {
   return (
     // ✅ 바(배경)는 화면 전체 폭
-    <div className="fixed inset-x-0 bottom-0 z-50 pb-[env(safe-area-inset-bottom)]">
+    <div className="fixed inset-x-0 bottom-0 pb-[env(safe-area-inset-bottom)]">
       {/* ✅ 버튼은 컨테이너 폭 유지 */}
       <div className="mx-auto w-full max-w-[410px] px-4">
         <button

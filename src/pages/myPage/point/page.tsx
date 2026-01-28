@@ -75,7 +75,7 @@ export default function PointPage() {
         <div className="mx-auto w-full max-w-md">
           <div className="pt-6">
             {/* header */}
-            <header className="app-header flex items-center px-1 py-2 ml-4 bg-white">
+            <header className="sticky top-0 z-50 flex items-center px-1 py-2 ml-4 bg-white">
               <button onClick={() => navigate(-1)} className="mr-[8px]">
                 <Back className="w-[18px] h-[18px]" />
               </button>

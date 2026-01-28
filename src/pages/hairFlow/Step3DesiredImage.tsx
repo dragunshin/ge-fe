@@ -14,6 +14,7 @@ const TAGS: DesiredTag[] = [
   "신뢰를 주는",
   "화려한",
   "자연스러움",
+  "기타",
 ];
 
 export function Step3DesiredImage({ onNext, onBack }: { onNext: () => void; onBack?: () => void }) {
@@ -21,6 +22,9 @@ export function Step3DesiredImage({ onNext, onBack }: { onNext: () => void; onBa
     useStyleSetupStore();
 
   const isSelected = (t: DesiredTag) => desiredTags.includes(t);
+
+  // const canNext = desiredTags.length > 0 || desiredOtherText.trim().length > 0;
+  const canNext = desiredTags.length > 0;
 
   useEffect(() => {
     // 1) window 스크롤을 쓰는 구조라면 이게 먹음
@@ -79,7 +83,7 @@ export function Step3DesiredImage({ onNext, onBack }: { onNext: () => void; onBa
         </div>
       </div>
 
-      <Footer onClick={onNext} />
+      <Footer onClick={onNext} disabled={!canNext} />
     </div>
   );
 }

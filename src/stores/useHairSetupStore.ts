@@ -223,7 +223,15 @@ export type DesiredTag =
   | "자연스러움"
   | "기타";
 
-export type FaceStrengthTag = "눈" | "눈썹" | "코" | "입" | "얼굴형" | "이미지 조화" | "모르겠음";
+export type FaceStrengthTag =
+  | "눈"
+  | "눈썹"
+  | "코"
+  | "입"
+  | "얼굴형"
+  | "이미지 조화"
+  | "모르겠음"
+  | "기타";
 
 export type FaceCoverTag =
   | "눈"
@@ -234,7 +242,8 @@ export type FaceCoverTag =
   | "이미지 조화"
   | "턱"
   | "광대"
-  | "모르겠음";
+  | "모르겠음"
+  | "기타";
 
 export type HairImageType = "hairstyle" | "front" | "left" | "right" | "favorite" | "difficulty";
 type HairImages = Record<HairImageType, string[]>;
@@ -534,7 +543,7 @@ export const useStyleSetupStore = create<State>()(
         set({
           sidePhotoKeys: {},
 
-          desiredTags: ["귀여움"],
+          desiredTags: [],
           desiredOtherText: "",
 
           questionText: "",

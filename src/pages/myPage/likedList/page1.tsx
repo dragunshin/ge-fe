@@ -70,12 +70,12 @@ export default function LikedListPage() {
   };
 
   return (
-    <div className="flex h-full flex-col bg-white">
+    <div className="flex h-full flex-col bg-white overflow-hidden">
       <main className="flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-md px-4 pb-12">
           <div className="pt-6">
             {/* header */}
-            <header className="flex items-center px-1 py-2 bg-white">
+            <header className="sticky top-0 z-50 flex items-center px-1 py-2 bg-white">
               <button onClick={() => navigate(-1)} className="mr-3">
                 <Back className="w-[18px] h-[18px]" />
               </button>

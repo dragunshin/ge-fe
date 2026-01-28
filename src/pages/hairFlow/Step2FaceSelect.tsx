@@ -13,6 +13,7 @@ const STRENGTH_TAGS: FaceStrengthTag[] = [
   "얼굴형",
   "이미지 조화",
   "모르겠음",
+  "기타",
 ];
 
 const COVER_TAGS: FaceCoverTag[] = [
@@ -25,6 +26,7 @@ const COVER_TAGS: FaceCoverTag[] = [
   "턱",
   "광대",
   "모르겠음",
+  "기타",
 ];
 
 export function Step2FaceSelect({ onNext, onBack }: { onNext: () => void; onBack?: () => void }) {
@@ -42,8 +44,10 @@ export function Step2FaceSelect({ onNext, onBack }: { onNext: () => void; onBack
 
   const isStrengthSelected = (t: FaceStrengthTag) => faceStrengthTags.includes(t);
   const isCoverSelected = (t: FaceCoverTag) => faceCoverTags.includes(t);
-  const strengthOk = faceStrengthTags.length > 0 || faceStrengthOtherText.trim().length > 0;
-  const coverOk = faceCoverTags.length > 0 || faceCoverOtherText.trim().length > 0;
+  // const strengthOk = faceStrengthTags.length > 0 || faceStrengthOtherText.trim().length > 0;
+  // const coverOk = faceCoverTags.length > 0 || faceCoverOtherText.trim().length > 0;
+  const strengthOk = faceStrengthTags.length > 0;
+  const coverOk = faceCoverTags.length > 0;
   const canNext = strengthOk && coverOk;
 
   return (

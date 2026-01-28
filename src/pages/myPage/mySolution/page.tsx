@@ -226,7 +226,7 @@ export default function MySolutionView() {
     <div className="flex h-full flex-col bg-white">
       <main className="flex-1 overflow-y-auto scrollbar-hide overscroll-none">
         {/* header */}
-        <header className="mt-3 flex items-center px-1 py-2 ml-4 bg-white">
+        <header className="sticky top-0 z-50 mt-3 flex items-center px-1 py-2 ml-4 bg-white">
           <button onClick={() => navigate(-1)} className="mr-[8px]">
             <Back className="w-[18px] h-[18px]" />
           </button>
